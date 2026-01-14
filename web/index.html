@@ -93,6 +93,21 @@
             margin-right: 8px;
             border-radius: 2px;
         }
+        .legend-gradient {
+            margin-bottom: 10px;
+        }
+        .gradient-bar {
+            height: 15px;
+            background: linear-gradient(to right, #1a9850, #66bd63, #a6d96a, #d9ef8b, #fee08b, #fdae61, #f46d43, #d73027, #a50026);
+            border-radius: 3px;
+        }
+        .gradient-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7em;
+            color: #a0a0c0;
+            margin-top: 3px;
+        }
         #info-panel {
             margin-top: 15px;
             background: #1a1a2e;
@@ -214,10 +229,6 @@
             <div class="layer-group">
                 <h3>Map Layers</h3>
                 <div class="layer-toggle">
-                    <input type="checkbox" id="layer-risk" checked>
-                    <label for="layer-risk">Drought Risk Heatmap</label>
-                </div>
-                <div class="layer-toggle">
                     <input type="checkbox" id="layer-hydro" checked>
                     <label for="layer-hydro">Hydropower Plants</label>
                 </div>
@@ -232,19 +243,27 @@
             </div>
             
             <div class="layer-group">
-                <h3>Risk Legend</h3>
+                <h3>Drought Risk</h3>
                 <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #e94560;"></div>
-                        <span>High Risk (>0.7)</span>
+                    <div class="legend-gradient">
+                        <div class="gradient-bar"></div>
+                        <div class="gradient-labels">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                    <div class="legend-item" style="margin-top: 10px;">
+                        <div class="legend-color" style="background: #a50026;"></div>
+                        <span>High Risk (>70%)</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #f39c12;"></div>
-                        <span>Medium Risk (0.4-0.7)</span>
+                        <div class="legend-color" style="background: #fdae61;"></div>
+                        <span>Medium Risk (40-70%)</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #27ae60;"></div>
-                        <span>Low Risk (<0.4)</span>
+                        <div class="legend-color" style="background: #1a9850;"></div>
+                        <span>Low Risk (<40%)</span>
                     </div>
                 </div>
             </div>
@@ -311,11 +330,26 @@
         const gwLayer = L.layerGroup();
         const boundaryLayer = L.layerGroup().addTo(map);
         
-        // Risk color function
+        // Risk color function (categorical)
         function getRiskColor(risk) {
             if (risk > 0.7) return '#e94560';
             if (risk > 0.4) return '#f39c12';
             return '#27ae60';
+        }
+        
+        // Choropleth color function (gradient)
+        function getChoroplethColor(risk) {
+            // Color scale from green (low risk) through yellow/orange to red (high risk)
+            if (risk <= 0) return '#1a9850';  // Dark green
+            if (risk <= 0.1) return '#66bd63'; // Green
+            if (risk <= 0.2) return '#a6d96a'; // Light green
+            if (risk <= 0.3) return '#d9ef8b'; // Yellow-green
+            if (risk <= 0.4) return '#fee08b'; // Yellow
+            if (risk <= 0.5) return '#fdae61'; // Orange
+            if (risk <= 0.6) return '#f46d43'; // Dark orange
+            if (risk <= 0.7) return '#d73027'; // Red-orange
+            if (risk <= 0.8) return '#a50026'; // Dark red
+            return '#67001f';  // Very dark red
         }
         
         function getRiskCategory(risk) {
@@ -376,45 +410,51 @@
             gwLayer.clearLayers();
             boundaryLayer.clearLayers();
             
-            // Render municipality boundaries with risk coloring
+            // Render choropleth - municipalities colored by risk score
             if (geojsonData) {
                 L.geoJSON(geojsonData, {
                     style: function(feature) {
                         const risk = feature.properties.risk_score || 0;
                         return {
-                            fillColor: getRiskColor(risk),
-                            fillOpacity: 0.4,
-                            color: '#0f3460',
+                            fillColor: getChoroplethColor(risk),
+                            fillOpacity: 0.75,
+                            color: '#1a1a2e',
                             weight: 0.5
                         };
                     },
                     onEachFeature: function(feature, layer) {
+                        const props = feature.properties;
+                        const risk = props.risk_score || 0;
+                        const gwTrend = props.gw_trend ? (props.gw_trend * 100).toFixed(1) + ' cm/dec' : 'N/A';
+                        
+                        layer.bindTooltip(`
+                            <b>${props.name}</b><br>
+                            Risk: ${(risk * 100).toFixed(0)}%<br>
+                            GW Trend: ${gwTrend}
+                        `, { sticky: true });
+                        
                         layer.on('click', function() {
-                            showMunicipalityInfo(feature.properties);
+                            showMunicipalityInfo(props);
                         });
                         
                         layer.on('mouseover', function() {
-                            layer.setStyle({ fillOpacity: 0.7 });
+                            layer.setStyle({ 
+                                fillOpacity: 0.9,
+                                weight: 2,
+                                color: '#fff'
+                            });
+                            layer.bringToFront();
                         });
                         
                         layer.on('mouseout', function() {
-                            layer.setStyle({ fillOpacity: 0.4 });
+                            layer.setStyle({ 
+                                fillOpacity: 0.75,
+                                weight: 0.5,
+                                color: '#1a1a2e'
+                            });
                         });
                     }
                 }).addTo(boundaryLayer);
-                
-                // Add risk circles for heatmap effect
-                municipalitiesData.forEach(m => {
-                    if (m.risk_score > 0.3) {
-                        const circle = L.circleMarker([m.lat, m.lon], {
-                            radius: Math.max(3, m.risk_score * 15),
-                            fillColor: getRiskColor(m.risk_score),
-                            fillOpacity: 0.5,
-                            color: 'none'
-                        });
-                        circle.addTo(riskLayer);
-                    }
-                });
             }
             
             // Render hydropower plants
@@ -505,11 +545,6 @@
         }
         
         // Layer toggle handlers
-        document.getElementById('layer-risk').addEventListener('change', function() {
-            if (this.checked) map.addLayer(riskLayer);
-            else map.removeLayer(riskLayer);
-        });
-        
         document.getElementById('layer-hydro').addEventListener('change', function() {
             if (this.checked) map.addLayer(hydroLayer);
             else map.removeLayer(hydroLayer);
