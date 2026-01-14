@@ -1329,11 +1329,11 @@
                             <div class="value">${muni.precip_mean_mm ? muni.precip_mean_mm + ' mm/yr' : 'N/A'}</div>
                         </div>
                         <div class="detail-item">
-                            <div class="label">Precip Trend</div>
+                            <div class="label">Precip Trend${muni.precip_estimated ? ' *' : ''}</div>
                             <div class="value" style="color: ${muni.precip_trend_mm < -20 ? '#e94560' : muni.precip_trend_mm < 0 ? '#f39c12' : '#27ae60'}">${muni.precip_trend_mm ? (muni.precip_trend_mm > 0 ? '+' : '') + muni.precip_trend_mm.toFixed(0) + ' mm/dec' : 'N/A'}</div>
                         </div>
                         <div class="detail-item">
-                            <div class="label">Flow Stations</div>
+                            <div class="label">Flow Stations${muni.flow_estimated ? ' *' : ''}</div>
                             <div class="value">${muni.flow_stations || 0}</div>
                         </div>
                         <div class="detail-item">
@@ -1341,7 +1341,7 @@
                             <div class="value">${muni.flow_mean_m3s ? muni.flow_mean_m3s.toFixed(1) + ' m³/s' : 'N/A'}</div>
                         </div>
                         <div class="detail-item">
-                            <div class="label">Flow Trend</div>
+                            <div class="label">Flow Trend${muni.flow_estimated ? ' *' : ''}</div>
                             <div class="value" style="color: ${muni.flow_trend_pct < -10 ? '#e94560' : muni.flow_trend_pct < 0 ? '#f39c12' : '#27ae60'}">${muni.flow_trend_pct ? (muni.flow_trend_pct > 0 ? '+' : '') + muni.flow_trend_pct.toFixed(1) + '%/dec' : 'N/A'}</div>
                         </div>
                         ${muni.flow_hydro_mw > 0 ? `
@@ -1351,6 +1351,7 @@
                         </div>
                         ` : ''}
                     </div>
+                    ${(muni.precip_estimated || muni.flow_estimated) ? '<p style="font-size: 0.65em; color: #6a6a8a; margin-top: 6px;">* Estimated from nearest stations</p>' : ''}
                 </div>
                 
                 ${riverInfo.length > 0 ? `

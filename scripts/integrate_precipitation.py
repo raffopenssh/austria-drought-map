@@ -21,15 +21,30 @@ def load_data():
     return muni, precip
 
 def find_nearby_precip(muni, precip_stations, max_dist_km=30):
-    """Find precipitation stations near municipality and calculate weighted average."""
+    """Find precipitation stations near municipality and calculate weighted average.
+    
+    If no stations within max_dist_km, expand search to find nearest 3 stations.
+    """
+    # First try within standard radius
     nearby = []
     for p in precip_stations:
         dist = haversine(muni['lat'], muni['lon'], p['lat'], p['lon'])
         if dist <= max_dist_km:
             nearby.append({**p, 'dist': dist})
     
+    # If no nearby stations, find nearest 3 regardless of distance
+    estimated = False
     if not nearby:
-        return None, None, 0
+        all_with_dist = []
+        for p in precip_stations:
+            dist = haversine(muni['lat'], muni['lon'], p['lat'], p['lon'])
+            all_with_dist.append({**p, 'dist': dist})
+        all_with_dist.sort(key=lambda x: x['dist'])
+        nearby = all_with_dist[:3]  # Take nearest 3
+        estimated = True
+    
+    if not nearby:
+        return None, None, 0, False
     
     # Distance-weighted average trend
     total_weight = 0
@@ -45,9 +60,9 @@ def find_nearby_precip(muni, precip_stations, max_dist_km=30):
     if total_weight > 0:
         avg_trend = weighted_trend / total_weight
         avg_mean = weighted_mean / total_weight
-        return avg_trend, avg_mean, len(nearby)
+        return avg_trend, avg_mean, len(nearby), estimated
     
-    return None, None, 0
+    return None, None, 0, False
 
 def calculate_precip_risk(trend_mm, mean_mm):
     """Convert precipitation trend to risk factor (0-1).
@@ -97,13 +112,14 @@ def main():
     with_precip = 0
     
     for m in muni:
-        trend, mean_precip, station_count = find_nearby_precip(m, precip)
+        trend, mean_precip, station_count, estimated = find_nearby_precip(m, precip)
         precip_risk = calculate_precip_risk(trend, mean_precip)
         
         # Update municipality data
         m['precip_trend_mm'] = round(trend, 1) if trend else None
         m['precip_mean_mm'] = round(mean_precip, 0) if mean_precip else None
         m['precip_stations'] = station_count
+        m['precip_estimated'] = estimated
         m['precip_risk'] = precip_risk
         
         if precip_risk is not None:

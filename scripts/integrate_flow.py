@@ -28,15 +28,30 @@ def load_data():
     return muni, flow, plants, sediment
 
 def find_nearby_flow(muni, flow_stations, max_dist_km=30):
-    """Find flow stations near municipality."""
+    """Find flow stations near municipality.
+    
+    If no stations within max_dist_km, expand search to find nearest 3 stations.
+    """
+    # First try within standard radius
     nearby = []
     for f in flow_stations:
         dist = haversine(muni['lat'], muni['lon'], f['lat'], f['lon'])
         if dist <= max_dist_km:
             nearby.append({**f, 'dist': dist})
     
+    # If no nearby stations, find nearest 3 regardless of distance
+    estimated = False
     if not nearby:
-        return None, None, 0, []
+        all_with_dist = []
+        for f in flow_stations:
+            dist = haversine(muni['lat'], muni['lon'], f['lat'], f['lon'])
+            all_with_dist.append({**f, 'dist': dist})
+        all_with_dist.sort(key=lambda x: x['dist'])
+        nearby = all_with_dist[:3]  # Take nearest 3
+        estimated = True
+    
+    if not nearby:
+        return None, None, 0, [], False
     
     # Distance-weighted average trend
     total_weight = 0
@@ -54,9 +69,9 @@ def find_nearby_flow(muni, flow_stations, max_dist_km=30):
         avg_flow = weighted_flow / total_weight
         # Get rivers
         rivers = list(set(f['river'] for f in nearby if f.get('river')))
-        return avg_trend, avg_flow, len(nearby), rivers[:4]
+        return avg_trend, avg_flow, len(nearby), rivers[:4], estimated
     
-    return None, None, 0, []
+    return None, None, 0, [], False
 
 def check_hydro_influence(muni, plants, flow_rivers, max_dist_km=50):
     """Check if nearby hydropower affects flow on these rivers."""
@@ -121,7 +136,7 @@ def main():
     hydro_influenced = 0
     
     for m in muni:
-        trend, mean_flow, station_count, rivers = find_nearby_flow(m, flow)
+        trend, mean_flow, station_count, rivers, estimated = find_nearby_flow(m, flow)
         flow_risk = calculate_flow_risk(trend)
         
         # Check hydropower influence on these rivers
@@ -135,6 +150,7 @@ def main():
         m['flow_mean_m3s'] = round(mean_flow, 1) if mean_flow else None
         m['flow_stations'] = station_count
         m['flow_rivers'] = rivers if rivers else []
+        m['flow_estimated'] = estimated
         m['flow_risk'] = flow_risk
         m['flow_hydro_mw'] = hydro_mw  # MW of hydro on same rivers
         m['flow_sediment_trend'] = round(sed_trend, 1) if sed_trend else None
