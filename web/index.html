@@ -1154,16 +1154,25 @@
             document.getElementById('sources-modal').classList.add('active');
         });
         
-        document.querySelectorAll('.modal-close').forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.closest('.modal-overlay').classList.remove('active');
-            });
+        // Use event delegation for modal close buttons and overlay clicks
+        document.addEventListener('click', function(e) {
+            // Close on X button click
+            if (e.target.classList.contains('modal-close')) {
+                e.target.closest('.modal-overlay').classList.remove('active');
+            }
+            // Close on overlay click (outside modal)
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('active');
+            }
         });
         
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', function(e) {
-                if (e.target === this) this.classList.remove('active');
-            });
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
         });
         
         
