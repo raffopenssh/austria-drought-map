@@ -1313,13 +1313,13 @@
                 
                 ${riverInfo.length > 0 ? `
                 <div class="detail-section">
-                    <h4>🌊 Nearby Rivers & Hydropower</h4>
+                    <h4>Nearby Rivers & Hydropower</h4>
                     <div class="stations-list" style="max-height: 150px;">
                         ${riverInfo.map(r => {
                             const impactClass = r.total_mw > 500 ? 'high' : r.total_mw > 100 ? 'medium' : 'low';
                             return `
                                 <div class="municipality-item" style="padding: 6px 8px;">
-                                    <span class="municipality-name" style="font-size: 0.85em;">🏞️ ${r.name}</span>
+                                    <span class="municipality-name" style="font-size: 0.85em;">${r.name}</span>
                                     <span style="font-size: 0.75em; color: #6a6a8a;">${r.plant_count} plants</span>
                                     <span class="municipality-score ${impactClass}" style="font-size: 0.75em;">${r.total_mw.toFixed(0)} MW</span>
                                 </div>
@@ -1331,21 +1331,20 @@
                 
                 ${nearbySediment.length > 0 ? `
                 <div class="detail-section">
-                    <h4>🪨 Sediment Transport</h4>
+                    <h4>Sediment Transport</h4>
                     <div class="stations-list" style="max-height: 130px;">
                         ${nearbySediment.map(s => {
                             const trendClass = s.trend_pct < -20 ? 'high' : s.trend_pct < 0 ? 'medium' : 'low';
-                            const trendIcon = s.trend_pct < 0 ? '📉' : '📈';
                             return `
                                 <div class="municipality-item" style="padding: 6px 8px;">
                                     <span class="municipality-name" style="font-size: 0.85em;">${s.station}</span>
                                     <span style="font-size: 0.75em; color: #6a6a8a;">${s.river}</span>
-                                    <span class="municipality-score ${trendClass}" style="font-size: 0.75em;" title="${s.mean_daily_t.toFixed(0)} t/day avg">${trendIcon} ${s.trend_pct > 0 ? '+' : ''}${s.trend_pct.toFixed(0)}%</span>
+                                    <span class="municipality-score ${trendClass}" style="font-size: 0.75em;" title="${s.mean_daily_t.toFixed(0)} t/day avg">${s.trend_pct > 0 ? '+' : ''}${s.trend_pct.toFixed(0)}%</span>
                                 </div>
                             `;
                         }).join('')}
                     </div>
-                    <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 6px;">📉 Declining sediment may indicate upstream dam trapping</p>
+                    <p style="font-size: 0.7em; color: #6a6a8a; margin-top: 8px;">Declining sediment may indicate upstream dam trapping</p>
                 </div>
                 ` : ''}
                 
