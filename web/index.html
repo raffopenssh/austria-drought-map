@@ -145,7 +145,7 @@
         }
         .gradient-bar {
             height: 15px;
-            background: linear-gradient(to right, #440154, #482878, #3e4989, #31688e, #26828e, #1f9e89, #35b779, #6ece58, #b4de2c, #fde725);
+            background: linear-gradient(to right, #27ae60, #52be5c, #82c341, #b4be32, #dcc028, #f39c12, #f07832, #eb5a46, #e94560);
             border-radius: 3px;
         }
         .gradient-bar.hydro-gradient {
@@ -153,6 +153,9 @@
         }
         .gradient-bar.viridis-gradient {
             background: linear-gradient(to right, #fde725, #b4de2c, #6ece58, #35b779, #1f9e89, #26828e, #31688e, #3e4989, #482878, #440154);
+        }
+        .gradient-bar.risk-gradient {
+            background: linear-gradient(to right, #27ae60, #82c341, #dcc028, #f39c12, #f07832, #e94560);
         }
         .map-legend {
             background: rgba(22, 33, 62, 0.92);
@@ -665,7 +668,7 @@
                 html += `
                     <div class="map-legend">
                         <h4>Drought Risk</h4>
-                        <div class="gradient-bar"></div>
+                        <div class="gradient-bar risk-gradient"></div>
                         <div class="gradient-labels">
                             <span>0%</span>
                             <span>50%</span>
@@ -695,32 +698,32 @@
         
         // Choropleth color function (gradient)
         function getChoroplethColor(risk) {
-            // Viridis color scale: purple (low risk) to yellow (high risk)
-            // Using inverted viridis so high risk = yellow (warning)
+            // Risk color scale: green (low) -> yellow (medium) -> red (high)
+            // Matches risk category colors: low=#27ae60, medium=#f39c12, high=#e94560
             const t = Math.max(0, Math.min(1, risk));
             
-            const viridis = [
-                [68, 1, 84],      // 0.0 - dark purple (low risk)
-                [72, 40, 120],    // 0.1
-                [62, 74, 137],    // 0.2
-                [49, 104, 142],   // 0.3
-                [38, 130, 142],   // 0.4
-                [31, 158, 137],   // 0.5
-                [53, 183, 121],   // 0.6
-                [109, 205, 89],   // 0.7
-                [180, 222, 44],   // 0.8
-                [253, 231, 37]    // 1.0 - yellow (high risk)
+            const riskColors = [
+                [39, 174, 96],    // 0.0 - green (low risk)
+                [46, 184, 92],    // 0.1
+                [80, 190, 80],    // 0.2
+                [130, 195, 65],   // 0.3
+                [180, 190, 50],   // 0.4 - yellow-green (medium threshold)
+                [220, 180, 40],   // 0.5
+                [243, 156, 18],   // 0.6 - orange (medium risk)
+                [240, 120, 50],   // 0.7 - orange-red (high threshold)
+                [235, 90, 70],    // 0.8
+                [233, 69, 96]     // 1.0 - red (high risk)
             ];
             
-            const idx = t * (viridis.length - 1);
+            const idx = t * (riskColors.length - 1);
             const i = Math.floor(idx);
             const f = idx - i;
             
-            if (i >= viridis.length - 1) return `rgb(${viridis[viridis.length-1].join(',')})`;
+            if (i >= riskColors.length - 1) return `rgb(${riskColors[riskColors.length-1].join(',')})`;
             
-            const r = Math.round(viridis[i][0] + f * (viridis[i+1][0] - viridis[i][0]));
-            const g = Math.round(viridis[i][1] + f * (viridis[i+1][1] - viridis[i][1]));
-            const b = Math.round(viridis[i][2] + f * (viridis[i+1][2] - viridis[i][2]));
+            const r = Math.round(riskColors[i][0] + f * (riskColors[i+1][0] - riskColors[i][0]));
+            const g = Math.round(riskColors[i][1] + f * (riskColors[i+1][1] - riskColors[i][1]));
+            const b = Math.round(riskColors[i][2] + f * (riskColors[i+1][2] - riskColors[i][2]));
             
             return `rgb(${r}, ${g}, ${b})`;
         }
