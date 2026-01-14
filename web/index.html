@@ -253,6 +253,14 @@
             color: #a0a0c0;
             margin-top: 4px;
         }
+        .stat.clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .stat.clickable:hover {
+            background: #252547;
+            transform: scale(1.02);
+        }
         .leaflet-popup-content-wrapper {
             background: #16213e;
             color: #fff;
@@ -380,6 +388,143 @@
             font-size: 0.8em;
             margin-top: 8px;
         }
+        .municipality-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .municipality-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #0f3460;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .municipality-item:hover {
+            background: #1a1a2e;
+        }
+        .municipality-item:last-child {
+            border-bottom: none;
+        }
+        .municipality-name {
+            font-weight: 500;
+            color: #fff;
+        }
+        .municipality-score {
+            font-size: 0.85em;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .municipality-score.high {
+            background: rgba(233, 69, 96, 0.2);
+            color: #e94560;
+        }
+        .municipality-score.medium {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        .detail-section h4 {
+            font-size: 0.85em;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #0f3460;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .detail-item {
+            background: #1a1a2e;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .detail-item .label {
+            font-size: 0.75em;
+            color: #6a6a8a;
+            margin-bottom: 3px;
+        }
+        .detail-item .value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #fff;
+        }
+        .detail-item .value.risk-high { color: #e94560; }
+        .detail-item .value.risk-medium { color: #f39c12; }
+        .detail-item .value.risk-low { color: #27ae60; }
+        .detail-item .value.declining { color: #fde725; }
+        .detail-item .value.rising { color: #440154; }
+        .risk-breakdown {
+            margin-top: 10px;
+        }
+        .risk-factor {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .risk-factor-label {
+            flex: 1;
+            font-size: 0.85em;
+            color: #a0a0c0;
+        }
+        .risk-factor-bar {
+            flex: 2;
+            height: 8px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+        .risk-factor-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .risk-factor-value {
+            width: 50px;
+            text-align: right;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .reasoning-list {
+            list-style: none;
+            padding: 0;
+        }
+        .reasoning-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #0f3460;
+            font-size: 0.85em;
+            color: #a0a0c0;
+        }
+        .reasoning-list li:last-child {
+            border-bottom: none;
+        }
+        .reasoning-list li::before {
+            content: '•';
+            color: #e94560;
+            margin-right: 8px;
+        }
+        .zoom-btn {
+            background: #e94560;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-top: 15px;
+        }
+        .zoom-btn:hover {
+            background: #c73e54;
+        }
         @media (max-width: 768px) {
             #container {
                 flex-direction: column;
@@ -409,11 +554,11 @@
                     <div class="stat-value" id="stat-hydro">-</div>
                     <div class="stat-label">Hydropower Plants</div>
                 </div>
-                <div class="stat">
+                <div class="stat clickable" id="stat-medium-box" title="Click to see medium risk municipalities">
                     <div class="stat-value" id="stat-medium">-</div>
                     <div class="stat-label">Medium Risk</div>
                 </div>
-                <div class="stat">
+                <div class="stat clickable" id="stat-highrisk-box" title="Click to see high risk municipalities">
                     <div class="stat-value" id="stat-highrisk">-</div>
                     <div class="stat-label">High Risk</div>
                 </div>
@@ -466,56 +611,75 @@
             maxZoom: 18
         }).addTo(map);
         
-        // Add map legends
-        const droughtLegend = L.control({ position: 'bottomright' });
-        droughtLegend.onAdd = function() {
-            const div = L.DomUtil.create('div', 'map-legend');
-            div.innerHTML = `
-                <h4>Drought Risk</h4>
-                <div class="gradient-bar"></div>
-                <div class="gradient-labels">
-                    <span>0%</span>
-                    <span>50%</span>
-                    <span>100%</span>
-                </div>
-            `;
+        // Add map legends container
+        const legendContainer = L.control({ position: 'bottomright' });
+        legendContainer.onAdd = function() {
+            const div = L.DomUtil.create('div', 'legend-container');
+            div.id = 'legend-container';
             return div;
         };
-        droughtLegend.addTo(map);
+        legendContainer.addTo(map);
         
-        const hydroLegend = L.control({ position: 'bottomright' });
-        hydroLegend.onAdd = function() {
-            const div = L.DomUtil.create('div', 'map-legend');
-            div.innerHTML = `
-                <h4>Hydropower</h4>
-                <div class="gradient-bar hydro-gradient"></div>
-                <div class="gradient-labels">
-                    <span>0</span>
-                    <span>375</span>
-                    <span>750 MW</span>
-                </div>
-            `;
-            return div;
+        // Legend state tracking
+        const legendState = {
+            drought: true,
+            hydro: true,
+            gw: false
         };
-        hydroLegend.addTo(map);
         
-        const gwLegend = L.control({ position: 'bottomright' });
-        gwLegend.onAdd = function() {
-            const div = L.DomUtil.create('div', 'map-legend');
-            div.id = 'gw-legend';
-            div.style.display = 'none';
-            div.innerHTML = `
-                <h4>GW Trend</h4>
-                <div class="gradient-bar viridis-gradient"></div>
-                <div class="gradient-labels">
-                    <span>-60 (dry)</span>
-                    <span>0</span>
-                    <span>+30 (wet)</span>
-                </div>
-            `;
-            return div;
-        };
-        gwLegend.addTo(map);
+        function updateLegends() {
+            const container = document.getElementById('legend-container');
+            if (!container) return;
+            
+            let html = '';
+            
+            if (legendState.gw) {
+                html += `
+                    <div class="map-legend">
+                        <h4>GW Trend</h4>
+                        <div class="gradient-bar viridis-gradient"></div>
+                        <div class="gradient-labels">
+                            <span>-60 (dry)</span>
+                            <span>0</span>
+                            <span>+30 (wet)</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.hydro) {
+                html += `
+                    <div class="map-legend">
+                        <h4>Hydropower</h4>
+                        <div class="gradient-bar hydro-gradient"></div>
+                        <div class="gradient-labels">
+                            <span>0</span>
+                            <span>375</span>
+                            <span>750 MW</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.drought) {
+                html += `
+                    <div class="map-legend">
+                        <h4>Drought Risk</h4>
+                        <div class="gradient-bar"></div>
+                        <div class="gradient-labels">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Initial legend render
+        setTimeout(updateLegends, 100);
         
         // Layer groups
         const hydroLayer = L.layerGroup().addTo(map);
@@ -669,7 +833,7 @@
                         `, { sticky: true });
                         
                         layer.on('click', function() {
-                            showMunicipalityInfo(props);
+                            showMunicipalityDetailModal(props.name);
                         });
                         
                         layer.on('mouseover', function() {
@@ -791,22 +955,195 @@
         document.getElementById('layer-hydro').addEventListener('change', function() {
             if (this.checked) map.addLayer(hydroLayer);
             else map.removeLayer(hydroLayer);
+            legendState.hydro = this.checked;
+            updateLegends();
         });
         
         document.getElementById('layer-boundaries').addEventListener('change', function() {
             if (this.checked) map.addLayer(boundaryLayer);
             else map.removeLayer(boundaryLayer);
+            legendState.drought = this.checked;
+            updateLegends();
         });
         
         document.getElementById('layer-gw').addEventListener('change', function() {
-            if (this.checked) {
-                map.addLayer(gwLayer);
-                document.getElementById('gw-legend').style.display = 'block';
-            } else {
-                map.removeLayer(gwLayer);
-                document.getElementById('gw-legend').style.display = 'none';
-            }
+            if (this.checked) map.addLayer(gwLayer);
+            else map.removeLayer(gwLayer);
+            legendState.gw = this.checked;
+            updateLegends();
         });
+        
+        // Stats click handlers
+        document.getElementById('stat-medium-box').addEventListener('click', function() {
+            showRiskListModal('medium');
+        });
+        
+        document.getElementById('stat-highrisk-box').addEventListener('click', function() {
+            showRiskListModal('high');
+        });
+        
+        function showRiskListModal(riskLevel) {
+            const modal = document.getElementById('risk-list-modal');
+            const title = document.getElementById('risk-list-title');
+            const list = document.getElementById('risk-list-content');
+            
+            const filtered = municipalitiesData
+                .filter(m => m.risk_category === riskLevel)
+                .sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0));
+            
+            const labelClass = riskLevel === 'high' ? 'high' : 'medium';
+            const labelText = riskLevel === 'high' ? 'High Risk' : 'Medium Risk';
+            
+            title.textContent = `${labelText} Municipalities (${filtered.length})`;
+            
+            let html = '<div class="municipality-list">';
+            filtered.forEach(m => {
+                const score = ((m.risk_score || 0) * 100).toFixed(0);
+                html += `
+                    <div class="municipality-item" data-name="${m.name}" onclick="showMunicipalityDetailModal('${m.name.replace(/'/g, "\\'")}')">
+                        <span class="municipality-name">${m.name}</span>
+                        <span class="municipality-score ${labelClass}">${score}%</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            list.innerHTML = html;
+            modal.classList.add('active');
+        }
+        
+        function showMunicipalityDetailModal(name) {
+            // Find municipality data
+            const muni = municipalitiesData.find(m => m.name === name);
+            if (!muni) return;
+            
+            // Find GeoJSON feature for bounds
+            let feature = null;
+            if (geojsonData) {
+                feature = geojsonData.features.find(f => f.properties.name === name);
+            }
+            
+            const modal = document.getElementById('municipality-detail-modal');
+            const title = document.getElementById('detail-muni-title');
+            const content = document.getElementById('detail-muni-content');
+            
+            title.textContent = name;
+            
+            // Calculate risk factors
+            const gwTrend = muni.gw_trend || 0;
+            const gwFactor = Math.min(Math.abs(gwTrend < 0 ? gwTrend : 0) / 0.5, 1) * 100;
+            const hydroFactor = Math.min((muni.hydro_capacity || 0) / 500, 1) * 100;
+            const riskScore = (muni.risk_score || 0) * 100;
+            
+            const riskClass = muni.risk_score > 0.7 ? 'risk-high' : muni.risk_score > 0.4 ? 'risk-medium' : 'risk-low';
+            const gwClass = gwTrend < 0 ? 'declining' : 'rising';
+            
+            // Build reasoning
+            const reasons = [];
+            if (gwTrend < -0.1) reasons.push(`Groundwater declining at ${(gwTrend * 100).toFixed(1)} cm/decade`);
+            else if (gwTrend < 0) reasons.push(`Slight groundwater decline: ${(gwTrend * 100).toFixed(1)} cm/decade`);
+            else if (gwTrend > 0.1) reasons.push(`Groundwater rising at +${(gwTrend * 100).toFixed(1)} cm/decade (positive indicator)`);
+            else reasons.push(`Groundwater stable: ${(gwTrend * 100).toFixed(1)} cm/decade`);
+            
+            if ((muni.hydro_capacity || 0) > 100) reasons.push(`High hydropower capacity (${muni.hydro_capacity} MW) may affect local hydrology`);
+            else if ((muni.hydro_plants || 0) > 0) reasons.push(`${muni.hydro_plants} hydropower plant(s) with ${muni.hydro_capacity || 0} MW capacity`);
+            else reasons.push('No significant hydropower infrastructure');
+            
+            if ((muni.gw_stations || 0) > 0) reasons.push(`${muni.gw_stations} groundwater monitoring station(s) in area`);
+            else reasons.push('No direct groundwater monitoring - risk interpolated from nearby stations');
+            
+            if ((muni.pump_storage || 0) > 0) reasons.push(`${muni.pump_storage} MW pump storage capacity (water cycling)`);
+            
+            content.innerHTML = `
+                <div class="detail-section">
+                    <h4>Risk Overview</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Risk Score</div>
+                            <div class="value ${riskClass}">${riskScore.toFixed(1)}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Category</div>
+                            <div class="value ${riskClass}">${muni.risk_category || 'low'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">GW Trend</div>
+                            <div class="value ${gwClass}">${(gwTrend * 100).toFixed(1)} cm/dec</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Monitoring Stations</div>
+                            <div class="value">${muni.gw_stations || 0}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Risk Factors</h4>
+                    <div class="risk-breakdown">
+                        <div class="risk-factor">
+                            <span class="risk-factor-label">Groundwater Decline</span>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" style="width: ${gwFactor}%; background: ${gwFactor > 50 ? '#e94560' : gwFactor > 25 ? '#f39c12' : '#27ae60'}"></div>
+                            </div>
+                            <span class="risk-factor-value" style="color: ${gwFactor > 50 ? '#e94560' : gwFactor > 25 ? '#f39c12' : '#27ae60'}">${gwFactor.toFixed(0)}%</span>
+                        </div>
+                        <div class="risk-factor">
+                            <span class="risk-factor-label">Hydropower Impact</span>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" style="width: ${hydroFactor}%; background: ${hydroFactor > 50 ? '#e94560' : hydroFactor > 25 ? '#f39c12' : '#27ae60'}"></div>
+                            </div>
+                            <span class="risk-factor-value" style="color: ${hydroFactor > 50 ? '#e94560' : hydroFactor > 25 ? '#f39c12' : '#27ae60'}">${hydroFactor.toFixed(0)}%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Infrastructure</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Hydropower Plants</div>
+                            <div class="value">${muni.hydro_plants || 0}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Total Capacity</div>
+                            <div class="value">${muni.hydro_capacity || 0} MW</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Pump Storage</div>
+                            <div class="value">${muni.pump_storage || 0} MW</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">GW Stations</div>
+                            <div class="value">${muni.gw_stations || 0}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Assessment Reasoning</h4>
+                    <ul class="reasoning-list">
+                        ${reasons.map(r => `<li>${r}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <button class="zoom-btn" onclick="zoomToMunicipality('${name.replace(/'/g, "\\'")}')">
+                    📍 Zoom to Location
+                </button>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
+        function zoomToMunicipality(name) {
+            if (!geojsonData) return;
+            const feature = geojsonData.features.find(f => f.properties.name === name);
+            if (feature) {
+                const layer = L.geoJSON(feature);
+                map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+                // Close modals
+                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+            }
+        }
         
         // Load data on page load
         loadData();
@@ -831,6 +1168,25 @@
         
         
     </script>
+    
+    <!-- Risk List Modal -->
+    <div class="modal-overlay" id="risk-list-modal">
+        <div class="modal">
+            <button class="modal-close">&times;</button>
+            <h2 id="risk-list-title">Risk Municipalities</h2>
+            <p style="color: #6a6a8a; font-size: 0.85em; margin-bottom: 15px;">Click on a municipality to see detailed analysis</p>
+            <div id="risk-list-content"></div>
+        </div>
+    </div>
+    
+    <!-- Municipality Detail Modal -->
+    <div class="modal-overlay" id="municipality-detail-modal">
+        <div class="modal" style="max-width: 500px;">
+            <button class="modal-close">&times;</button>
+            <h2 id="detail-muni-title">Municipality Details</h2>
+            <div id="detail-muni-content"></div>
+        </div>
+    </div>
     
     <!-- Sources Modal -->
     <div class="modal-overlay" id="sources-modal">
