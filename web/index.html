@@ -101,6 +101,9 @@
             background: linear-gradient(to right, #1a9850, #66bd63, #a6d96a, #d9ef8b, #fee08b, #fdae61, #f46d43, #d73027, #a50026);
             border-radius: 3px;
         }
+        .gradient-bar.hydro-gradient {
+            background: linear-gradient(to right, #87CEEB, #5BA3C6, #2F78A1, #1E5A7C, #0D3C57, #00008B);
+        }
         .gradient-labels {
             display: flex;
             justify-content: space-between;
@@ -269,20 +272,19 @@
             </div>
             
             <div class="layer-group">
-                <h3>Hydropower Legend</h3>
+                <h3>Hydropower Capacity</h3>
                 <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #9b59b6;"></div>
-                        <span>Pump Storage (high impact)</span>
+                    <div class="legend-gradient">
+                        <div class="gradient-bar hydro-gradient"></div>
+                        <div class="gradient-labels">
+                            <span>0 MW</span>
+                            <span>375</span>
+                            <span>750 MW</span>
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #3498db;"></div>
-                        <span>Run-of-river (Laufkraftwerk)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #1abc9c;"></div>
-                        <span>Storage (Speicherkraftwerk)</span>
-                    </div>
+                    <p style="font-size: 0.75em; color: #a0a0c0; margin-top: 8px;">
+                        Light → Dark blue = Low → High capacity
+                    </p>
                 </div>
             </div>
             
@@ -358,11 +360,19 @@
             return 'Low';
         }
         
-        // Hydropower color function
-        function getHydroColor(type) {
-            if (type.includes('Pumpspeicher')) return '#9b59b6';
-            if (type.includes('Laufkraftwerk')) return '#3498db';
-            return '#1abc9c';
+        // Hydropower color function - continuous blue scale based on power (MW)
+        function getHydroColor(mw) {
+            // Scale from light blue (low power) to dark blue (high power)
+            // Max power is around 730 MW (Malta pump storage)
+            const maxMW = 750;
+            const ratio = Math.min(mw / maxMW, 1);
+            
+            // Interpolate from light blue (#87CEEB) to dark blue (#00008B)
+            const r = Math.round(135 - ratio * 135);
+            const g = Math.round(206 - ratio * 156);
+            const b = Math.round(235 - ratio * 96);
+            
+            return `rgb(${r}, ${g}, ${b})`;
         }
         
         // Load data
@@ -457,15 +467,14 @@
                 }).addTo(boundaryLayer);
             }
             
-            // Render hydropower plants
+            // Render hydropower plants - uniform size, color by power
             powerplantsData.forEach(pp => {
-                const size = Math.max(5, Math.sqrt(pp.mw) * 1.5);
                 const marker = L.circleMarker([pp.lat, pp.lon], {
-                    radius: size,
-                    fillColor: getHydroColor(pp.type),
-                    fillOpacity: 0.8,
+                    radius: 7,
+                    fillColor: getHydroColor(pp.mw || 0),
+                    fillOpacity: 0.9,
                     color: '#fff',
-                    weight: 1
+                    weight: 1.5
                 });
                 
                 marker.bindPopup(`
