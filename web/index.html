@@ -1012,6 +1012,35 @@
             modal.classList.add('active');
         }
         
+        // Point-in-polygon check using ray casting algorithm
+        function pointInPolygon(point, polygon) {
+            const [x, y] = point;
+            let inside = false;
+            
+            for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+                const [xi, yi] = polygon[i];
+                const [xj, yj] = polygon[j];
+                
+                if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+        
+        // Check if point is in any polygon of a GeoJSON feature (handles MultiPolygon)
+        function pointInFeature(lat, lon, feature) {
+            if (!feature || !feature.geometry) return false;
+            const point = [lon, lat]; // GeoJSON uses [lon, lat]
+            
+            if (feature.geometry.type === 'Polygon') {
+                return pointInPolygon(point, feature.geometry.coordinates[0]);
+            } else if (feature.geometry.type === 'MultiPolygon') {
+                return feature.geometry.coordinates.some(poly => pointInPolygon(point, poly[0]));
+            }
+            return false;
+        }
+        
         function showMunicipalityDetailModal(name) {
             // Find municipality data
             const muni = municipalitiesData.find(m => m.name === name);
@@ -1029,13 +1058,27 @@
             
             title.textContent = name;
             
-            // Check if municipality has direct GW monitoring
-            const hasDirectGW = (muni.gw_stations || 0) > 0;
-            const hasGWTrend = muni.gw_trend !== undefined && muni.gw_trend !== null;
+            // Find GW stations actually inside this municipality's polygon
+            const stationsInMuni = feature ? gwStationsData.filter(s => 
+                s.lat && s.lon && pointInFeature(s.lat, s.lon, feature)
+            ) : [];
             
-            // Find nearby GW stations for context
+            // Filter to those with trend data
+            const stationsWithTrends = stationsInMuni.filter(s => s.trend_m_per_decade !== undefined);
+            
+            // Check if municipality has direct GW monitoring
+            const hasDirectGW = stationsInMuni.length > 0;
+            const hasGWTrend = stationsWithTrends.length > 0;
+            
+            // Calculate average trend from stations in municipality
+            let avgTrendInMuni = null;
+            if (hasGWTrend) {
+                avgTrendInMuni = stationsWithTrends.reduce((sum, s) => sum + s.trend_m_per_decade, 0) / stationsWithTrends.length;
+            }
+            
+            // Find nearby GW stations for context (outside municipality)
             const nearbyStations = gwStationsData
-                .filter(s => s.trend_m_per_decade !== undefined)
+                .filter(s => s.trend_m_per_decade !== undefined && !stationsInMuni.includes(s))
                 .map(s => ({
                     ...s,
                     dist: Math.sqrt(Math.pow(s.lat - muni.lat, 2) + Math.pow(s.lon - muni.lon, 2))
@@ -1043,8 +1086,8 @@
                 .sort((a, b) => a.dist - b.dist)
                 .slice(0, 5);
             
-            // Calculate risk factors
-            const gwTrend = hasGWTrend ? muni.gw_trend : null;
+            // Calculate risk factors - use actual trend from stations in municipality if available
+            const gwTrend = hasGWTrend ? avgTrendInMuni : (muni.gw_trend !== undefined ? muni.gw_trend : null);
             const gwFactor = gwTrend !== null ? Math.min(Math.abs(gwTrend < 0 ? gwTrend : 0) / 0.5, 1) * 100 : 0;
             const hydroFactor = Math.min((muni.hydro_capacity || 0) / 500, 1) * 100;
             const riskScore = (muni.risk_score || 0) * 100;
@@ -1055,12 +1098,17 @@
             // Build reasoning
             const reasons = [];
             
-            if (hasDirectGW && hasGWTrend) {
-                if (gwTrend < -0.1) reasons.push(`Groundwater declining at ${(gwTrend * 100).toFixed(1)} cm/decade (direct measurement)`);
-                else if (gwTrend < 0) reasons.push(`Slight groundwater decline: ${(gwTrend * 100).toFixed(1)} cm/decade (direct measurement)`);
-                else if (gwTrend > 0.1) reasons.push(`Groundwater rising at +${(gwTrend * 100).toFixed(1)} cm/decade (positive indicator)`);
-                else reasons.push(`Groundwater stable: ${(gwTrend * 100).toFixed(1)} cm/decade (direct measurement)`);
-            } else if (!hasDirectGW) {
+            if (hasDirectGW) {
+                reasons.push(`${stationsInMuni.length} groundwater monitoring station(s) in municipality`);
+                if (hasGWTrend) {
+                    if (gwTrend < -0.1) reasons.push(`Average trend: ${(gwTrend * 100).toFixed(1)} cm/decade (declining)`);
+                    else if (gwTrend < 0) reasons.push(`Average trend: ${(gwTrend * 100).toFixed(1)} cm/decade (slight decline)`);
+                    else if (gwTrend > 0.1) reasons.push(`Average trend: +${(gwTrend * 100).toFixed(1)} cm/decade (rising)`);
+                    else reasons.push(`Average trend: ${(gwTrend * 100).toFixed(1)} cm/decade (stable)`);
+                } else {
+                    reasons.push(`${stationsInMuni.length - stationsWithTrends.length} station(s) without trend data`);
+                }
+            } else {
                 reasons.push('No groundwater monitoring stations in this municipality');
                 if (nearbyStations.length > 0) {
                     const avgTrend = nearbyStations.reduce((sum, s) => sum + s.trend_m_per_decade, 0) / nearbyStations.length;
@@ -1075,10 +1123,31 @@
             
             if ((muni.pump_storage || 0) > 0) reasons.push(`${muni.pump_storage} MW pump storage capacity (water cycling)`);
             
-            // Build nearby stations HTML
-            let nearbyStationsHtml = '';
-            if (!hasDirectGW && nearbyStations.length > 0) {
-                nearbyStationsHtml = `
+            // Build stations HTML - either in municipality or nearby
+            let stationsHtml = '';
+            if (hasDirectGW && stationsInMuni.length > 0) {
+                // Show stations inside the municipality
+                stationsHtml = `
+                    <div class="detail-section">
+                        <h4>Groundwater Stations in Municipality</h4>
+                        <div class="municipality-list" style="max-height: 150px;">
+                            ${stationsInMuni.map(s => {
+                                const hasTrend = s.trend_m_per_decade !== undefined;
+                                const trendCm = hasTrend ? (s.trend_m_per_decade * 100).toFixed(1) : 'N/A';
+                                const trendClass = hasTrend ? (s.trend_m_per_decade < -0.1 ? 'high' : 'medium') : '';
+                                return `
+                                    <div class="municipality-item" style="padding: 6px 8px;" onclick="showGWStationDetailModal(gwStationsData.find(g => g.id === '${s.id}'))">
+                                        <span class="municipality-name" style="font-size: 0.8em;">${s.name || 'Station ' + s.id}</span>
+                                        <span class="municipality-score ${trendClass}" style="font-size: 0.75em;">${trendCm}${hasTrend ? ' cm/dec' : ''}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (!hasDirectGW && nearbyStations.length > 0) {
+                // Show nearby stations
+                stationsHtml = `
                     <div class="detail-section">
                         <h4>Nearby Groundwater Stations</h4>
                         <p style="font-size: 0.8em; color: #6a6a8a; margin-bottom: 10px;">No stations in municipality - showing nearest monitoring points:</p>
@@ -1118,7 +1187,7 @@
                         </div>
                         <div class="detail-item">
                             <div class="label">Monitoring Stations</div>
-                            <div class="value">${muni.gw_stations || 0}${!hasDirectGW ? ' (nearby)' : ''}</div>
+                            <div class="value">${stationsInMuni.length}${hasGWTrend ? ` (${stationsWithTrends.length} with data)` : ''}</div>
                         </div>
                     </div>
                     ${!hasDirectGW ? '<p style="font-size: 0.7em; color: #6a6a8a; margin-top: 8px;">* Estimated from nearby stations</p>' : ''}
@@ -1161,12 +1230,12 @@
                         </div>
                         <div class="detail-item">
                             <div class="label">GW Stations</div>
-                            <div class="value">${muni.gw_stations || 0}</div>
+                            <div class="value">${stationsInMuni.length}</div>
                         </div>
                     </div>
                 </div>
                 
-                ${nearbyStationsHtml}
+                ${stationsHtml}
                 
                 <div class="detail-section">
                     <h4>Assessment Reasoning</h4>
