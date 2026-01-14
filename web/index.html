@@ -681,9 +681,9 @@
         // Initial legend render
         setTimeout(updateLegends, 100);
         
-        // Layer groups
-        const hydroLayer = L.layerGroup().addTo(map);
+        // Layer groups - order matters! Bottom to top: boundaries, hydro, gw
         const boundaryLayer = L.layerGroup().addTo(map);
+        const hydroLayer = L.layerGroup().addTo(map);
         const gwLayer = L.layerGroup();
         
         // Risk color function (categorical)
@@ -866,12 +866,12 @@
                     weight: 1
                 });
                 
-                marker.bindPopup(`
-                    <div class="popup-title">${pp.type}</div>
-                    <div class="popup-row"><span class="popup-label">Capacity:</span> ${pp.mw} MW</div>
-                    <div class="popup-row"><span class="popup-label">River:</span> ${pp.river || 'N/A'}</div>
-                    <div class="popup-row"><span class="popup-label">Region:</span> ${pp.region}</div>
-                `);
+                marker.on('click', function(e) {
+                    L.DomEvent.stopPropagation(e);
+                    showHydroDetailModal(pp);
+                });
+                
+                marker.bindTooltip(`${pp.name || pp.type}: ${pp.mw} MW`, { direction: 'top' });
                 
                 marker.addTo(hydroLayer);
             });
@@ -893,12 +893,12 @@
                 const trendCm = (trend * 100).toFixed(1);
                 const trendDir = trend < 0 ? 'declining' : 'rising';
                 
-                marker.bindPopup(`
-                    <div class="popup-title">${gw.name || 'GW Station'}</div>
-                    <div class="popup-row"><span class="popup-label">Trend:</span> ${trendCm} cm/decade (${trendDir})</div>
-                    <div class="popup-row"><span class="popup-label">Data years:</span> ${gw.data_years ? gw.data_years.toFixed(0) : 'N/A'}</div>
-                    <div class="popup-row"><span class="popup-label">Mean level:</span> ${gw.mean_level ? gw.mean_level.toFixed(1) + ' m' : 'N/A'}</div>
-                `);
+                marker.on('click', function(e) {
+                    L.DomEvent.stopPropagation(e);
+                    showGWStationDetailModal(gw);
+                });
+                
+                marker.bindTooltip(`${gw.name || 'GW Station'}: ${trendCm} cm/dec`, { direction: 'top' });
                 
                 marker.addTo(gwLayer);
             });
@@ -1134,6 +1134,149 @@
             modal.classList.add('active');
         }
         
+        function showHydroDetailModal(pp) {
+            const modal = document.getElementById('hydro-detail-modal');
+            const title = document.getElementById('hydro-detail-title');
+            const content = document.getElementById('hydro-detail-content');
+            
+            title.textContent = pp.name || pp.type || 'Hydropower Plant';
+            
+            const capacityClass = pp.mw > 500 ? 'risk-high' : pp.mw > 100 ? 'risk-medium' : 'risk-low';
+            
+            content.innerHTML = `
+                <div class="detail-section">
+                    <h4>Plant Information</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Type</div>
+                            <div class="value">${pp.type || 'Hydropower'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Capacity</div>
+                            <div class="value ${capacityClass}">${pp.mw || 0} MW</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">River</div>
+                            <div class="value">${pp.river || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Region</div>
+                            <div class="value">${pp.region || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Location</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Latitude</div>
+                            <div class="value">${pp.lat?.toFixed(5) || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Longitude</div>
+                            <div class="value">${pp.lon?.toFixed(5) || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Impact Assessment</h4>
+                    <ul class="reasoning-list">
+                        <li>${pp.mw > 500 ? 'Large-scale facility with significant water usage' : pp.mw > 100 ? 'Medium-scale facility with moderate water usage' : 'Small-scale facility with limited water impact'}</li>
+                        <li>${pp.type?.includes('Pump') || pp.type?.includes('pump') ? 'Pump storage: water is cycled, net consumption lower' : 'Run-of-river or reservoir: continuous water flow impact'}</li>
+                        ${pp.river ? `<li>Located on ${pp.river}</li>` : ''}
+                    </ul>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
+        function showGWStationDetailModal(gw) {
+            const modal = document.getElementById('gw-detail-modal');
+            const title = document.getElementById('gw-detail-title');
+            const content = document.getElementById('gw-detail-content');
+            
+            title.textContent = gw.name || 'Groundwater Station';
+            
+            const trend = gw.trend_m_per_decade || 0;
+            const trendCm = (trend * 100).toFixed(1);
+            const trendClass = trend < -0.1 ? 'declining' : trend > 0.1 ? 'rising' : '';
+            const trendStatus = trend < -0.1 ? 'Declining' : trend > 0.1 ? 'Rising' : 'Stable';
+            
+            content.innerHTML = `
+                <div class="detail-section">
+                    <h4>Trend Analysis</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Trend</div>
+                            <div class="value ${trendClass}">${trendCm} cm/decade</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Status</div>
+                            <div class="value ${trendClass}">${trendStatus}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Data Years</div>
+                            <div class="value">${gw.data_years ? gw.data_years.toFixed(1) : 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">P-Value</div>
+                            <div class="value">${gw.p_value ? gw.p_value.toFixed(4) : 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Water Levels</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Mean Level</div>
+                            <div class="value">${gw.mean_level ? gw.mean_level.toFixed(2) + ' m' : 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Current Level</div>
+                            <div class="value">${gw.current_level ? gw.current_level.toFixed(2) + ' m' : 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Station Information</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Station ID</div>
+                            <div class="value">${gw.id || gw.station_id || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Area Code</div>
+                            <div class="value">${gw.area || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Latitude</div>
+                            <div class="value">${gw.lat?.toFixed(5) || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Longitude</div>
+                            <div class="value">${gw.lon?.toFixed(5) || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Interpretation</h4>
+                    <ul class="reasoning-list">
+                        <li>${trend < -0.1 ? 'Significant declining trend indicates potential groundwater depletion' : trend > 0.1 ? 'Rising trend suggests good groundwater recharge' : 'Stable water table indicates balanced recharge and extraction'}</li>
+                        <li>${gw.p_value && gw.p_value < 0.05 ? 'Trend is statistically significant (p < 0.05)' : 'Trend may not be statistically significant'}</li>
+                        <li>${gw.data_years && gw.data_years > 20 ? 'Long-term monitoring provides reliable trend data' : 'Limited data history - trend should be interpreted with caution'}</li>
+                    </ul>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
         function zoomToMunicipality(name) {
             if (!geojsonData) return;
             const feature = geojsonData.features.find(f => f.properties.name === name);
@@ -1194,6 +1337,24 @@
             <button class="modal-close">&times;</button>
             <h2 id="detail-muni-title">Municipality Details</h2>
             <div id="detail-muni-content"></div>
+        </div>
+    </div>
+    
+    <!-- Hydropower Detail Modal -->
+    <div class="modal-overlay" id="hydro-detail-modal">
+        <div class="modal" style="max-width: 450px;">
+            <button class="modal-close">&times;</button>
+            <h2 id="hydro-detail-title">Hydropower Plant</h2>
+            <div id="hydro-detail-content"></div>
+        </div>
+    </div>
+    
+    <!-- Groundwater Station Detail Modal -->
+    <div class="modal-overlay" id="gw-detail-modal">
+        <div class="modal" style="max-width: 450px;">
+            <button class="modal-close">&times;</button>
+            <h2 id="gw-detail-title">Groundwater Station</h2>
+            <div id="gw-detail-content"></div>
         </div>
     </div>
     
