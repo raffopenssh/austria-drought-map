@@ -1142,6 +1142,7 @@
             // 1000 MW = 100% (99th percentile of Austrian municipalities)
             const hydroFactor = (muni.hydro_factor || 0) * 100;  // Use pre-calculated hydro_factor
             const precipFactor = (muni.precip_risk || 0) * 100;  // Precipitation decline risk
+            const flowFactor = (muni.flow_risk || 0) * 100;  // Surface water flow decline risk
             const riskScore = (muni.risk_score || 0) * 100;
             
             // Find nearby hydropower plants and their rivers
@@ -1294,6 +1295,13 @@
                             </div>
                             <span class="risk-factor-value" style="color: ${precipFactor > 50 ? '#e94560' : precipFactor > 25 ? '#f39c12' : '#27ae60'}">${precipFactor.toFixed(0)}%</span>
                         </div>
+                        <div class="risk-factor">
+                            <span class="risk-factor-label">Surface Water Decline</span>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" style="width: ${flowFactor}%; background: ${flowFactor > 50 ? '#e94560' : flowFactor > 25 ? '#f39c12' : '#27ae60'}"></div>
+                            </div>
+                            <span class="risk-factor-value" style="color: ${flowFactor > 50 ? '#e94560' : flowFactor > 25 ? '#f39c12' : '#27ae60'}">${flowFactor.toFixed(0)}%</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -1324,6 +1332,24 @@
                             <div class="label">Precip Trend</div>
                             <div class="value" style="color: ${muni.precip_trend_mm < -20 ? '#e94560' : muni.precip_trend_mm < 0 ? '#f39c12' : '#27ae60'}">${muni.precip_trend_mm ? (muni.precip_trend_mm > 0 ? '+' : '') + muni.precip_trend_mm.toFixed(0) + ' mm/dec' : 'N/A'}</div>
                         </div>
+                        <div class="detail-item">
+                            <div class="label">Flow Stations</div>
+                            <div class="value">${muni.flow_stations || 0}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Mean Flow</div>
+                            <div class="value">${muni.flow_mean_m3s ? muni.flow_mean_m3s.toFixed(1) + ' m³/s' : 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Flow Trend</div>
+                            <div class="value" style="color: ${muni.flow_trend_pct < -10 ? '#e94560' : muni.flow_trend_pct < 0 ? '#f39c12' : '#27ae60'}">${muni.flow_trend_pct ? (muni.flow_trend_pct > 0 ? '+' : '') + muni.flow_trend_pct.toFixed(1) + '%/dec' : 'N/A'}</div>
+                        </div>
+                        ${muni.flow_hydro_mw > 0 ? `
+                        <div class="detail-item">
+                            <div class="label">Hydro on Rivers</div>
+                            <div class="value" style="color: #f39c12">${muni.flow_hydro_mw.toFixed(0)} MW</div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 
@@ -1616,7 +1642,8 @@
                 <li><a href="https://ehyd.gv.at" target="_blank">eHYD Portal</a> - Austrian hydrographic service
                     <ul>
                         <li>Groundwater levels (2,074 monitoring stations)</li>
-                        <li>Surface water stations (795 OWF stations on 469 rivers)</li>
+                        <li>Surface water flow (604 gauging stations with discharge data)</li>
+                        <li>Surface water network (795 OWF stations on 469 rivers)</li>
                         <li>Sediment transport (34 stations with daily measurements)</li>
                         <li>Precipitation (861 stations with daily data since 1971)</li>
                         <li>100+ years of measurements</li>
@@ -1627,11 +1654,12 @@
             </ul>
             
             <h3>Risk Calculation</h3>
-            <p>The drought risk score combines three factors:</p>
+            <p>The drought risk score combines four factors:</p>
             <ul>
-                <li><b>Groundwater trend (40%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
-                <li><b>Hydropower impact (30%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
-                <li><b>Precipitation trend (30%)</b>: Long-term precipitation trends from nearby stations. Declining precipitation increases drought risk.</li>
+                <li><b>Groundwater trend (35%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
+                <li><b>Hydropower impact (25%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
+                <li><b>Precipitation trend (25%)</b>: Long-term precipitation trends from nearby stations. Declining precipitation increases drought risk.</li>
+                <li><b>Surface water flow (15%)</b>: River discharge trends. Declining flow indicates reduced water availability, linked to dam operations.</li>
             </ul>
             
             <h3>Hydropower Impact Factor</h3>
@@ -1683,6 +1711,22 @@
                         <li>Zürs-Hexenboden: -449 mm/decade (Alpine decline)</li>
                         <li>Pfänder: +313 mm/decade (Lake Constance increase)</li>
                         <li>Mean trend: +9 mm/decade</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <h3>Surface Water Flow Analysis</h3>
+            <ul>
+                <li>604 flow gauging stations analyzed (Q-Tagesmittel)</li>
+                <li>Annual mean discharge calculated (min 300 days/year)</li>
+                <li>Linear trend over 10+ years</li>
+                <li>Risk factor: -20%/decade = 100% risk, +20%/decade = 0% risk</li>
+                <li>Links to hydropower: identifies MW capacity on same rivers</li>
+                <li>Finding: 390/604 stations show declining flow (mean: -2.8%/decade)</li>
+                <li>Example trends:
+                    <ul>
+                        <li>Traisen at Herzogenburg: -67% (severe decline)</li>
+                        <li>Rußbach at Leopoldsdorf: +42% (increasing)</li>
                     </ul>
                 </li>
             </ul>
