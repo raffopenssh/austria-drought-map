@@ -1318,10 +1318,10 @@
                         ${riverInfo.map(r => {
                             const impactClass = r.total_mw > 500 ? 'high' : r.total_mw > 100 ? 'medium' : 'low';
                             return `
-                                <div class="municipality-item" style="padding: 6px 8px;">
+                                <div class="municipality-item" style="padding: 6px 8px; display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center;">
                                     <span class="municipality-name" style="font-size: 0.85em;">${r.name}</span>
-                                    <span style="font-size: 0.75em; color: #6a6a8a;">${r.plant_count} plants</span>
-                                    <span class="municipality-score ${impactClass}" style="font-size: 0.75em;">${r.total_mw.toFixed(0)} MW</span>
+                                    <span style="font-size: 0.75em; color: #6a6a8a; text-align: right;">${r.plant_count} plants</span>
+                                    <span class="municipality-score ${impactClass}" style="font-size: 0.75em; min-width: 70px; text-align: right;">${r.total_mw.toFixed(0)} MW</span>
                                 </div>
                             `;
                         }).join('')}
@@ -1336,10 +1336,10 @@
                         ${nearbySediment.map(s => {
                             const trendClass = s.trend_pct < -20 ? 'high' : s.trend_pct < 0 ? 'medium' : 'low';
                             return `
-                                <div class="municipality-item" style="padding: 6px 8px;">
+                                <div class="municipality-item" style="padding: 6px 8px; display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center;">
                                     <span class="municipality-name" style="font-size: 0.85em;">${s.station}</span>
-                                    <span style="font-size: 0.75em; color: #6a6a8a;">${s.river}</span>
-                                    <span class="municipality-score ${trendClass}" style="font-size: 0.75em;" title="${s.mean_daily_t.toFixed(0)} t/day avg">${s.trend_pct > 0 ? '+' : ''}${s.trend_pct.toFixed(0)}%</span>
+                                    <span style="font-size: 0.75em; color: #6a6a8a; text-align: right;">${s.river}</span>
+                                    <span class="municipality-score ${trendClass}" style="font-size: 0.75em; min-width: 50px; text-align: right;" title="${s.mean_daily_t.toFixed(0)} t/day avg">${s.trend_pct > 0 ? '+' : ''}${s.trend_pct.toFixed(0)}%</span>
                                 </div>
                             `;
                         }).join('')}
