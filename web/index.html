@@ -152,7 +152,7 @@
             background: linear-gradient(to right, #87CEEB, #5BA3C6, #2F78A1, #1E5A7C, #0D3C57, #00008B);
         }
         .gradient-bar.viridis-gradient {
-            background: linear-gradient(to right, #440154, #482878, #3e4989, #31688e, #26828e, #1f9e89, #35b779, #6ece58, #b4de2c, #fde725);
+            background: linear-gradient(to right, #fde725, #b4de2c, #6ece58, #35b779, #1f9e89, #26828e, #31688e, #3e4989, #482878, #440154);
         }
         .map-legend {
             background: rgba(22, 33, 62, 0.92);
@@ -508,9 +508,9 @@
                 <h4>GW Trend</h4>
                 <div class="gradient-bar viridis-gradient"></div>
                 <div class="gradient-labels">
-                    <span>-60</span>
+                    <span>-60 (dry)</span>
                     <span>0</span>
-                    <span>+30 cm/dec</span>
+                    <span>+30 (wet)</span>
                 </div>
             `;
             return div;
@@ -564,19 +564,19 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
         
-        // Viridis color scale for groundwater trends
+        // Viridis color scale for groundwater trends (inverted)
         // Trend range: approximately -0.6 to +0.3 m/decade
+        // Yellow = declining (dry), Purple = rising (wet)
         function getViridisColor(trend) {
-            // Normalize trend to 0-1 (negative=declining=yellow, positive=rising=purple)
-            // We flip it so declining (bad) is yellow/green, rising (good) is purple/blue
             const minTrend = -0.6;
             const maxTrend = 0.3;
+            // Invert: declining (negative) = 1 (yellow), rising (positive) = 0 (purple)
             const normalized = (trend - minTrend) / (maxTrend - minTrend);
-            const t = Math.max(0, Math.min(1, normalized));
+            const t = 1 - Math.max(0, Math.min(1, normalized)); // Invert the scale
             
             // Viridis colormap approximation
             const viridis = [
-                [68, 1, 84],      // 0.0 - dark purple
+                [68, 1, 84],      // 0.0 - dark purple (rising/wet)
                 [72, 40, 120],    // 0.1
                 [62, 74, 137],    // 0.2
                 [49, 104, 142],   // 0.3
@@ -585,7 +585,7 @@
                 [53, 183, 121],   // 0.6
                 [109, 205, 89],   // 0.7
                 [180, 222, 44],   // 0.8
-                [253, 231, 37]    // 1.0 - yellow
+                [253, 231, 37]    // 1.0 - yellow (declining/dry)
             ];
             
             const idx = t * (viridis.length - 1);
