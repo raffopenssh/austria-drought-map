@@ -1601,7 +1601,9 @@
                 <li><a href="https://ehyd.gv.at" target="_blank">eHYD Portal</a> - Austrian hydrographic service
                     <ul>
                         <li>Groundwater levels (2,074 monitoring stations)</li>
-                        <li>100+ years of monthly measurements</li>
+                        <li>Surface water stations (795 OWF stations on 469 rivers)</li>
+                        <li>Sediment transport (34 stations with daily measurements)</li>
+                        <li>100+ years of measurements</li>
                     </ul>
                 </li>
                 <li><a href="https://oesterreichsenergie.at" target="_blank">Oesterreichs Energie</a> - Power plant registry (156 hydropower plants)</li>
@@ -1612,10 +1614,46 @@
             <p>The drought risk score combines:</p>
             <ul>
                 <li><b>Groundwater trend (50%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
-                <li><b>Hydropower impact (50%)</b>: Normalized capacity of nearby hydropower plants. Higher capacity = potentially higher impact on local hydrology.</li>
+                <li><b>Hydropower impact (50%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
             </ul>
             
-            <h3>Trend Analysis</h3>
+            <h3>Hydropower Impact Factor</h3>
+            <p>The hydro_factor calculation considers:</p>
+            <ul>
+                <li><b>Proximity</b>: Plants within 30km radius, with distance decay (closer = more impact)</li>
+                <li><b>Plant type weights</b>:
+                    <ul>
+                        <li>Storage (Speicherkraftwerk): 0.7 - major sediment trapping</li>
+                        <li>Pumped storage (Pumpspeicherkraftwerk): 0.5 - moderate impact</li>
+                        <li>Run-of-river (Laufkraftwerk): 0.3 - lower sediment impact</li>
+                    </ul>
+                </li>
+                <li><b>Sediment trends</b>: Declining sediment transport indicates upstream dam trapping, used as modifier</li>
+                <li>Normalized to 500 MW weighted impact = 100%</li>
+            </ul>
+            
+            <h3>River Network Analysis</h3>
+            <ul>
+                <li>469 rivers identified from surface water monitoring network</li>
+                <li>Major rivers by hydropower: Donau (2,254 MW), Ill (2,237 MW), Inn (1,294 MW)</li>
+                <li>Hydropower aggregated by river for impact assessment</li>
+            </ul>
+            
+            <h3>Sediment Transport Analysis</h3>
+            <ul>
+                <li>34 sediment monitoring stations analyzed</li>
+                <li>Trend calculated: recent 3-year average vs. historical 3-year average</li>
+                <li>Declining trends may indicate upstream dam sediment trapping</li>
+                <li>Example findings:
+                    <ul>
+                        <li>Enns at Steyr: -64% decline</li>
+                        <li>Inn at Schärding: 12,674 t/day average</li>
+                        <li>Salzach at Ach: +98% increase</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <h3>Groundwater Trend Analysis</h3>
             <ul>
                 <li>Minimum 10 years of data required</li>
                 <li>Outliers filtered (trends > 5m/decade excluded)</li>
@@ -1628,7 +1666,9 @@
             <ul>
                 <li>Coordinate transformation (BMN to WGS84) is approximate</li>
                 <li>Risk interpolated to municipalities without direct monitoring</li>
-                <li>Hydropower impact is proximity-based, not hydrologically modeled</li>
+                <li>Hydropower impact is proximity-based, not fully hydrologically modeled</li>
+                <li>Sediment stations matched to municipalities via river names (no direct coordinates)</li>
+                <li>River connectivity not modeled (upstream/downstream relationships)</li>
             </ul>
         </div>
     </div>
