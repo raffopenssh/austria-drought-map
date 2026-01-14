@@ -1088,7 +1088,32 @@
             
             // Calculate risk factors - use actual trend from stations in municipality if available
             const gwTrend = hasGWTrend ? avgTrendInMuni : (muni.gw_trend !== undefined ? muni.gw_trend : null);
-            const gwFactor = gwTrend !== null ? Math.min(Math.abs(gwTrend < 0 ? gwTrend : 0) / 0.5, 1) * 100 : 0;
+            
+            // Calculate GW decline factor based on:
+            // 1. Percentage of stations with declining trends
+            // 2. Severity of decline (median of negative trends)
+            let gwFactor = 0;
+            if (hasGWTrend && stationsWithTrends.length > 0) {
+                const decliningStations = stationsWithTrends.filter(s => s.trend_m_per_decade < 0);
+                const decliningPct = decliningStations.length / stationsWithTrends.length;
+                
+                // Get median decline rate (only negative trends)
+                let medianDecline = 0;
+                if (decliningStations.length > 0) {
+                    const declines = decliningStations.map(s => s.trend_m_per_decade).sort((a, b) => a - b);
+                    const mid = Math.floor(declines.length / 2);
+                    medianDecline = declines.length % 2 ? declines[mid] : (declines[mid - 1] + declines[mid]) / 2;
+                }
+                
+                // Combine: % declining * severity factor
+                // Severity: -0.1 m/dec (-10cm) = 50% severity, -0.2 m/dec = 100%
+                const severityFactor = Math.min(Math.abs(medianDecline) / 0.2, 1);
+                gwFactor = decliningPct * 50 + severityFactor * 50;  // Max 100%
+            } else if (gwTrend !== null && gwTrend < 0) {
+                // Fallback for interpolated data
+                gwFactor = Math.min(Math.abs(gwTrend) / 0.2, 1) * 100;
+            }
+            
             const hydroFactor = Math.min((muni.hydro_capacity || 0) / 500, 1) * 100;
             const riskScore = (muni.risk_score || 0) * 100;
             
