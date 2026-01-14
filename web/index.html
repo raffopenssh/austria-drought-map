@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Austria Drought Risk Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        #header {
+            background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+            padding: 15px 20px;
+            border-bottom: 1px solid #0f3460;
+        }
+        #header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        #header p {
+            font-size: 0.85em;
+            color: #a0a0c0;
+        }
+        #container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+        #sidebar {
+            width: 320px;
+            background: #16213e;
+            padding: 15px;
+            overflow-y: auto;
+            border-right: 1px solid #0f3460;
+        }
+        #map {
+            flex: 1;
+            background: #0f0f23;
+        }
+        .layer-group {
+            margin-bottom: 15px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .layer-group h3 {
+            font-size: 0.9em;
+            color: #e94560;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .layer-toggle {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        .layer-toggle input {
+            margin-right: 10px;
+            accent-color: #e94560;
+        }
+        .layer-toggle label {
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        .legend {
+            margin-top: 15px;
+        }
+        .legend-title {
+            font-size: 0.85em;
+            color: #e94560;
+            margin-bottom: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 0.8em;
+        }
+        .legend-color {
+            width: 20px;
+            height: 12px;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+        #info-panel {
+            margin-top: 15px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px;
+            display: none;
+        }
+        #info-panel.active {
+            display: block;
+        }
+        #info-panel h4 {
+            font-size: 1em;
+            margin-bottom: 10px;
+            color: #e94560;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #0f3460;
+            font-size: 0.85em;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            color: #a0a0c0;
+        }
+        .info-value {
+            font-weight: 500;
+        }
+        .risk-high { color: #e94560; }
+        .risk-medium { color: #f39c12; }
+        .risk-low { color: #27ae60; }
+        .stats-box {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .stat {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #e94560;
+        }
+        .stat-label {
+            font-size: 0.75em;
+            color: #a0a0c0;
+            margin-top: 4px;
+        }
+        .leaflet-popup-content-wrapper {
+            background: #16213e;
+            color: #fff;
+            border-radius: 8px;
+        }
+        .leaflet-popup-tip {
+            background: #16213e;
+        }
+        .popup-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #e94560;
+        }
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.85em;
+        }
+        .popup-label {
+            color: #a0a0c0;
+        }
+        @media (max-width: 768px) {
+            #container {
+                flex-direction: column;
+            }
+            #sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>🌊 Austria Drought Risk Map</h1>
+        <p>Municipality-level analysis of groundwater, hydropower impact, and drought risk indicators</p>
+    </div>
+    
+    <div id="container">
+        <div id="sidebar">
+            <div class="stats-box">
+                <div class="stat">
+                    <div class="stat-value" id="stat-municipalities">-</div>
+                    <div class="stat-label">Municipalities</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-hydro">-</div>
+                    <div class="stat-label">Hydropower Plants</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-gw">-</div>
+                    <div class="stat-label">GW Stations</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-highrisk">-</div>
+                    <div class="stat-label">At-Risk Areas</div>
+                </div>
+            </div>
+            
+            <div class="layer-group">
+                <h3>Map Layers</h3>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-risk" checked>
+                    <label for="layer-risk">Drought Risk Heatmap</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-hydro" checked>
+                    <label for="layer-hydro">Hydropower Plants</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-gw">
+                    <label for="layer-gw">Groundwater Stations</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-boundaries" checked>
+                    <label for="layer-boundaries">Municipality Boundaries</label>
+                </div>
+            </div>
+            
+            <div class="layer-group">
+                <h3>Risk Legend</h3>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e94560;"></div>
+                        <span>High Risk (>0.7)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f39c12;"></div>
+                        <span>Medium Risk (0.4-0.7)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #27ae60;"></div>
+                        <span>Low Risk (<0.4)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="layer-group">
+                <h3>Hydropower Legend</h3>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #9b59b6;"></div>
+                        <span>Pump Storage (high impact)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3498db;"></div>
+                        <span>Run-of-river (Laufkraftwerk)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #1abc9c;"></div>
+                        <span>Storage (Speicherkraftwerk)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="info-panel">
+                <h4 id="info-title">Municipality Info</h4>
+                <div id="info-content"></div>
+            </div>
+            
+            <div class="layer-group" style="margin-top: 15px;">
+                <h3>About This Map</h3>
+                <p style="font-size: 0.8em; color: #a0a0c0; line-height: 1.5;">
+                    This map visualizes drought risk across Austrian municipalities based on:
+                    <br>• <b>Groundwater trends</b> from 100-year eHYD monitoring data
+                    <br>• <b>Hydropower impact</b> from pump storage and run-of-river plants
+                    <br>• <b>Precipitation patterns</b>
+                    <br><br>
+                    Areas with declining groundwater combined with high hydropower activity face elevated risk for:
+                    <br>• Water rationing measures
+                    <br>• Groundwater heat pump failures
+                    <br>• Reduced drinking water availability
+                </p>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+    </div>
+    
+    <script>
+        // Initialize map
+        const map = L.map('map', {
+            center: [47.5, 13.5],
+            zoom: 7,
+            zoomControl: true
+        });
+        
+        // Dark basemap
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            maxZoom: 18
+        }).addTo(map);
+        
+        // Layer groups
+        const riskLayer = L.layerGroup().addTo(map);
+        const hydroLayer = L.layerGroup().addTo(map);
+        const gwLayer = L.layerGroup();
+        const boundaryLayer = L.layerGroup().addTo(map);
+        
+        // Risk color function
+        function getRiskColor(risk) {
+            if (risk > 0.7) return '#e94560';
+            if (risk > 0.4) return '#f39c12';
+            return '#27ae60';
+        }
+        
+        function getRiskCategory(risk) {
+            if (risk > 0.7) return 'High';
+            if (risk > 0.4) return 'Medium';
+            return 'Low';
+        }
+        
+        // Hydropower color function
+        function getHydroColor(type) {
+            if (type.includes('Pumpspeicher')) return '#9b59b6';
+            if (type.includes('Laufkraftwerk')) return '#3498db';
+            return '#1abc9c';
+        }
+        
+        // Load data
+        let municipalitiesData = [];
+        let powerplantsData = [];
+        let gwStationsData = [];
+        let geojsonData = null;
+        
+        async function loadData() {
+            try {
+                const [muniResp, ppResp, gwResp, geoResp] = await Promise.all([
+                    fetch('data/municipalities.json'),
+                    fetch('data/powerplants.json'),
+                    fetch('data/gw_stations.json'),
+                    fetch('data/municipalities_risk.geojson')
+                ]);
+                
+                municipalitiesData = await muniResp.json();
+                powerplantsData = await ppResp.json();
+                gwStationsData = await gwResp.json();
+                geojsonData = await geoResp.json();
+                
+                updateStats();
+                renderLayers();
+            } catch (e) {
+                console.error('Error loading data:', e);
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('stat-municipalities').textContent = municipalitiesData.length;
+            document.getElementById('stat-hydro').textContent = powerplantsData.length;
+            document.getElementById('stat-gw').textContent = gwStationsData.length;
+            
+            // Count risk categories
+            const highRisk = municipalitiesData.filter(m => m.risk_category === 'high').length;
+            const medRisk = municipalitiesData.filter(m => m.risk_category === 'medium').length;
+            document.getElementById('stat-highrisk').textContent = highRisk + medRisk;
+        }
+        
+        function renderLayers() {
+            // Clear layers
+            riskLayer.clearLayers();
+            hydroLayer.clearLayers();
+            gwLayer.clearLayers();
+            boundaryLayer.clearLayers();
+            
+            // Render municipality boundaries with risk coloring
+            if (geojsonData) {
+                L.geoJSON(geojsonData, {
+                    style: function(feature) {
+                        const risk = feature.properties.risk_score || 0;
+                        return {
+                            fillColor: getRiskColor(risk),
+                            fillOpacity: 0.4,
+                            color: '#0f3460',
+                            weight: 0.5
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        layer.on('click', function() {
+                            showMunicipalityInfo(feature.properties);
+                        });
+                        
+                        layer.on('mouseover', function() {
+                            layer.setStyle({ fillOpacity: 0.7 });
+                        });
+                        
+                        layer.on('mouseout', function() {
+                            layer.setStyle({ fillOpacity: 0.4 });
+                        });
+                    }
+                }).addTo(boundaryLayer);
+                
+                // Add risk circles for heatmap effect
+                municipalitiesData.forEach(m => {
+                    if (m.risk_score > 0.3) {
+                        const circle = L.circleMarker([m.lat, m.lon], {
+                            radius: Math.max(3, m.risk_score * 15),
+                            fillColor: getRiskColor(m.risk_score),
+                            fillOpacity: 0.5,
+                            color: 'none'
+                        });
+                        circle.addTo(riskLayer);
+                    }
+                });
+            }
+            
+            // Render hydropower plants
+            powerplantsData.forEach(pp => {
+                const size = Math.max(5, Math.sqrt(pp.mw) * 1.5);
+                const marker = L.circleMarker([pp.lat, pp.lon], {
+                    radius: size,
+                    fillColor: getHydroColor(pp.type),
+                    fillOpacity: 0.8,
+                    color: '#fff',
+                    weight: 1
+                });
+                
+                marker.bindPopup(`
+                    <div class="popup-title">${pp.type}</div>
+                    <div class="popup-row"><span class="popup-label">Capacity:</span> ${pp.mw} MW</div>
+                    <div class="popup-row"><span class="popup-label">River:</span> ${pp.river || 'N/A'}</div>
+                    <div class="popup-row"><span class="popup-label">Region:</span> ${pp.region}</div>
+                `);
+                
+                marker.addTo(hydroLayer);
+            });
+            
+            // Render groundwater stations
+            gwStationsData.forEach(gw => {
+                const marker = L.circleMarker([gw.lat, gw.lon], {
+                    radius: 3,
+                    fillColor: '#00ff88',
+                    fillOpacity: 0.6,
+                    color: 'none'
+                });
+                
+                marker.bindPopup(`
+                    <div class="popup-title">${gw.name || 'GW Station'}</div>
+                    <div class="popup-row"><span class="popup-label">ID:</span> ${gw.id}</div>
+                    <div class="popup-row"><span class="popup-label">Area:</span> ${gw.area || 'N/A'}</div>
+                `);
+                
+                marker.addTo(gwLayer);
+            });
+        }
+        
+        function showMunicipalityInfo(props) {
+            const panel = document.getElementById('info-panel');
+            const title = document.getElementById('info-title');
+            const content = document.getElementById('info-content');
+            
+            title.textContent = props.name || 'Unknown';
+            
+            const riskClass = props.risk_score > 0.7 ? 'risk-high' : 
+                             props.risk_score > 0.4 ? 'risk-medium' : 'risk-low';
+            
+            const gwTrend = props.gw_trend ? (props.gw_trend * 100).toFixed(1) : 'N/A';
+            const gwTrendClass = props.gw_trend < 0 ? 'risk-high' : 'risk-low';
+            
+            content.innerHTML = `
+                <div class="info-row">
+                    <span class="info-label">Risk Score:</span>
+                    <span class="info-value ${riskClass}">${(props.risk_score * 100 || 0).toFixed(1)}%</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Risk Category:</span>
+                    <span class="info-value ${riskClass}">${props.risk_category || 'low'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">GW Trend:</span>
+                    <span class="info-value ${gwTrendClass}">${gwTrend} cm/decade</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">GW Stations:</span>
+                    <span class="info-value">${props.gw_stations || 0}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Hydro Plants:</span>
+                    <span class="info-value">${props.hydro_plants || 0}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Hydro Capacity:</span>
+                    <span class="info-value">${props.hydro_capacity || 0} MW</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Pump Storage:</span>
+                    <span class="info-value">${props.pump_storage || 0} MW</span>
+                </div>
+            `;
+            
+            panel.classList.add('active');
+        }
+        
+        // Layer toggle handlers
+        document.getElementById('layer-risk').addEventListener('change', function() {
+            if (this.checked) map.addLayer(riskLayer);
+            else map.removeLayer(riskLayer);
+        });
+        
+        document.getElementById('layer-hydro').addEventListener('change', function() {
+            if (this.checked) map.addLayer(hydroLayer);
+            else map.removeLayer(hydroLayer);
+        });
+        
+        document.getElementById('layer-gw').addEventListener('change', function() {
+            if (this.checked) map.addLayer(gwLayer);
+            else map.removeLayer(gwLayer);
+        });
+        
+        document.getElementById('layer-boundaries').addEventListener('change', function() {
+            if (this.checked) map.addLayer(boundaryLayer);
+            else map.removeLayer(boundaryLayer);
+        });
+        
+        // Load data on page load
+        loadData();
+    </script>
+</body>
+</html>
