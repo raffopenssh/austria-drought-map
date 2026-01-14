@@ -151,6 +151,45 @@
         .gradient-bar.hydro-gradient {
             background: linear-gradient(to right, #87CEEB, #5BA3C6, #2F78A1, #1E5A7C, #0D3C57, #00008B);
         }
+        .gradient-bar.viridis-gradient {
+            background: linear-gradient(to right, #440154, #482878, #3e4989, #31688e, #26828e, #1f9e89, #35b779, #6ece58, #b4de2c, #fde725);
+        }
+        .map-legend {
+            background: rgba(22, 33, 62, 0.92);
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+        }
+        .map-legend h4 {
+            margin: 0 0 6px 0;
+            font-size: 11px;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .map-legend .gradient-bar {
+            height: 10px;
+            width: 120px;
+            border-radius: 2px;
+        }
+        .map-legend .gradient-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #a0a0c0;
+            margin-top: 2px;
+        }
+        .map-legend + .map-legend {
+            margin-top: 8px;
+        }
+        .leaflet-bottom.leaflet-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
         .gradient-labels {
             display: flex;
             justify-content: space-between;
@@ -390,50 +429,13 @@
                     <input type="checkbox" id="layer-hydro" checked>
                     <label for="layer-hydro">Hydropower Plants</label>
                 </div>
-            </div>
-            
-            <div class="layer-group">
-                <h3>Drought Risk</h3>
-                <div class="legend">
-                    <div class="legend-gradient">
-                        <div class="gradient-bar"></div>
-                        <div class="gradient-labels">
-                            <span>0%</span>
-                            <span>50%</span>
-                            <span>100%</span>
-                        </div>
-                    </div>
-                    <div class="legend-item" style="margin-top: 10px;">
-                        <div class="legend-color" style="background: #a50026;"></div>
-                        <span>High Risk (>70%)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #fdae61;"></div>
-                        <span>Medium Risk (40-70%)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #1a9850;"></div>
-                        <span>Low Risk (<40%)</span>
-                    </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-gw">
+                    <label for="layer-gw">Groundwater Trends</label>
                 </div>
             </div>
             
-            <div class="layer-group">
-                <h3>Hydropower Capacity</h3>
-                <div class="legend">
-                    <div class="legend-gradient">
-                        <div class="gradient-bar hydro-gradient"></div>
-                        <div class="gradient-labels">
-                            <span>0 MW</span>
-                            <span>375</span>
-                            <span>750 MW</span>
-                        </div>
-                    </div>
-                    <p style="font-size: 0.75em; color: #a0a0c0; margin-top: 8px;">
-                        Light → Dark blue = Low → High capacity
-                    </p>
-                </div>
-            </div>
+            
             
             <div id="info-panel">
                 <h4 id="info-title">Municipality Info</h4>
@@ -443,7 +445,7 @@
             <div class="footer-links">
                 <a href="#" id="sources-link">Sources & Methods</a>
                 <span class="separator">•</span>
-                <a href="#" id="download-link">Download Data</a>
+                <a href="data/austria_drought_risk.gpkg" download>Download GeoPackage</a>
             </div>
         </div>
         
@@ -464,9 +466,61 @@
             maxZoom: 18
         }).addTo(map);
         
+        // Add map legends
+        const droughtLegend = L.control({ position: 'bottomright' });
+        droughtLegend.onAdd = function() {
+            const div = L.DomUtil.create('div', 'map-legend');
+            div.innerHTML = `
+                <h4>Drought Risk</h4>
+                <div class="gradient-bar"></div>
+                <div class="gradient-labels">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+                </div>
+            `;
+            return div;
+        };
+        droughtLegend.addTo(map);
+        
+        const hydroLegend = L.control({ position: 'bottomright' });
+        hydroLegend.onAdd = function() {
+            const div = L.DomUtil.create('div', 'map-legend');
+            div.innerHTML = `
+                <h4>Hydropower</h4>
+                <div class="gradient-bar hydro-gradient"></div>
+                <div class="gradient-labels">
+                    <span>0</span>
+                    <span>375</span>
+                    <span>750 MW</span>
+                </div>
+            `;
+            return div;
+        };
+        hydroLegend.addTo(map);
+        
+        const gwLegend = L.control({ position: 'bottomright' });
+        gwLegend.onAdd = function() {
+            const div = L.DomUtil.create('div', 'map-legend');
+            div.id = 'gw-legend';
+            div.style.display = 'none';
+            div.innerHTML = `
+                <h4>GW Trend</h4>
+                <div class="gradient-bar viridis-gradient"></div>
+                <div class="gradient-labels">
+                    <span>-60</span>
+                    <span>0</span>
+                    <span>+30 cm/dec</span>
+                </div>
+            `;
+            return div;
+        };
+        gwLegend.addTo(map);
+        
         // Layer groups
         const hydroLayer = L.layerGroup().addTo(map);
         const boundaryLayer = L.layerGroup().addTo(map);
+        const gwLayer = L.layerGroup();
         
         // Risk color function (categorical)
         function getRiskColor(risk) {
@@ -499,7 +553,6 @@
         // Hydropower color function - continuous blue scale based on power (MW)
         function getHydroColor(mw) {
             // Scale from light blue (low power) to dark blue (high power)
-            // Max power is around 730 MW (Malta pump storage)
             const maxMW = 750;
             const ratio = Math.min(mw / maxMW, 1);
             
@@ -511,21 +564,61 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
         
+        // Viridis color scale for groundwater trends
+        // Trend range: approximately -0.6 to +0.3 m/decade
+        function getViridisColor(trend) {
+            // Normalize trend to 0-1 (negative=declining=yellow, positive=rising=purple)
+            // We flip it so declining (bad) is yellow/green, rising (good) is purple/blue
+            const minTrend = -0.6;
+            const maxTrend = 0.3;
+            const normalized = (trend - minTrend) / (maxTrend - minTrend);
+            const t = Math.max(0, Math.min(1, normalized));
+            
+            // Viridis colormap approximation
+            const viridis = [
+                [68, 1, 84],      // 0.0 - dark purple
+                [72, 40, 120],    // 0.1
+                [62, 74, 137],    // 0.2
+                [49, 104, 142],   // 0.3
+                [38, 130, 142],   // 0.4
+                [31, 158, 137],   // 0.5
+                [53, 183, 121],   // 0.6
+                [109, 205, 89],   // 0.7
+                [180, 222, 44],   // 0.8
+                [253, 231, 37]    // 1.0 - yellow
+            ];
+            
+            const idx = t * (viridis.length - 1);
+            const i = Math.floor(idx);
+            const f = idx - i;
+            
+            if (i >= viridis.length - 1) return `rgb(${viridis[viridis.length-1].join(',')})`;
+            
+            const r = Math.round(viridis[i][0] + f * (viridis[i+1][0] - viridis[i][0]));
+            const g = Math.round(viridis[i][1] + f * (viridis[i+1][1] - viridis[i][1]));
+            const b = Math.round(viridis[i][2] + f * (viridis[i+1][2] - viridis[i][2]));
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+        
         // Load data
         let municipalitiesData = [];
         let powerplantsData = [];
+        let gwStationsData = [];
         let geojsonData = null;
         
         async function loadData() {
             try {
-                const [muniResp, ppResp, geoResp] = await Promise.all([
+                const [muniResp, ppResp, gwResp, geoResp] = await Promise.all([
                     fetch('data/municipalities.json'),
                     fetch('data/powerplants.json'),
+                    fetch('data/gw_stations_trends.json'),
                     fetch('data/municipalities_risk.geojson')
                 ]);
                 
                 municipalitiesData = await muniResp.json();
                 powerplantsData = await ppResp.json();
+                gwStationsData = await gwResp.json();
                 geojsonData = await geoResp.json();
                 
                 updateStats();
@@ -550,6 +643,7 @@
             // Clear layers
             hydroLayer.clearLayers();
             boundaryLayer.clearLayers();
+            gwLayer.clearLayers();
             
             // Render choropleth - municipalities colored by risk score
             if (geojsonData) {
@@ -601,11 +695,11 @@
             // Render hydropower plants - uniform size, color by power
             powerplantsData.forEach(pp => {
                 const marker = L.circleMarker([pp.lat, pp.lon], {
-                    radius: 7,
+                    radius: 6,
                     fillColor: getHydroColor(pp.mw || 0),
                     fillOpacity: 0.9,
                     color: '#fff',
-                    weight: 1.5
+                    weight: 1
                 });
                 
                 marker.bindPopup(`
@@ -618,7 +712,32 @@
                 marker.addTo(hydroLayer);
             });
             
-            
+            // Render groundwater stations with trend coloring (viridis)
+            gwStationsData.forEach(gw => {
+                if (!gw.lat || !gw.lon) return;
+                const trend = gw.trend_m_per_decade;
+                if (trend === undefined || trend === null) return;
+                
+                const marker = L.circleMarker([gw.lat, gw.lon], {
+                    radius: 5,
+                    fillColor: getViridisColor(trend),
+                    fillOpacity: 0.85,
+                    color: '#222',
+                    weight: 0.5
+                });
+                
+                const trendCm = (trend * 100).toFixed(1);
+                const trendDir = trend < 0 ? 'declining' : 'rising';
+                
+                marker.bindPopup(`
+                    <div class="popup-title">${gw.name || 'GW Station'}</div>
+                    <div class="popup-row"><span class="popup-label">Trend:</span> ${trendCm} cm/decade (${trendDir})</div>
+                    <div class="popup-row"><span class="popup-label">Data years:</span> ${gw.data_years ? gw.data_years.toFixed(0) : 'N/A'}</div>
+                    <div class="popup-row"><span class="popup-label">Mean level:</span> ${gw.mean_level ? gw.mean_level.toFixed(1) + ' m' : 'N/A'}</div>
+                `);
+                
+                marker.addTo(gwLayer);
+            });
         }
         
         function showMunicipalityInfo(props) {
@@ -679,6 +798,16 @@
             else map.removeLayer(boundaryLayer);
         });
         
+        document.getElementById('layer-gw').addEventListener('change', function() {
+            if (this.checked) {
+                map.addLayer(gwLayer);
+                document.getElementById('gw-legend').style.display = 'block';
+            } else {
+                map.removeLayer(gwLayer);
+                document.getElementById('gw-legend').style.display = 'none';
+            }
+        });
+        
         // Load data on page load
         loadData();
         
@@ -686,11 +815,6 @@
         document.getElementById('sources-link').addEventListener('click', function(e) {
             e.preventDefault();
             document.getElementById('sources-modal').classList.add('active');
-        });
-        
-        document.getElementById('download-link').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('download-modal').classList.add('active');
         });
         
         document.querySelectorAll('.modal-close').forEach(btn => {
@@ -705,19 +829,7 @@
             });
         });
         
-        // Password protected download
-        document.getElementById('download-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const pwd = document.getElementById('download-pwd').value;
-            const errorEl = document.getElementById('pwd-error');
-            
-            if (pwd === 'flo2026') {
-                errorEl.textContent = '';
-                window.location.href = 'data/austria_drought_risk.gpkg';
-            } else {
-                errorEl.textContent = 'Incorrect password';
-            }
-        });
+        
     </script>
     
     <!-- Sources Modal -->
@@ -763,23 +875,6 @@
         </div>
     </div>
     
-    <!-- Download Modal -->
-    <div class="modal-overlay" id="download-modal">
-        <div class="modal">
-            <button class="modal-close">&times;</button>
-            <h2>Download Data</h2>
-            <p>Download the complete dataset as a GeoPackage file containing:</p>
-            <ul>
-                <li>Municipality boundaries with risk scores</li>
-                <li>Hydropower plant locations and capacities</li>
-                <li>Groundwater station locations and trends</li>
-            </ul>
-            <form class="password-form" id="download-form">
-                <input type="password" id="download-pwd" placeholder="Enter password">
-                <button type="submit">Download</button>
-                <div class="error-msg" id="pwd-error"></div>
-            </form>
-        </div>
-    </div>
+    
 </body>
 </html>
