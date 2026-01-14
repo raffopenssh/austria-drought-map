@@ -1,0 +1,4919 @@
+{
+  "rivers": {
+    "K\u00f6nigssee m. Almkanal": [
+      {
+        "id": "203364",
+        "name": "St. Leonhard (Summenpegel)",
+        "km": 446.14
+      }
+    ],
+    "Donau": [
+      {
+        "id": "207282",
+        "name": "Wolfsthal (Strom-km 1874,84)",
+        "km": 130.21
+      },
+      {
+        "id": "207407",
+        "name": "Thebnerstra\u00dfl",
+        "km": 133.26
+      },
+      {
+        "id": "207274",
+        "name": "Hainburg an der Donau",
+        "km": 135.25
+      },
+      {
+        "id": "207480",
+        "name": "Hainburg Stra\u00dfenbr\u00fccke",
+        "km": 136.0
+      },
+      {
+        "id": "207266",
+        "name": "Bad Deutsch Altenburg (Bauleitung)",
+        "km": 136.18
+      },
+      {
+        "id": "207373",
+        "name": "Wildungsmauer",
+        "km": 139.48
+      },
+      {
+        "id": "207423",
+        "name": "Orth an der Donau",
+        "km": 142.3
+      },
+      {
+        "id": "207258",
+        "name": "Fischamend (Sporthafen)",
+        "km": 143.92
+      },
+      {
+        "id": "207183",
+        "name": "Wien (Nu\u00dfdorf)",
+        "km": 156.48
+      },
+      {
+        "id": "207241",
+        "name": "Korneuburg",
+        "km": 159.87
+      },
+      {
+        "id": "207175",
+        "name": "Greifenstein",
+        "km": 160.0
+      },
+      {
+        "id": "207365",
+        "name": "B\u00e4rndorf",
+        "km": 174.0
+      },
+      {
+        "id": "207142",
+        "name": "Stein-Krems",
+        "km": 188.96
+      },
+      {
+        "id": "207357",
+        "name": "Kienstock",
+        "km": 194.0
+      },
+      {
+        "id": "207134",
+        "name": "Melk (Strom-km 2035,98)",
+        "km": 199.97
+      },
+      {
+        "id": "207126",
+        "name": "Ybbs an der Donau",
+        "km": 212.22
+      },
+      {
+        "id": "207100",
+        "name": "Grein (Schiffsstation)",
+        "km": 219.43
+      },
+      {
+        "id": "207431",
+        "name": "Wallsee",
+        "km": 226.0
+      },
+      {
+        "id": "207084",
+        "name": "Mauthausen (Strom-km 2110,98)",
+        "km": 235.98
+      },
+      {
+        "id": "207068",
+        "name": "Linz",
+        "km": 247.74
+      },
+      {
+        "id": "207340",
+        "name": "Wilhering",
+        "km": 249.12
+      },
+      {
+        "id": "207035",
+        "name": "Wehrstelle KW Aschach",
+        "km": 260.0
+      },
+      {
+        "id": "207043",
+        "name": "Aschach an der Donau (Agentie)",
+        "km": 260.0
+      },
+      {
+        "id": "207027",
+        "name": "Engelhartszell",
+        "km": 276.99
+      },
+      {
+        "id": "207019",
+        "name": "Achleiten",
+        "km": 288.04
+      }
+    ],
+    "G\u00f6lsen": [
+      {
+        "id": "207902",
+        "name": "St. Veit an der G\u00f6lsen",
+        "km": 372.08
+      },
+      {
+        "id": "215574",
+        "name": "Rainfeld",
+        "km": 379.57
+      }
+    ],
+    "Thauabach": [
+      {
+        "id": "209775",
+        "name": "Windigsteig",
+        "km": 484.17
+      },
+      {
+        "id": "214437",
+        "name": "Thaua",
+        "km": 511.23
+      }
+    ],
+    "M\u00fcrz": [
+      {
+        "id": "211268",
+        "name": "Kapfenberg-Diemlach",
+        "km": 485.94
+      },
+      {
+        "id": "211243",
+        "name": "Kindtal",
+        "km": 569.84
+      },
+      {
+        "id": "211227",
+        "name": "Neuberg an der M\u00fcrz",
+        "km": 715.45
+      },
+      {
+        "id": "214536",
+        "name": "Totes Weib",
+        "km": 847.32
+      }
+    ],
+    "Wildbach": [
+      {
+        "id": "211813",
+        "name": "Frauental (Wildbach)",
+        "km": 327.0
+      }
+    ],
+    "M\u00f6ll": [
+      {
+        "id": "212407",
+        "name": "M\u00f6llbr\u00fccke",
+        "km": 555.0
+      },
+      {
+        "id": "212399",
+        "name": "Kolbnitz-Verbund",
+        "km": 607.89
+      },
+      {
+        "id": "213124",
+        "name": "Flattach",
+        "km": 687.15
+      },
+      {
+        "id": "212373",
+        "name": "Winklern",
+        "km": 878.14
+      },
+      {
+        "id": "213926",
+        "name": "Heiligenblut-Winkl",
+        "km": 1229.77
+      }
+    ],
+    "G\u00f6ssering": [
+      {
+        "id": "212704",
+        "name": "Neudorf",
+        "km": 581.56
+      }
+    ],
+    "Navisbach": [
+      {
+        "id": "201582",
+        "name": "M\u00fchlen",
+        "km": 1009.08
+      }
+    ],
+    "Thierseebach": [
+      {
+        "id": "202259",
+        "name": "Thiersee",
+        "km": 615.66
+      }
+    ],
+    "Feistritz": [
+      {
+        "id": "208827",
+        "name": "Feistritz am Wechsel",
+        "km": 447.86
+      },
+      {
+        "id": "211029",
+        "name": "Anger",
+        "km": 465.39
+      },
+      {
+        "id": "211722",
+        "name": "Rettenegg",
+        "km": 849.97
+      }
+    ],
+    "St. Oswald Bach": [
+      {
+        "id": "213686",
+        "name": "Alte Schmiede",
+        "km": 1304.12
+      }
+    ],
+    "Reifnitzbach": [
+      {
+        "id": "213496",
+        "name": "Reifnitz",
+        "km": 440.93
+      }
+    ],
+    "W\u00f6rthersee": [
+      {
+        "id": "212985",
+        "name": "P\u00f6rtschach-See",
+        "km": 438.89
+      }
+    ],
+    "Viktringer Bach": [
+      {
+        "id": "213009",
+        "name": "Viktring",
+        "km": 447.37
+      }
+    ],
+    "Glanfurt": [
+      {
+        "id": "213025",
+        "name": "Weinl\u00e4nder",
+        "km": 434.2
+      }
+    ],
+    "Glan": [
+      {
+        "id": "213033",
+        "name": "Zell",
+        "km": 410.44
+      },
+      {
+        "id": "213934",
+        "name": "Klagenfurt-Professor Deutschgasse",
+        "km": 437.17
+      },
+      {
+        "id": "213827",
+        "name": "St. Veit",
+        "km": 462.66
+      },
+      {
+        "id": "213322",
+        "name": "Mauthbr\u00fccken",
+        "km": 499.71
+      }
+    ],
+    "Gurk": [
+      {
+        "id": "213041",
+        "name": "Gumisch",
+        "km": 394.38
+      },
+      {
+        "id": "213157",
+        "name": "Launsdorf",
+        "km": 509.99
+      },
+      {
+        "id": "213397",
+        "name": "M\u00f6lbling",
+        "km": 579.26
+      },
+      {
+        "id": "212886",
+        "name": "Weitensfeld-Ost",
+        "km": 692.94
+      },
+      {
+        "id": "212878",
+        "name": "Urschwirtbr\u00fccke",
+        "km": 934.95
+      },
+      {
+        "id": "212860",
+        "name": "Maitratten-Gnesau",
+        "km": 975.7
+      }
+    ],
+    "Klopeiner See": [
+      {
+        "id": "213348",
+        "name": "Unterburg-See",
+        "km": 445.14
+      }
+    ],
+    "G\u00f6sselsdorfer See": [
+      {
+        "id": "213579",
+        "name": "G\u00f6sselsdorf-See",
+        "km": 466.66
+      }
+    ],
+    "Globasnitzbach": [
+      {
+        "id": "213942",
+        "name": "St. Stefan",
+        "km": 511.21
+      }
+    ],
+    "W\u00f6lfnitzbach": [
+      {
+        "id": "213389",
+        "name": "Kaunz",
+        "km": 523.21
+      }
+    ],
+    "Loibach": [
+      {
+        "id": "213520",
+        "name": "Loibach",
+        "km": 485.61
+      }
+    ],
+    "Drau": [
+      {
+        "id": "213173",
+        "name": "Lavam\u00fcnd Ort",
+        "km": 338.02
+      },
+      {
+        "id": "213215",
+        "name": "Amlach",
+        "km": 522.79
+      },
+      {
+        "id": "213199",
+        "name": "Drauhofen",
+        "km": 547.07
+      },
+      {
+        "id": "212357",
+        "name": "Sachsenburg S\u00fcd",
+        "km": 555.02
+      },
+      {
+        "id": "213660",
+        "name": "Dellach",
+        "km": 599.73
+      },
+      {
+        "id": "212324",
+        "name": "Oberdrauburg Ort",
+        "km": 616.1
+      },
+      {
+        "id": "212316",
+        "name": "Lienz-Peggetz",
+        "km": 661.43
+      },
+      {
+        "id": "231092",
+        "name": "Lienz-Falkensteinsteg",
+        "km": 679.87
+      },
+      {
+        "id": "212027",
+        "name": "Rabland",
+        "km": 1070.98
+      },
+      {
+        "id": "202523",
+        "name": "Arnbach",
+        "km": 1107.73
+      }
+    ],
+    "Lavant": [
+      {
+        "id": "213090",
+        "name": "Krottendorf",
+        "km": 354.05
+      },
+      {
+        "id": "213371",
+        "name": "Fischering",
+        "km": 409.75
+      },
+      {
+        "id": "213363",
+        "name": "Bad St. Leonhard",
+        "km": 668.2
+      }
+    ],
+    "Waldensteiner Bach": [
+      {
+        "id": "213538",
+        "name": "Waldenstein",
+        "km": 695.13
+      }
+    ],
+    "Wei\u00dfenbach": [
+      {
+        "id": "213314",
+        "name": "St. Jakob",
+        "km": 459.87
+      },
+      {
+        "id": "206425",
+        "name": "Hinterstoder (Wei\u00dfenbach)",
+        "km": 645.24
+      },
+      {
+        "id": "213454",
+        "name": "Gassen",
+        "km": 683.29
+      }
+    ],
+    "Granitzbach": [
+      {
+        "id": "213819",
+        "name": "St. Paul",
+        "km": 374.48
+      }
+    ],
+    "Rhein": [
+      {
+        "id": "200196",
+        "name": "Lustenau (H\u00f6chster Br\u00fccke)",
+        "km": 393.51
+      },
+      {
+        "id": "200014",
+        "name": "Bangs",
+        "km": 419.93
+      }
+    ],
+    "Ill": [
+      {
+        "id": "200147",
+        "name": "Gisingen",
+        "km": 434.3
+      },
+      {
+        "id": "200121",
+        "name": "Frastanz",
+        "km": 460.48
+      },
+      {
+        "id": "231688",
+        "name": "Beschling",
+        "km": 484.88
+      },
+      {
+        "id": "231670",
+        "name": "Nenzing",
+        "km": 510.32
+      },
+      {
+        "id": "231662",
+        "name": "Lor\u00fcns-\u00c4ule",
+        "km": 578.53
+      },
+      {
+        "id": "200055",
+        "name": "Vandans (VIW)",
+        "km": 624.83
+      },
+      {
+        "id": "200022",
+        "name": "Gaschurn (VIW)",
+        "km": 946.82
+      }
+    ],
+    "Suggadinbach": [
+      {
+        "id": "200030",
+        "name": "Gargellen",
+        "km": 1402.24
+      }
+    ],
+    "Litz": [
+      {
+        "id": "200048",
+        "name": "Schruns (Vonbunweg)",
+        "km": 673.25
+      }
+    ],
+    "Alfenz": [
+      {
+        "id": "200592",
+        "name": "Kl\u00f6sterle (\u00d6BB)",
+        "km": 1014.35
+      }
+    ],
+    "Lutz": [
+      {
+        "id": "200105",
+        "name": "Garsella",
+        "km": 730.09
+      }
+    ],
+    "Samina": [
+      {
+        "id": "200501",
+        "name": "Amerl\u00fcgen",
+        "km": 603.3
+      }
+    ],
+    "Frutz": [
+      {
+        "id": "200642",
+        "name": "Sulz",
+        "km": 453.73
+      },
+      {
+        "id": "200154",
+        "name": "Laterns",
+        "km": 830.98
+      }
+    ],
+    "Ehbach": [
+      {
+        "id": "200162",
+        "name": "Meiningen (G\u00fcfel)",
+        "km": 419.32
+      },
+      {
+        "id": "200527",
+        "name": "Brederis",
+        "km": 427.19
+      }
+    ],
+    "Dornbirnerach": [
+      {
+        "id": "200410",
+        "name": "Lauterach",
+        "km": 394.53
+      },
+      {
+        "id": "200212",
+        "name": "Hoher Steg",
+        "km": 398.5
+      },
+      {
+        "id": "200204",
+        "name": "Enz",
+        "km": 467.06
+      }
+    ],
+    "Schwarzach": [
+      {
+        "id": "200428",
+        "name": "Schwarzach",
+        "km": 425.18
+      },
+      {
+        "id": "212100",
+        "name": "Hopfgarten im Def. Zwenewald",
+        "km": 1096.27
+      }
+    ],
+    "Emsbach": [
+      {
+        "id": "200576",
+        "name": "Hohenems",
+        "km": 408.81
+      }
+    ],
+    "Rheintalbinnenkanal": [
+      {
+        "id": "200220",
+        "name": "Lustenau (Hofsteig)",
+        "km": 399.52
+      }
+    ],
+    "Bregenzerach": [
+      {
+        "id": "200329",
+        "name": "Kennelbach",
+        "km": 423.02
+      },
+      {
+        "id": "200550",
+        "name": "Bersbuch",
+        "km": 560.0
+      },
+      {
+        "id": "200568",
+        "name": "Reuthe (Wehr)",
+        "km": 623.0
+      },
+      {
+        "id": "200261",
+        "name": "Mellau",
+        "km": 671.42
+      },
+      {
+        "id": "200253",
+        "name": "Au",
+        "km": 773.66
+      },
+      {
+        "id": "200246",
+        "name": "Hopfreben",
+        "km": 943.52
+      }
+    ],
+    "Bizauerbach": [
+      {
+        "id": "200493",
+        "name": "Reuthe",
+        "km": 643.86
+      }
+    ],
+    "Subersach": [
+      {
+        "id": "200295",
+        "name": "Lingenau",
+        "km": 589.52
+      },
+      {
+        "id": "200287",
+        "name": "Sch\u00f6nenbach (Hengstig)",
+        "km": 980.72
+      }
+    ],
+    "Leckenbach": [
+      {
+        "id": "200584",
+        "name": "K\u00e4lberweide",
+        "km": 974.44
+      }
+    ],
+    "Bolgenach": [
+      {
+        "id": "200451",
+        "name": "Hittisau (VKW)",
+        "km": 747.1
+      }
+    ],
+    "Wei\u00dfach": [
+      {
+        "id": "200303",
+        "name": "Krumbach-Zwing",
+        "km": 540.32
+      }
+    ],
+    "Rotach": [
+      {
+        "id": "200311",
+        "name": "Thal (Martinsbr\u00fccke)",
+        "km": 539.16
+      }
+    ],
+    "Bodensee": [
+      {
+        "id": "200337",
+        "name": "Bregenz (Seepegel)",
+        "km": 392.14
+      }
+    ],
+    "Ruggbach": [
+      {
+        "id": "200345",
+        "name": "Lochau",
+        "km": 409.45
+      }
+    ],
+    "Leiblach": [
+      {
+        "id": "200352",
+        "name": "Unterhochsteg",
+        "km": 396.35
+      }
+    ],
+    "Leiblach mit Werkskanal": [
+      {
+        "id": "200394",
+        "name": "Unterhochsteg (Summenpegel)",
+        "km": 396.35
+      }
+    ],
+    "Z\u00fcrsbach": [
+      {
+        "id": "200360",
+        "name": "Lech",
+        "km": 1453.94
+      }
+    ],
+    "Lech": [
+      {
+        "id": "201087",
+        "name": "Lechaschau",
+        "km": 836.09
+      },
+      {
+        "id": "201038",
+        "name": "Grie\u00dfau",
+        "km": 1013.48
+      },
+      {
+        "id": "201012",
+        "name": "Steeg",
+        "km": 1109.3
+      },
+      {
+        "id": "200378",
+        "name": "Lech (Tannbergbr\u00fccke)",
+        "km": 1437.49
+      }
+    ],
+    "Hornbach": [
+      {
+        "id": "201053",
+        "name": "Vorderhornbach (Br\u00fccke)",
+        "km": 957.31
+      }
+    ],
+    "Namlosbach": [
+      {
+        "id": "202226",
+        "name": "Stanzach",
+        "km": 937.39
+      }
+    ],
+    "Plansee": [
+      {
+        "id": "202184",
+        "name": "Seespitze (Seepegel)",
+        "km": 969.95
+      }
+    ],
+    "Vilsalpsee": [
+      {
+        "id": "202713",
+        "name": "Tannheim (Seepegel)",
+        "km": 1163.35
+      }
+    ],
+    "Haldensee": [
+      {
+        "id": "202192",
+        "name": "Gr\u00e4n (Seepegel)",
+        "km": 1122.75
+      }
+    ],
+    "Vils": [
+      {
+        "id": "201111",
+        "name": "Vils (L\u00e4nde)",
+        "km": 806.98
+      }
+    ],
+    "Karwendelbach": [
+      {
+        "id": "201129",
+        "name": "Scharnitz (Karwendelbr\u00fccke)",
+        "km": 976.02
+      }
+    ],
+    "Isar": [
+      {
+        "id": "201095",
+        "name": "Scharnitz (Weidach)",
+        "km": 956.95
+      }
+    ],
+    "Wildsee": [
+      {
+        "id": "202176",
+        "name": "Seefeld (Seepegel)",
+        "km": 1176.61
+      }
+    ],
+    "Gie\u00dfenbach": [
+      {
+        "id": "202143",
+        "name": "Scharnitz (Gie\u00dfenbach)",
+        "km": 965.66
+      }
+    ],
+    "Leutascher Ache": [
+      {
+        "id": "202127",
+        "name": "Klamm",
+        "km": 1184.07
+      }
+    ],
+    "Achensee": [
+      {
+        "id": "201145",
+        "name": "Pertisau (Seepegel)",
+        "km": 918.78
+      }
+    ],
+    "Blindsee": [
+      {
+        "id": "202507",
+        "name": "Biberwier (Seepegel)",
+        "km": 1092.81
+      }
+    ],
+    "Loisach": [
+      {
+        "id": "201152",
+        "name": "Ehrwald (Viadukt)",
+        "km": 958.0
+      }
+    ],
+    "Schalklbach": [
+      {
+        "id": "201160",
+        "name": "Schalklhof",
+        "km": 982.18
+      }
+    ],
+    "Inn": [
+      {
+        "id": "206201",
+        "name": "Sch\u00e4rding (Schreibpegel)",
+        "km": 299.8
+      },
+      {
+        "id": "230102",
+        "name": "Oberaudorf",
+        "km": 464.41
+      },
+      {
+        "id": "201905",
+        "name": "Kufstein (Bahnhofsbr\u00fccke)",
+        "km": 475.29
+      },
+      {
+        "id": "201889",
+        "name": "Kirchbichl-Bichlwang",
+        "km": 484.0
+      },
+      {
+        "id": "201814",
+        "name": "Rattenberg",
+        "km": 508.2
+      },
+      {
+        "id": "201806",
+        "name": "Brixlegg",
+        "km": 512.5
+      },
+      {
+        "id": "201681",
+        "name": "Jenbach-Rotholz",
+        "km": 521.48
+      },
+      {
+        "id": "201673",
+        "name": "Schwaz (Steinbr\u00fccke)",
+        "km": 531.69
+      },
+      {
+        "id": "202572",
+        "name": "Hall-West",
+        "km": 557.15
+      },
+      {
+        "id": "201525",
+        "name": "Innsbruck (oberh. Sill)",
+        "km": 568.46
+      },
+      {
+        "id": "201475",
+        "name": "Zirl",
+        "km": 590.6
+      },
+      {
+        "id": "230078",
+        "name": "Telfs (Fu\u00dfg\u00e4ngersteg)",
+        "km": 616.12
+      },
+      {
+        "id": "201459",
+        "name": "Magerbach",
+        "km": 652.98
+      },
+      {
+        "id": "201319",
+        "name": "Imst (Bahnhof)",
+        "km": 706.89
+      },
+      {
+        "id": "201293",
+        "name": "Landeck-Perjen",
+        "km": 768.73
+      },
+      {
+        "id": "201194",
+        "name": "Prutz",
+        "km": 861.36
+      },
+      {
+        "id": "201178",
+        "name": "Kajetansbr\u00fccke",
+        "km": 967.18
+      }
+    ],
+    "Fagge": [
+      {
+        "id": "202119",
+        "name": "Platz-Loch",
+        "km": 1220.96
+      },
+      {
+        "id": "230300",
+        "name": "Gepatschalm",
+        "km": 1895.01
+      }
+    ],
+    "Rosanna": [
+      {
+        "id": "201251",
+        "name": "St. Anton am Arlberg-Moos",
+        "km": 1312.79
+      }
+    ],
+    "Trisanna": [
+      {
+        "id": "201236",
+        "name": "See",
+        "km": 1017.0
+      },
+      {
+        "id": "201210",
+        "name": "Galt\u00fcr-Au",
+        "km": 1543.7
+      }
+    ],
+    "Sanna": [
+      {
+        "id": "202036",
+        "name": "Landeck-Bruggen",
+        "km": 775.3
+      }
+    ],
+    "Gurglbach": [
+      {
+        "id": "202101",
+        "name": "Nassereith (Wiesenm\u00fchle)",
+        "km": 813.39
+      }
+    ],
+    "Pitze": [
+      {
+        "id": "201335",
+        "name": "St. Leonhard im Pitztal",
+        "km": 1338.77
+      }
+    ],
+    "Vernagtbach": [
+      {
+        "id": "202689",
+        "name": "Vernagt",
+        "km": 2634.79
+      }
+    ],
+    "Rofenache": [
+      {
+        "id": "201350",
+        "name": "Vent (oberh. Niedertalbach)",
+        "km": 1891.01
+      }
+    ],
+    "Gurgler Ache": [
+      {
+        "id": "201376",
+        "name": "Obergurgl",
+        "km": 1878.64
+      }
+    ],
+    "\u00d6tztaler Ache": [
+      {
+        "id": "230342",
+        "name": "Brunau",
+        "km": 701.46
+      },
+      {
+        "id": "201434",
+        "name": "Tumpen",
+        "km": 931.1
+      },
+      {
+        "id": "201392",
+        "name": "Huben",
+        "km": 1186.35
+      }
+    ],
+    "Fundusbach": [
+      {
+        "id": "230383",
+        "name": "Fundusalm",
+        "km": 1593.85
+      }
+    ],
+    "Piburger See": [
+      {
+        "id": "202358",
+        "name": "Oetz-Badeanstalt (Seepegel)",
+        "km": 912.23
+      }
+    ],
+    "L\u00e4ngentalbach": [
+      {
+        "id": "202093",
+        "name": "K\u00fchtai",
+        "km": 1902.36
+      }
+    ],
+    "Melach": [
+      {
+        "id": "230706",
+        "name": "In der Au",
+        "km": 813.58
+      },
+      {
+        "id": "202069",
+        "name": "Kniepi\u00df",
+        "km": 1552.72
+      }
+    ],
+    "Zirmbach": [
+      {
+        "id": "202077",
+        "name": "Koflerkreuz",
+        "km": 1383.55
+      }
+    ],
+    "Brennersee": [
+      {
+        "id": "202200",
+        "name": "Gries am Brenner (Seepegel)",
+        "km": 1310.31
+      }
+    ],
+    "Sill": [
+      {
+        "id": "201624",
+        "name": "Innsbruck-Reichenau",
+        "km": 567.39
+      },
+      {
+        "id": "201574",
+        "name": "Puig",
+        "km": 1004.97
+      },
+      {
+        "id": "202275",
+        "name": "Lueg",
+        "km": 1216.24
+      }
+    ],
+    "Obernberger Seebach": [
+      {
+        "id": "201533",
+        "name": "Gries am Brenner",
+        "km": 1174.62
+      },
+      {
+        "id": "201640",
+        "name": "Gries am Brenner (mit UW-Kanal)",
+        "km": 1174.66
+      }
+    ],
+    "Valser Bach": [
+      {
+        "id": "201558",
+        "name": "St. Jodok am Brenner",
+        "km": 1120.02
+      }
+    ],
+    "Gschnitzbach": [
+      {
+        "id": "201566",
+        "name": "Steinach am Brenner",
+        "km": 1039.69
+      }
+    ],
+    "Ruetz": [
+      {
+        "id": "230714",
+        "name": "Fulpmes",
+        "km": 896.07
+      },
+      {
+        "id": "202283",
+        "name": "Kr\u00f6ssbach",
+        "km": 1086.16
+      }
+    ],
+    "Wattenbach": [
+      {
+        "id": "201657",
+        "name": "Wattens",
+        "km": 550.86
+      }
+    ],
+    "Weerbach": [
+      {
+        "id": "201665",
+        "name": "Weer",
+        "km": 547.46
+      }
+    ],
+    "Ziller": [
+      {
+        "id": "201780",
+        "name": "Hart im Zillertal",
+        "km": 530.99
+      },
+      {
+        "id": "201756",
+        "name": "Zell am Ziller-Zellbergeben",
+        "km": 569.82
+      },
+      {
+        "id": "201749",
+        "name": "Mayrhofen",
+        "km": 622.01
+      },
+      {
+        "id": "201699",
+        "name": "Klaushof (Br\u00fccke)",
+        "km": 1011.48
+      }
+    ],
+    "Zamserbach": [
+      {
+        "id": "201996",
+        "name": "Neukaser",
+        "km": 1785.91
+      }
+    ],
+    "Zemmbach": [
+      {
+        "id": "201715",
+        "name": "Sausteinaste",
+        "km": 909.54
+      }
+    ],
+    "Tuxbach": [
+      {
+        "id": "201723",
+        "name": "Persal",
+        "km": 881.69
+      }
+    ],
+    "Sidanbach": [
+      {
+        "id": "230755",
+        "name": "Schwendberg-Aue",
+        "km": 1383.05
+      }
+    ],
+    "Gerlosbach": [
+      {
+        "id": "201772",
+        "name": "Rohr",
+        "km": 570.69
+      },
+      {
+        "id": "201970",
+        "name": "EW-Gm\u00fcnd",
+        "km": 1192.91
+      }
+    ],
+    "Grundache": [
+      {
+        "id": "230896",
+        "name": "Steinberg am Rofan-Au\u00dfersteinberg",
+        "km": 984.29
+      }
+    ],
+    "M\u00fchlbach": [
+      {
+        "id": "208942",
+        "name": "Peisching",
+        "km": 355.83
+      },
+      {
+        "id": "203067",
+        "name": "Bramberg-M\u00fchlbach",
+        "km": 813.97
+      },
+      {
+        "id": "230904",
+        "name": "Steinberg am Rofan-Untersteinberg",
+        "km": 955.0
+      }
+    ],
+    "Brandenberger Ache": [
+      {
+        "id": "201822",
+        "name": "Mariathal",
+        "km": 528.9
+      }
+    ],
+    "W\u00f6rglerbach": [
+      {
+        "id": "202697",
+        "name": "Niederau",
+        "km": 790.63
+      }
+    ],
+    "Windauer Ache": [
+      {
+        "id": "202218",
+        "name": "Unterwindau",
+        "km": 633.87
+      }
+    ],
+    "Kelchsauer Ache": [
+      {
+        "id": "201848",
+        "name": "H\u00f6rbrunn",
+        "km": 658.11
+      }
+    ],
+    "Brixentaler Ache": [
+      {
+        "id": "201863",
+        "name": "Bruckh\u00e4usl",
+        "km": 524.34
+      }
+    ],
+    "Hintersteiner See": [
+      {
+        "id": "202788",
+        "name": "Scheffau am Wilden Kaiser (Seepegel)",
+        "km": 879.31
+      }
+    ],
+    "Stampfangerbach": [
+      {
+        "id": "202135",
+        "name": "S\u00f6ll",
+        "km": 628.26
+      }
+    ],
+    "Wei\u00dfache": [
+      {
+        "id": "201897",
+        "name": "Kaiserwerk",
+        "km": 554.97
+      }
+    ],
+    "Sparchenbach": [
+      {
+        "id": "230938",
+        "name": "Kufstein (\u00d6BK)",
+        "km": 477.41
+      }
+    ],
+    "Thiersee": [
+      {
+        "id": "202242",
+        "name": "Thiersee (Seepegel)",
+        "km": 615.79
+      }
+    ],
+    "Walchentaler Bach": [
+      {
+        "id": "201830",
+        "name": "Rettensch\u00f6\u00df",
+        "km": 690.12
+      }
+    ],
+    "Jennbach": [
+      {
+        "id": "230912",
+        "name": "Niederndorf (\u00d6BK)",
+        "km": 478.88
+      }
+    ],
+    "Kitzb\u00fcheler Ache": [
+      {
+        "id": "201939",
+        "name": "St. Johann in Tirol",
+        "km": 659.7
+      },
+      {
+        "id": "201913",
+        "name": "Kitzb\u00fchel (Bahnhofsbr\u00fccke)",
+        "km": 735.44
+      }
+    ],
+    "Aschauer Ache": [
+      {
+        "id": "201921",
+        "name": "Sperten",
+        "km": 669.24
+      },
+      {
+        "id": "202622",
+        "name": "Kirchberg",
+        "km": 811.6
+      }
+    ],
+    "Schwarzsee": [
+      {
+        "id": "202556",
+        "name": "Kitzb\u00fchel (Seepegel)",
+        "km": 778.1
+      }
+    ],
+    "Fieberbrunner Ache": [
+      {
+        "id": "201947",
+        "name": "Almdorf",
+        "km": 663.59
+      }
+    ],
+    "Gro\u00dfache": [
+      {
+        "id": "202382",
+        "name": "K\u00f6ssen-H\u00fctte",
+        "km": 588.75
+      },
+      {
+        "id": "201954",
+        "name": "Wohlmuting",
+        "km": 625.02
+      }
+    ],
+    "Kohlenbach": [
+      {
+        "id": "202630",
+        "name": "K\u00f6ssen-Waidach",
+        "km": 593.26
+      },
+      {
+        "id": "202549",
+        "name": "Schwendt-Unterbichl",
+        "km": 642.3
+      }
+    ],
+    "Walchsee": [
+      {
+        "id": "202234",
+        "name": "Walchsee (Seepegel)",
+        "km": 653.38
+      }
+    ],
+    "Krimmler Ache": [
+      {
+        "id": "204107",
+        "name": "Krimml",
+        "km": 1055.7
+      }
+    ],
+    "Salzach": [
+      {
+        "id": "206847",
+        "name": "Ach",
+        "km": 351.82
+      },
+      {
+        "id": "204560",
+        "name": "Ettenau",
+        "km": 365.86
+      },
+      {
+        "id": "203539",
+        "name": "Oberndorf",
+        "km": 387.25
+      },
+      {
+        "id": "203380",
+        "name": "Salzburg (Staatsbr\u00fccke)",
+        "km": 412.63
+      },
+      {
+        "id": "203323",
+        "name": "Golling",
+        "km": 463.19
+      },
+      {
+        "id": "204032",
+        "name": "Werfen",
+        "km": 512.13
+      },
+      {
+        "id": "203901",
+        "name": "Wallnerau (Pegel)",
+        "km": 597.9
+      },
+      {
+        "id": "204388",
+        "name": "Bruck-Neuwiesen",
+        "km": 763.83
+      },
+      {
+        "id": "203075",
+        "name": "Mittersill",
+        "km": 782.9
+      },
+      {
+        "id": "203026",
+        "name": "Wald",
+        "km": 858.66
+      }
+    ],
+    "Obersulzbach": [
+      {
+        "id": "203034",
+        "name": "Sulzau",
+        "km": 882.2
+      },
+      {
+        "id": "203893",
+        "name": "Kees",
+        "km": 2040.0
+      }
+    ],
+    "Untersulzbach": [
+      {
+        "id": "203042",
+        "name": "Neukirchen",
+        "km": 848.2
+      }
+    ],
+    "Habach": [
+      {
+        "id": "203596",
+        "name": "Habach",
+        "km": 873.78
+      }
+    ],
+    "Felber Bach": [
+      {
+        "id": "203083",
+        "name": "Haidbach",
+        "km": 864.42
+      }
+    ],
+    "Stuhlfeldnerbach": [
+      {
+        "id": "203984",
+        "name": "Stuhlfelden",
+        "km": 785.42
+      }
+    ],
+    "Stubache": [
+      {
+        "id": "203554",
+        "name": "Uttendorf (\u00d6BB)",
+        "km": 788.82
+      }
+    ],
+    "Kapruner Ache": [
+      {
+        "id": "203109",
+        "name": "Kaprun",
+        "km": 763.83
+      }
+    ],
+    "Zeller See": [
+      {
+        "id": "203117",
+        "name": "Zell am See (Seepegel)",
+        "km": 747.72
+      }
+    ],
+    "Fuscher Ache": [
+      {
+        "id": "203141",
+        "name": "Bruck (Fuscher Ache)",
+        "km": 758.61
+      },
+      {
+        "id": "203133",
+        "name": "Ferleiten",
+        "km": 1141.77
+      }
+    ],
+    "H\u00fcttwinklache": [
+      {
+        "id": "203158",
+        "name": "Bucheben",
+        "km": 1050.54
+      }
+    ],
+    "Rauriser Ache": [
+      {
+        "id": "203166",
+        "name": "Rauris (Unterland)",
+        "km": 917.19
+      }
+    ],
+    "Nassfelder Ache": [
+      {
+        "id": "203190",
+        "name": "B\u00f6ckstein",
+        "km": 1115.01
+      }
+    ],
+    "Nassfelder Ache m.Werksk.": [
+      {
+        "id": "203851",
+        "name": "B\u00f6ckstein (Summenpegel)",
+        "km": 1115.02
+      }
+    ],
+    "Gasteiner Ache": [
+      {
+        "id": "203208",
+        "name": "Bad Hofgastein",
+        "km": 836.77
+      }
+    ],
+    "Salzach m. KW-Schwarzach": [
+      {
+        "id": "203968",
+        "name": "Wallnerau (Summenpegel)",
+        "km": 598.03
+      }
+    ],
+    "Gro\u00dfarlbach": [
+      {
+        "id": "203224",
+        "name": "Gro\u00dfarl",
+        "km": 879.57
+      }
+    ],
+    "Bl\u00fchnbach": [
+      {
+        "id": "204099",
+        "name": "Tenneck",
+        "km": 513.24
+      }
+    ],
+    "Lammer": [
+      {
+        "id": "203307",
+        "name": "Oberg\u00e4u",
+        "km": 470.77
+      },
+      {
+        "id": "203265",
+        "name": "Schwaighofbr\u00fccke",
+        "km": 628.36
+      }
+    ],
+    "Schwarzbach": [
+      {
+        "id": "203943",
+        "name": "St. Nikolaus",
+        "km": 470.86
+      },
+      {
+        "id": "203927",
+        "name": "Abtenau Au",
+        "km": 649.71
+      }
+    ],
+    "Torrener Bach": [
+      {
+        "id": "203315",
+        "name": "Torren",
+        "km": 466.84
+      }
+    ],
+    "Salzach mit Almkanal": [
+      {
+        "id": "204297",
+        "name": "Salzburg (Summenpegel)",
+        "km": 408.06
+      }
+    ],
+    "Alterbach": [
+      {
+        "id": "203430",
+        "name": "Itzling",
+        "km": 413.46
+      }
+    ],
+    "Glanbach": [
+      {
+        "id": "203422",
+        "name": "Moos",
+        "km": 427.21
+      }
+    ],
+    "Wallersee": [
+      {
+        "id": "203588",
+        "name": "Wallersee (Seepegel)",
+        "km": 504.25
+      }
+    ],
+    "Fischach": [
+      {
+        "id": "203455",
+        "name": "Lengfelden",
+        "km": 422.99
+      },
+      {
+        "id": "204057",
+        "name": "Seekirchen (Kl\u00e4ranlage)",
+        "km": 501.96
+      }
+    ],
+    "Saalach": [
+      {
+        "id": "203570",
+        "name": "Siezenheim",
+        "km": 415.77
+      },
+      {
+        "id": "203497",
+        "name": "Wei\u00dfbach",
+        "km": 658.77
+      },
+      {
+        "id": "203463",
+        "name": "Viehhofen",
+        "km": 845.81
+      }
+    ],
+    "Urslau": [
+      {
+        "id": "203471",
+        "name": "Saalfelden",
+        "km": 729.3
+      }
+    ],
+    "Leoganger Ache": [
+      {
+        "id": "203489",
+        "name": "Uttenhofen",
+        "km": 719.2
+      }
+    ],
+    "Saalach und Wei\u00dfbach": [
+      {
+        "id": "204362",
+        "name": "Wei\u00dfbach (Summenpegel)",
+        "km": 658.77
+      }
+    ],
+    "Pillersee": [
+      {
+        "id": "202267",
+        "name": "St. Ulrich am Pillersee (Seepegel)",
+        "km": 835.19
+      }
+    ],
+    "Loferbach": [
+      {
+        "id": "203505",
+        "name": "Lofer (Loferbach)",
+        "km": 616.82
+      }
+    ],
+    "Saalach mit Werkskan\u00e4len": [
+      {
+        "id": "203521",
+        "name": "Siezenheim (Summenpegel)",
+        "km": 415.77
+      }
+    ],
+    "Oichten": [
+      {
+        "id": "203844",
+        "name": "Nu\u00dfdorf",
+        "km": 414.11
+      }
+    ],
+    "Holz\u00f6stersee": [
+      {
+        "id": "204537",
+        "name": "Holz\u00f6ster",
+        "km": 461.43
+      }
+    ],
+    "Moosache": [
+      {
+        "id": "203547",
+        "name": "Au St. Georgen",
+        "km": 382.5
+      },
+      {
+        "id": "204545",
+        "name": "Steinwag",
+        "km": 419.35
+      }
+    ],
+    "Pladenbach": [
+      {
+        "id": "203836",
+        "name": "Untereching",
+        "km": 388.17
+      }
+    ],
+    "Enknach": [
+      {
+        "id": "206623",
+        "name": "\u00d6sterlehen",
+        "km": 397.74
+      }
+    ],
+    "Mattsee": [
+      {
+        "id": "203604",
+        "name": "Mattsee (Seepegel)",
+        "km": 501.4
+      }
+    ],
+    "Obertrumer See": [
+      {
+        "id": "203612",
+        "name": "Obertrum (Seepegel)",
+        "km": 501.4
+      }
+    ],
+    "Grabensee": [
+      {
+        "id": "203620",
+        "name": "Zellhof (Seepegel)",
+        "km": 501.4
+      },
+      {
+        "id": "204131",
+        "name": "Perwang Strandbad (Seepegel)",
+        "km": 501.4
+      }
+    ],
+    "Mattig": [
+      {
+        "id": "204677",
+        "name": "Jahrsdorf",
+        "km": 349.82
+      },
+      {
+        "id": "204610",
+        "name": "Pfaffst\u00e4tt",
+        "km": 455.0
+      },
+      {
+        "id": "204586",
+        "name": "Laimhausm\u00fchle",
+        "km": 498.11
+      }
+    ],
+    "Berndorfer Bach": [
+      {
+        "id": "206698",
+        "name": "Elexlochen",
+        "km": 506.13
+      }
+    ],
+    "M\u00fchlberger Bach": [
+      {
+        "id": "204602",
+        "name": "Lochen",
+        "km": 506.07
+      }
+    ],
+    "Schwemmbach": [
+      {
+        "id": "206078",
+        "name": "Furth (Bundesstra\u00dfe)",
+        "km": 428.73
+      },
+      {
+        "id": "206839",
+        "name": "Kolming",
+        "km": 484.5
+      },
+      {
+        "id": "204636",
+        "name": "Friedburg",
+        "km": 507.72
+      },
+      {
+        "id": "206052",
+        "name": "Hocheck (Forsthaus)",
+        "km": 590.13
+      }
+    ],
+    "Hainbach": [
+      {
+        "id": "206250",
+        "name": "Lengau (Basisableitung)",
+        "km": 496.65
+      },
+      {
+        "id": "206730",
+        "name": "Lengau",
+        "km": 503.97
+      },
+      {
+        "id": "203638",
+        "name": "Stra\u00dfwalchen",
+        "km": 523.77
+      }
+    ],
+    "Schalchener Brunnbach": [
+      {
+        "id": "206086",
+        "name": "Furth (Ort)",
+        "km": 426.4
+      }
+    ],
+    "Waldzeller Ache": [
+      {
+        "id": "204685",
+        "name": "Waldzell",
+        "km": 508.95
+      }
+    ],
+    "Mettmach": [
+      {
+        "id": "204693",
+        "name": "Mettmach",
+        "km": 454.0
+      }
+    ],
+    "M\u00fchlheimer Ache": [
+      {
+        "id": "206748",
+        "name": "Altheim",
+        "km": 348.0
+      }
+    ],
+    "Moosbach": [
+      {
+        "id": "206722",
+        "name": "Lindlau",
+        "km": 406.0
+      }
+    ],
+    "Lochbach": [
+      {
+        "id": "204701",
+        "name": "Bauerding",
+        "km": 357.34
+      }
+    ],
+    "Ach": [
+      {
+        "id": "204719",
+        "name": "Mamling",
+        "km": 328.45
+      }
+    ],
+    "Antiesen": [
+      {
+        "id": "204750",
+        "name": "Haging",
+        "km": 377.67
+      },
+      {
+        "id": "206805",
+        "name": "Danner",
+        "km": 409.35
+      }
+    ],
+    "Oberach": [
+      {
+        "id": "204727",
+        "name": "Pramet",
+        "km": 505.98
+      }
+    ],
+    "Rieder Bach": [
+      {
+        "id": "204735",
+        "name": "Ried im Innkreis (Ort)",
+        "km": 421.92
+      }
+    ],
+    "Osternach": [
+      {
+        "id": "204768",
+        "name": "Osternach",
+        "km": 357.0
+      }
+    ],
+    "Pram": [
+      {
+        "id": "204867",
+        "name": "Pramerdorf",
+        "km": 308.48
+      },
+      {
+        "id": "206326",
+        "name": "Winertsham (Steg)",
+        "km": 335.94
+      },
+      {
+        "id": "204784",
+        "name": "Riedau",
+        "km": 365.0
+      },
+      {
+        "id": "206102",
+        "name": "Pram",
+        "km": 427.11
+      }
+    ],
+    "Messenbach": [
+      {
+        "id": "206268",
+        "name": "Lohstampf",
+        "km": 338.68
+      }
+    ],
+    "Pfudabach": [
+      {
+        "id": "204834",
+        "name": "Alfersham",
+        "km": 329.78
+      },
+      {
+        "id": "204826",
+        "name": "Angs\u00fc\u00df",
+        "km": 345.34
+      }
+    ],
+    "Diersbach": [
+      {
+        "id": "204842",
+        "name": "Diersbach",
+        "km": 333.99
+      }
+    ],
+    "Ranna": [
+      {
+        "id": "204875",
+        "name": "Oberkappel",
+        "km": 491.76
+      }
+    ],
+    "Kleine M\u00fchl": [
+      {
+        "id": "204883",
+        "name": "Oberm\u00fchl",
+        "km": 283.5
+      },
+      {
+        "id": "206771",
+        "name": "Koblm\u00fchle",
+        "km": 482.0
+      }
+    ],
+    "Gro\u00dfe M\u00fchl": [
+      {
+        "id": "204933",
+        "name": "Teufelm\u00fchle",
+        "km": 479.99
+      },
+      {
+        "id": "204917",
+        "name": "Furtm\u00fchle",
+        "km": 503.98
+      },
+      {
+        "id": "204891",
+        "name": "Vorderanger",
+        "km": 589.41
+      }
+    ],
+    "Klafferbach": [
+      {
+        "id": "204909",
+        "name": "Pfaffetschlag",
+        "km": 693.66
+      }
+    ],
+    "Steinerne M\u00fchl": [
+      {
+        "id": "204925",
+        "name": "Hartmannsdorf",
+        "km": 499.59
+      }
+    ],
+    "Trattnach": [
+      {
+        "id": "205021",
+        "name": "Bad Schallerbach",
+        "km": 300.62
+      },
+      {
+        "id": "205013",
+        "name": "Grieskirchen",
+        "km": 329.93
+      },
+      {
+        "id": "204974",
+        "name": "Str\u00f6tting",
+        "km": 378.04
+      },
+      {
+        "id": "206565",
+        "name": "HWR-Becken Leithen (Ausflu\u00df)",
+        "km": 467.44
+      }
+    ],
+    "Stillbach": [
+      {
+        "id": "204990",
+        "name": "Still",
+        "km": 382.43
+      }
+    ],
+    "Innbach": [
+      {
+        "id": "205039",
+        "name": "Fraham",
+        "km": 266.17
+      }
+    ],
+    "D\u00fcrre Aschach": [
+      {
+        "id": "205047",
+        "name": "Neumarkt im Hausruckkreis",
+        "km": 376.56
+      }
+    ],
+    "Faule Aschach": [
+      {
+        "id": "206151",
+        "name": "Edtm\u00fchle",
+        "km": 362.05
+      }
+    ],
+    "Aschach": [
+      {
+        "id": "205070",
+        "name": "Pfaffing",
+        "km": 264.76
+      },
+      {
+        "id": "205054",
+        "name": "Kropfm\u00fchle",
+        "km": 347.95
+      },
+      {
+        "id": "206169",
+        "name": "Niederspaching",
+        "km": 358.71
+      }
+    ],
+    "Leitenbach": [
+      {
+        "id": "206177",
+        "name": "Knotzberg",
+        "km": 417.98
+      }
+    ],
+    "Pesenbach": [
+      {
+        "id": "205062",
+        "name": "Bad M\u00fchllacken",
+        "km": 271.39
+      }
+    ],
+    "Gro\u00dfe Rodl": [
+      {
+        "id": "205088",
+        "name": "Rottenegg",
+        "km": 271.83
+      },
+      {
+        "id": "206656",
+        "name": "Zwettl an der Rodl",
+        "km": 613.5
+      }
+    ],
+    "Diestlbach": [
+      {
+        "id": "206664",
+        "name": "Zwettl an der Rodl (Gemeindeamt)",
+        "km": 611.01
+      }
+    ],
+    "Gro\u00dfer Haselbach": [
+      {
+        "id": "205096",
+        "name": "Asberg",
+        "km": 354.63
+      }
+    ],
+    "Grundlseer-Traun": [
+      {
+        "id": "210526",
+        "name": "Archkogl",
+        "km": 704.45
+      }
+    ],
+    "Altausseer See": [
+      {
+        "id": "210534",
+        "name": "Altaussee (Seeklause)",
+        "km": 710.36
+      }
+    ],
+    "Altausseer-Traun": [
+      {
+        "id": "210542",
+        "name": "Altaussee (Traun)",
+        "km": 709.44
+      }
+    ],
+    "Augstbach": [
+      {
+        "id": "210559",
+        "name": "Altaussee (Augstbach)",
+        "km": 714.41
+      }
+    ],
+    "Kainischtraun": [
+      {
+        "id": "210583",
+        "name": "Kainisch",
+        "km": 764.26
+      }
+    ],
+    "Koppentraun": [
+      {
+        "id": "210591",
+        "name": "Bad Aussee (Hadeksteg)",
+        "km": 632.64
+      }
+    ],
+    "Traun": [
+      {
+        "id": "205682",
+        "name": "Ebelsberg",
+        "km": 250.85
+      },
+      {
+        "id": "206391",
+        "name": "Wels-Lichtenegg",
+        "km": 309.0
+      },
+      {
+        "id": "205526",
+        "name": "Hafeld",
+        "km": 330.55
+      },
+      {
+        "id": "205468",
+        "name": "Lambach (Traunbr\u00fccke)",
+        "km": 341.45
+      },
+      {
+        "id": "206128",
+        "name": "Theresienthal",
+        "km": 410.0
+      },
+      {
+        "id": "205203",
+        "name": "Ebensee",
+        "km": 422.17
+      },
+      {
+        "id": "205153",
+        "name": "Bad Ischl (Maxquelle)",
+        "km": 458.6
+      },
+      {
+        "id": "205146",
+        "name": "Steeg (Seeausfluss)",
+        "km": 505.66
+      },
+      {
+        "id": "205104",
+        "name": "Obertraun",
+        "km": 526.2
+      }
+    ],
+    "Hallst\u00e4tter See": [
+      {
+        "id": "205138",
+        "name": "Steeg (Bootsh\u00fctte)",
+        "km": 507.35
+      },
+      {
+        "id": "205112",
+        "name": "Lahn",
+        "km": 507.48
+      }
+    ],
+    "Waldbach": [
+      {
+        "id": "205120",
+        "name": "Waldbachstrub",
+        "km": 533.22
+      }
+    ],
+    "Hinterer Gosausee": [
+      {
+        "id": "205575",
+        "name": "Hinterer Gosausee",
+        "km": 1110.76
+      }
+    ],
+    "Stambach": [
+      {
+        "id": "206631",
+        "name": "Bad Goisern",
+        "km": 501.55
+      }
+    ],
+    "Wolfgangsee (Abersee)": [
+      {
+        "id": "205161",
+        "name": "Strobl",
+        "km": 536.89
+      },
+      {
+        "id": "203646",
+        "name": "St. Gilgen (Seepegel)",
+        "km": 537.3
+      }
+    ],
+    "Ischl": [
+      {
+        "id": "205187",
+        "name": "Bad Ischl (Giselabr\u00fccke)",
+        "km": 469.64
+      },
+      {
+        "id": "205179",
+        "name": "Strobl (B\u00fcrglstein)",
+        "km": 536.97
+      }
+    ],
+    "Rettenbach": [
+      {
+        "id": "205955",
+        "name": "Grabenbachbr\u00fccke",
+        "km": 561.78
+      }
+    ],
+    "Mitterwei\u00dfenbach": [
+      {
+        "id": "206615",
+        "name": "Mitterwei\u00dfenbach",
+        "km": 465.34
+      }
+    ],
+    "Vorderer Langbathsee": [
+      {
+        "id": "205211",
+        "name": "Jagdschlo\u00df Langbathsee",
+        "km": 663.01
+      }
+    ],
+    "Langbathbach": [
+      {
+        "id": "205229",
+        "name": "Ebensee (Unterlangbath)",
+        "km": 431.17
+      }
+    ],
+    "Traunsee": [
+      {
+        "id": "205237",
+        "name": "Ebensee (Landungssteg)",
+        "km": 420.62
+      },
+      {
+        "id": "205245",
+        "name": "Gmunden (Esplanade)",
+        "km": 421.31
+      }
+    ],
+    "Zeller See (Irrsee)": [
+      {
+        "id": "205260",
+        "name": "Zell am Moos",
+        "km": 551.42
+      }
+    ],
+    "Zeller Ache": [
+      {
+        "id": "205278",
+        "name": "Mondsee (Armaturenwerk)",
+        "km": 495.54
+      }
+    ],
+    "Mondsee": [
+      {
+        "id": "205286",
+        "name": "Mondsee (Limnolog.Institut)",
+        "km": 479.28
+      },
+      {
+        "id": "205302",
+        "name": "See am Mondsee",
+        "km": 480.24
+      }
+    ],
+    "Fuschlsee": [
+      {
+        "id": "203653",
+        "name": "Fuschl (Seepegel)",
+        "km": 662.4
+      }
+    ],
+    "Fuschler Ache": [
+      {
+        "id": "203661",
+        "name": "Hof bei Salzburg",
+        "km": 660.24
+      }
+    ],
+    "Griesler Ache": [
+      {
+        "id": "205294",
+        "name": "St. Lorenz",
+        "km": 492.41
+      }
+    ],
+    "Seeache": [
+      {
+        "id": "206185",
+        "name": "See am Mondsee (Au)",
+        "km": 477.35
+      }
+    ],
+    "Attersee": [
+      {
+        "id": "205328",
+        "name": "Unterach am Attersee",
+        "km": 467.51
+      },
+      {
+        "id": "205351",
+        "name": "Kammer",
+        "km": 467.75
+      },
+      {
+        "id": "216002",
+        "name": "Wei\u00dfenbach am Attersee (Seepegel)",
+        "km": 468.0
+      }
+    ],
+    "\u00c4usserer Wei\u00dfenbach": [
+      {
+        "id": "205336",
+        "name": "Wei\u00dfenbach am Attersee",
+        "km": 473.22
+      }
+    ],
+    "Ager": [
+      {
+        "id": "205450",
+        "name": "Fischerau",
+        "km": 348.0
+      },
+      {
+        "id": "205427",
+        "name": "Schalchham",
+        "km": 411.17
+      },
+      {
+        "id": "206276",
+        "name": "D\u00fcrnau",
+        "km": 434.32
+      },
+      {
+        "id": "205369",
+        "name": "Raudaschls\u00e4ge",
+        "km": 466.31
+      }
+    ],
+    "V\u00f6ckla": [
+      {
+        "id": "205419",
+        "name": "V\u00f6cklabruck",
+        "km": 418.61
+      },
+      {
+        "id": "205393",
+        "name": "Timelkam",
+        "km": 442.0
+      },
+      {
+        "id": "205377",
+        "name": "Stauf",
+        "km": 502.5
+      }
+    ],
+    "Frankenburger Redl": [
+      {
+        "id": "205385",
+        "name": "Redl",
+        "km": 470.44
+      }
+    ],
+    "D\u00fcrre Ager": [
+      {
+        "id": "206383",
+        "name": "Timelkam (Fu\u00dfg\u00e4ngersteg)",
+        "km": 443.86
+      },
+      {
+        "id": "205401",
+        "name": "St. Georgen im Attergau",
+        "km": 531.36
+      }
+    ],
+    "Aurach": [
+      {
+        "id": "205435",
+        "name": "Aurachkirchen",
+        "km": 419.88
+      }
+    ],
+    "Staiger Bach": [
+      {
+        "id": "205443",
+        "name": "Pitzenberg",
+        "km": 404.29
+      }
+    ],
+    "Schwaiger Bach": [
+      {
+        "id": "205476",
+        "name": "Oberschwaig",
+        "km": 367.14
+      }
+    ],
+    "Almsee": [
+      {
+        "id": "205484",
+        "name": "Almsee",
+        "km": 586.39
+      }
+    ],
+    "Alm": [
+      {
+        "id": "205518",
+        "name": "Penningersteg",
+        "km": 357.71
+      },
+      {
+        "id": "205500",
+        "name": "Friedlm\u00fchle",
+        "km": 442.11
+      },
+      {
+        "id": "206508",
+        "name": "Gr\u00fcnau",
+        "km": 518.87
+      }
+    ],
+    "Laudach": [
+      {
+        "id": "206292",
+        "name": "Au (Mittlere Au)",
+        "km": 367.71
+      }
+    ],
+    "Traun mit Welser M\u00fchlbach": [
+      {
+        "id": "206409",
+        "name": "Wels-Lichtenegg (Summenpegel)",
+        "km": 309.0
+      }
+    ],
+    "Aiterbach": [
+      {
+        "id": "205534",
+        "name": "Oberschauersberg",
+        "km": 322.42
+      }
+    ],
+    "Sipbach": [
+      {
+        "id": "205609",
+        "name": "Holzerm\u00fchle",
+        "km": 370.01
+      }
+    ],
+    "Krems": [
+      {
+        "id": "207878",
+        "name": "Imbach",
+        "km": 230.59
+      },
+      {
+        "id": "205658",
+        "name": "Kremsdorf",
+        "km": 270.35
+      },
+      {
+        "id": "205641",
+        "name": "Kremsm\u00fcnster (Ort)",
+        "km": 338.84
+      },
+      {
+        "id": "205633",
+        "name": "Kirchdorf an der Krems",
+        "km": 414.44
+      }
+    ],
+    "Sulzbach": [
+      {
+        "id": "206813",
+        "name": "Unterrohr",
+        "km": 318.39
+      }
+    ],
+    "Welser M\u00fchlbach": [
+      {
+        "id": "206516",
+        "name": "Au bei der Traun",
+        "km": 321.34
+      }
+    ],
+    "H\u00f6rschinger Bach": [
+      {
+        "id": "206607",
+        "name": "H\u00f6rsching (Ort)",
+        "km": 286.16
+      }
+    ],
+    "Ipfbach": [
+      {
+        "id": "205690",
+        "name": "St. Florian bei Linz",
+        "km": 258.21
+      }
+    ],
+    "Gro\u00dfe Gusen": [
+      {
+        "id": "206573",
+        "name": "Engerwitzdorf",
+        "km": 312.5
+      }
+    ],
+    "Kleine Gusen": [
+      {
+        "id": "206854",
+        "name": "Unterweitersdorf",
+        "km": 327.42
+      }
+    ],
+    "Gusen": [
+      {
+        "id": "206375",
+        "name": "St. Georgen an der Gusen (Bad)",
+        "km": 246.67
+      }
+    ],
+    "Enns": [
+      {
+        "id": "205922",
+        "name": "Steyr (Ortskai)",
+        "km": 280.97
+      },
+      {
+        "id": "205757",
+        "name": "J\u00e4gerberg",
+        "km": 285.77
+      },
+      {
+        "id": "210823",
+        "name": "Admont (Enns)",
+        "km": 616.8
+      },
+      {
+        "id": "210799",
+        "name": "Liezen (R\u00f6thelbr\u00fccke)",
+        "km": 627.0
+      },
+      {
+        "id": "210740",
+        "name": "Trautenfels",
+        "km": 639.96
+      },
+      {
+        "id": "210674",
+        "name": "Aich",
+        "km": 688.86
+      },
+      {
+        "id": "210641",
+        "name": "Schladming",
+        "km": 724.85
+      },
+      {
+        "id": "203729",
+        "name": "Radstadt (Enns)",
+        "km": 823.31
+      },
+      {
+        "id": "203711",
+        "name": "Altenmarkt im Pongau",
+        "km": 837.35
+      },
+      {
+        "id": "203703",
+        "name": "Flachau",
+        "km": 898.45
+      }
+    ],
+    "Taurach": [
+      {
+        "id": "203737",
+        "name": "L\u00f6benau",
+        "km": 835.8
+      },
+      {
+        "id": "203786",
+        "name": "Tamsweg (Taurach)",
+        "km": 1019.02
+      },
+      {
+        "id": "203760",
+        "name": "Mauterndorf",
+        "km": 1108.22
+      }
+    ],
+    "Forstaubach": [
+      {
+        "id": "203919",
+        "name": "Forstau",
+        "km": 882.42
+      }
+    ],
+    "Untertalbach": [
+      {
+        "id": "210625",
+        "name": "Tetter",
+        "km": 1019.47
+      }
+    ],
+    "Donnersbach": [
+      {
+        "id": "210732",
+        "name": "Irdning",
+        "km": 644.07
+      }
+    ],
+    "Gulling": [
+      {
+        "id": "210773",
+        "name": "Aigen im Ennstal-Ketten",
+        "km": 644.59
+      }
+    ],
+    "Palten": [
+      {
+        "id": "210815",
+        "name": "Selzthal",
+        "km": 632.93
+      }
+    ],
+    "Erzbach": [
+      {
+        "id": "210856",
+        "name": "Hieflau",
+        "km": 485.86
+      }
+    ],
+    "Salza": [
+      {
+        "id": "210898",
+        "name": "Wildalpen",
+        "km": 583.06
+      },
+      {
+        "id": "210864",
+        "name": "Gu\u00dfwerk",
+        "km": 735.5
+      }
+    ],
+    "Radmerbach": [
+      {
+        "id": "210880",
+        "name": "Weichselboden",
+        "km": 668.63
+      }
+    ],
+    "Laussabach": [
+      {
+        "id": "206763",
+        "name": "Platzl",
+        "km": 421.0
+      }
+    ],
+    "Gaflenzbach": [
+      {
+        "id": "205732",
+        "name": "Weyer Markt",
+        "km": 383.76
+      }
+    ],
+    "Pechgraben": [
+      {
+        "id": "206540",
+        "name": "Pechgraben",
+        "km": 420.78
+      }
+    ],
+    "Reichramingbach": [
+      {
+        "id": "205740",
+        "name": "Reichraming",
+        "km": 347.78
+      },
+      {
+        "id": "206367",
+        "name": "Gro\u00dfe Klause",
+        "km": 463.43
+      }
+    ],
+    "Steyr": [
+      {
+        "id": "205914",
+        "name": "Pergern",
+        "km": 301.81
+      },
+      {
+        "id": "205864",
+        "name": "Klaus an der Pyhrnbahn",
+        "km": 420.29
+      },
+      {
+        "id": "205799",
+        "name": "Kniewas",
+        "km": 468.61
+      },
+      {
+        "id": "205781",
+        "name": "Hinterstoder",
+        "km": 599.45
+      },
+      {
+        "id": "205765",
+        "name": "Dietlgut",
+        "km": 642.78
+      }
+    ],
+    "Krumme Steyr": [
+      {
+        "id": "205773",
+        "name": "Polsterlucke",
+        "km": 614.01
+      }
+    ],
+    "Teichl": [
+      {
+        "id": "205831",
+        "name": "St. Pankraz",
+        "km": 484.58
+      },
+      {
+        "id": "205823",
+        "name": "Teichlbr\u00fccke",
+        "km": 571.17
+      },
+      {
+        "id": "205807",
+        "name": "Spital am Pyhrn",
+        "km": 625.5
+      }
+    ],
+    "Dambach": [
+      {
+        "id": "205815",
+        "name": "Windischgarsten",
+        "km": 603.32
+      }
+    ],
+    "Hinterer Rettenbach": [
+      {
+        "id": "206821",
+        "name": "Ro\u00dfleithen (Klammstein)",
+        "km": 593.6
+      }
+    ],
+    "Vorderer Rettenbach": [
+      {
+        "id": "206524",
+        "name": "Spering",
+        "km": 513.95
+      }
+    ],
+    "Steyrling": [
+      {
+        "id": "205856",
+        "name": "Steyrling",
+        "km": 496.68
+      }
+    ],
+    "Paltenbach": [
+      {
+        "id": "205872",
+        "name": "Dandelm\u00fchle",
+        "km": 398.72
+      }
+    ],
+    "Krumme Steyrling": [
+      {
+        "id": "205898",
+        "name": "Molln",
+        "km": 404.16
+      },
+      {
+        "id": "205880",
+        "name": "Innerbreitenau",
+        "km": 470.85
+      }
+    ],
+    "Schmiedleitnerbach": [
+      {
+        "id": "205583",
+        "name": "Leonstein",
+        "km": 422.9
+      }
+    ],
+    "Ramingbach": [
+      {
+        "id": "206599",
+        "name": "Steyr (Zollamt)",
+        "km": 290.37
+      }
+    ],
+    "Feldaist": [
+      {
+        "id": "206581",
+        "name": "Kefermarkt",
+        "km": 462.04
+      },
+      {
+        "id": "205948",
+        "name": "Freistadt (Hafnerzeile)",
+        "km": 538.42
+      }
+    ],
+    "Wald-(Schwarze) Aist": [
+      {
+        "id": "206680",
+        "name": "Weitersfelden",
+        "km": 676.66
+      }
+    ],
+    "Waldaist": [
+      {
+        "id": "205971",
+        "name": "Pfahnlm\u00fchle",
+        "km": 322.36
+      }
+    ],
+    "Aist": [
+      {
+        "id": "205989",
+        "name": "Schwertberg (Kaolinwerk)",
+        "km": 253.24
+      }
+    ],
+    "Erla": [
+      {
+        "id": "209247",
+        "name": "St. Pantaleon (S\u00fcd)",
+        "km": 241.68
+      }
+    ],
+    "Gro\u00dfe Naarn": [
+      {
+        "id": "205997",
+        "name": "K\u00f6nigswiesen (Ort)",
+        "km": 562.56
+      }
+    ],
+    "Kleine Naarn": [
+      {
+        "id": "206003",
+        "name": "Unterwei\u00dfenbach",
+        "km": 612.06
+      }
+    ],
+    "Naarn": [
+      {
+        "id": "206029",
+        "name": "Haid",
+        "km": 233.54
+      }
+    ],
+    "Klambach": [
+      {
+        "id": "206037",
+        "name": "Sturmm\u00fchle",
+        "km": 231.56
+      }
+    ],
+    "Sarmingbach": [
+      {
+        "id": "206227",
+        "name": "Waldhausen (Seeausflu\u00df)",
+        "km": 457.75
+      }
+    ],
+    "Isper": [
+      {
+        "id": "207613",
+        "name": "Isperdorf",
+        "km": 232.74
+      }
+    ],
+    "Ois": [
+      {
+        "id": "209551",
+        "name": "Lunz am See (Seestra\u00dfe)",
+        "km": 592.43
+      }
+    ],
+    "Lunzer See": [
+      {
+        "id": "214262",
+        "name": "Lunz am See (Wassercluster)",
+        "km": 606.25
+      }
+    ],
+    "Lunzer See mit Seeausleitung": [
+      {
+        "id": "214445",
+        "name": "Lunz am See (Wassercluster Summenpegel)",
+        "km": 606.25
+      }
+    ],
+    "Ybbs": [
+      {
+        "id": "207688",
+        "name": "Greimpersdorf",
+        "km": 261.89
+      },
+      {
+        "id": "207654",
+        "name": "Opponitz (Mirenau)",
+        "km": 391.29
+      },
+      {
+        "id": "214254",
+        "name": "G\u00f6stling (Weidenauer Br\u00fccke)",
+        "km": 518.33
+      }
+    ],
+    "Kleine Ybbs": [
+      {
+        "id": "209130",
+        "name": "Ybbsitz (Obergurhof)",
+        "km": 398.86
+      }
+    ],
+    "Urlbach": [
+      {
+        "id": "207696",
+        "name": "Krenstetten",
+        "km": 304.27
+      }
+    ],
+    "Gro\u00dfe Erlauf": [
+      {
+        "id": "209882",
+        "name": "Scheibbs (Kardinal K\u00f6nig Br\u00fccke)",
+        "km": 325.25
+      },
+      {
+        "id": "207738",
+        "name": "Kienberg (Neuhaus)",
+        "km": 382.82
+      },
+      {
+        "id": "208850",
+        "name": "Erlaufboden (EVN)",
+        "km": 529.79
+      },
+      {
+        "id": "207704",
+        "name": "Mitterbach (Br\u00fccke)",
+        "km": 785.91
+      }
+    ],
+    "\u00d6tscherbach": [
+      {
+        "id": "207712",
+        "name": "Wienerbruck",
+        "km": 622.17
+      }
+    ],
+    "Lassingbach": [
+      {
+        "id": "207720",
+        "name": "Reith",
+        "km": 793.88
+      }
+    ],
+    "Gamingbach": [
+      {
+        "id": "207746",
+        "name": "Gaming",
+        "km": 396.14
+      }
+    ],
+    "Je\u00dfnitz": [
+      {
+        "id": "207787",
+        "name": "Neubruck",
+        "km": 352.92
+      }
+    ],
+    "Schliefaubach": [
+      {
+        "id": "209403",
+        "name": "Schliefau",
+        "km": 385.95
+      }
+    ],
+    "Kleine Erlauf": [
+      {
+        "id": "207795",
+        "name": "Wieselburg (Messegel\u00e4nde)",
+        "km": 247.97
+      },
+      {
+        "id": "209817",
+        "name": "Wang",
+        "km": 313.07
+      }
+    ],
+    "Erlauf": [
+      {
+        "id": "207803",
+        "name": "Niederndorf",
+        "km": 225.4
+      }
+    ],
+    "Laimbach": [
+      {
+        "id": "209387",
+        "name": "Laimbach",
+        "km": 515.44
+      }
+    ],
+    "Weitenbach": [
+      {
+        "id": "207811",
+        "name": "Weitenegg",
+        "km": 234.23
+      }
+    ],
+    "Melk": [
+      {
+        "id": "207837",
+        "name": "Matzleinsdorf",
+        "km": 211.52
+      },
+      {
+        "id": "209197",
+        "name": "Lachau",
+        "km": 250.53
+      }
+    ],
+    "Mank": [
+      {
+        "id": "207829",
+        "name": "H\u00f6rsdorf",
+        "km": 279.77
+      }
+    ],
+    "Pielach": [
+      {
+        "id": "207852",
+        "name": "Hofstetten (Bad)",
+        "km": 311.24
+      },
+      {
+        "id": "214312",
+        "name": "Loich",
+        "km": 394.09
+      },
+      {
+        "id": "207845",
+        "name": "Schwarzenbach an der Pielach (Guttenhof)",
+        "km": 471.6
+      }
+    ],
+    "Sierningbach": [
+      {
+        "id": "207860",
+        "name": "Gro\u00dfsierning",
+        "km": 236.68
+      }
+    ],
+    "Spitzerbach": [
+      {
+        "id": "209502",
+        "name": "Elsarn",
+        "km": 312.63
+      }
+    ],
+    "Fladnitz": [
+      {
+        "id": "214304",
+        "name": "Furth (Feuerwehrhaus)",
+        "km": 209.23
+      }
+    ],
+    "Unrechttraisen": [
+      {
+        "id": "208868",
+        "name": "Hohenberg (S\u00fcd)",
+        "km": 484.81
+      },
+      {
+        "id": "209536",
+        "name": "St. Aegyd am Neuwalde (Eisenwerk)",
+        "km": 562.52
+      }
+    ],
+    "Traisen": [
+      {
+        "id": "208777",
+        "name": "Herzogenburg (Stra\u00dfenbr\u00fccke)",
+        "km": 219.61
+      },
+      {
+        "id": "207910",
+        "name": "Windpassing",
+        "km": 294.15
+      },
+      {
+        "id": "207894",
+        "name": "Lilienfeld-Marktl",
+        "km": 356.55
+      }
+    ],
+    "Ramsaubach": [
+      {
+        "id": "208793",
+        "name": "Ramsau (Zentrum)",
+        "km": 468.32
+      }
+    ],
+    "Halbach": [
+      {
+        "id": "209445",
+        "name": "Haxenm\u00fchle",
+        "km": 396.02
+      }
+    ],
+    "Gro\u00dfer Kamp": [
+      {
+        "id": "207951",
+        "name": "Neustift",
+        "km": 687.04
+      }
+    ],
+    "Zwettl": [
+      {
+        "id": "207936",
+        "name": "Zwettl (Sportplatz)",
+        "km": 514.68
+      }
+    ],
+    "Kamp": [
+      {
+        "id": "207993",
+        "name": "Stiefern",
+        "km": 216.99
+      },
+      {
+        "id": "207985",
+        "name": "Rosenburg (EVN)",
+        "km": 261.58
+      },
+      {
+        "id": "207944",
+        "name": "Zwettl (Bahnbr\u00fccke)",
+        "km": 506.57
+      }
+    ],
+    "Purzelkamp": [
+      {
+        "id": "207977",
+        "name": "Rastenberg",
+        "km": 517.48
+      },
+      {
+        "id": "207969",
+        "name": "Kaltenbrunn",
+        "km": 722.05
+      }
+    ],
+    "Taffa": [
+      {
+        "id": "208520",
+        "name": "Rosenburg",
+        "km": 263.46
+      },
+      {
+        "id": "209338",
+        "name": "Frauenhofen",
+        "km": 304.83
+      }
+    ],
+    "Perschling": [
+      {
+        "id": "208009",
+        "name": "Atzenbrugg (Bundesstra\u00dfenbr\u00fccke)",
+        "km": 184.52
+      },
+      {
+        "id": "209486",
+        "name": "B\u00f6heimkirchen",
+        "km": 230.53
+      }
+    ],
+    "Michelbach": [
+      {
+        "id": "215541",
+        "name": "Plosdorf",
+        "km": 238.45
+      }
+    ],
+    "Gro\u00dfe Tulln": [
+      {
+        "id": "208017",
+        "name": "Siegersdorf",
+        "km": 195.68
+      }
+    ],
+    "Kleine Tulln": [
+      {
+        "id": "209569",
+        "name": "Sieghartskirchen (Steg)",
+        "km": 190.06
+      }
+    ],
+    "Schmida": [
+      {
+        "id": "208041",
+        "name": "Hollenstein",
+        "km": 225.54
+      },
+      {
+        "id": "209643",
+        "name": "Eggenburg (Kl\u00e4ranlage)",
+        "km": 298.6
+      }
+    ],
+    "Kleiner G\u00f6llersbach": [
+      {
+        "id": "209635",
+        "name": "Kleinstetteldorf",
+        "km": 233.71
+      }
+    ],
+    "G\u00f6llersbach": [
+      {
+        "id": "208058",
+        "name": "Obermallebarn",
+        "km": 189.13
+      }
+    ],
+    "Weidlingbach": [
+      {
+        "id": "209460",
+        "name": "Klosterneuburg (Pr\u00e4garten)",
+        "km": 167.54
+      }
+    ],
+    "Donaukanal": [
+      {
+        "id": "207233",
+        "name": "Wien (Schwedenbr\u00fccke)",
+        "km": 152.68
+      },
+      {
+        "id": "207209",
+        "name": "Wien (Brigittenau)",
+        "km": 154.22
+      },
+      {
+        "id": "207225",
+        "name": "Wien (Heiligenst\u00e4dter Br\u00fccke)",
+        "km": 154.22
+      }
+    ],
+    "Wien": [
+      {
+        "id": "208082",
+        "name": "Kennedybr\u00fccke",
+        "km": 182.61
+      },
+      {
+        "id": "209916",
+        "name": "Hadersdorf-Weidlingau",
+        "km": 219.81
+      },
+      {
+        "id": "208066",
+        "name": "Pressbaum",
+        "km": 287.44
+      }
+    ],
+    "Gablitzbach": [
+      {
+        "id": "209627",
+        "name": "Purkersdorf",
+        "km": 245.05
+      }
+    ],
+    "Mauerbach": [
+      {
+        "id": "209890",
+        "name": "Mauerbachstra\u00dfe",
+        "km": 225.47
+      }
+    ],
+    "Schwechat": [
+      {
+        "id": "208157",
+        "name": "Schwechat (Hallenbad)",
+        "km": 154.6
+      },
+      {
+        "id": "209718",
+        "name": "Traiskirchen",
+        "km": 192.44
+      },
+      {
+        "id": "208090",
+        "name": "Cholerakapelle",
+        "km": 255.21
+      },
+      {
+        "id": "209478",
+        "name": "Klausenleopoldsdorf",
+        "km": 369.53
+      }
+    ],
+    "Triesting": [
+      {
+        "id": "208124",
+        "name": "Hirtenberg",
+        "km": 279.13
+      },
+      {
+        "id": "208116",
+        "name": "Fahrafeld",
+        "km": 338.17
+      }
+    ],
+    "M\u00f6dling": [
+      {
+        "id": "208108",
+        "name": "M\u00f6dling",
+        "km": 223.23
+      }
+    ],
+    "Badener M\u00fchlbach": [
+      {
+        "id": "209783",
+        "name": "Baden (Schlo\u00dfgasse)",
+        "km": 236.3
+      }
+    ],
+    "Krottenbach": [
+      {
+        "id": "209031",
+        "name": "Achau (Pottendorfer Linie)",
+        "km": 173.92
+      }
+    ],
+    "Petersbach": [
+      {
+        "id": "209346",
+        "name": "Hennersdorf",
+        "km": 181.31
+      }
+    ],
+    "Liesing": [
+      {
+        "id": "209353",
+        "name": "Oberlaa",
+        "km": 171.46
+      },
+      {
+        "id": "209908",
+        "name": "Gro\u00dfmarktstra\u00dfe",
+        "km": 179.47
+      },
+      {
+        "id": "208132",
+        "name": "Paul Katzbergergasse",
+        "km": 228.18
+      },
+      {
+        "id": "211169",
+        "name": "Kammern im Liesingtal",
+        "km": 647.88
+      }
+    ],
+    "Kalter Gang": [
+      {
+        "id": "208199",
+        "name": "Schwechat (Rathauspark)",
+        "km": 158.02
+      },
+      {
+        "id": "208165",
+        "name": "Ebreichsdorf (Golfplatz)",
+        "km": 197.43
+      }
+    ],
+    "Alte Donau": [
+      {
+        "id": "207217",
+        "name": "Wien (Kagraner Br\u00fccke)",
+        "km": 154.62
+      }
+    ],
+    "Fischa": [
+      {
+        "id": "208439",
+        "name": "Fischamend (Rohrbr\u00fccke)",
+        "km": 152.42
+      },
+      {
+        "id": "208413",
+        "name": "Marienthal (Bahnbr\u00fccke)",
+        "km": 174.61
+      },
+      {
+        "id": "208231",
+        "name": "Schranawand",
+        "km": 190.54
+      }
+    ],
+    "Piesting": [
+      {
+        "id": "214502",
+        "name": "Ebreichsdorf (Steg)",
+        "km": 195.57
+      },
+      {
+        "id": "208306",
+        "name": "Tattendorf",
+        "km": 221.1
+      },
+      {
+        "id": "208280",
+        "name": "W\u00f6llersdorf (Hydro)",
+        "km": 307.04
+      },
+      {
+        "id": "208140",
+        "name": "Oed (Br\u00fccke)",
+        "km": 388.07
+      },
+      {
+        "id": "208272",
+        "name": "Gutenstein (Kirche)",
+        "km": 477.83
+      }
+    ],
+    "Tirolerbach": [
+      {
+        "id": "208298",
+        "name": "W\u00f6llersdorf (Ausleitung)",
+        "km": 308.57
+      }
+    ],
+    "Schlauchgraben": [
+      {
+        "id": "208397",
+        "name": "Moosbrunn (Feuchtland)",
+        "km": 181.92
+      }
+    ],
+    "Jesuitenbach": [
+      {
+        "id": "208405",
+        "name": "Gramatneusiedl",
+        "km": 178.26
+      }
+    ],
+    "Reisenbach": [
+      {
+        "id": "208421",
+        "name": "Reisenberg",
+        "km": 174.43
+      }
+    ],
+    "Ru\u00dfbach": [
+      {
+        "id": "209262",
+        "name": "Engelhartstetten",
+        "km": 138.32
+      },
+      {
+        "id": "208454",
+        "name": "Leopoldsdorf im Marchfelde",
+        "km": 145.37
+      },
+      {
+        "id": "208769",
+        "name": "Wolkersdorf (R\u00fcckhaltebecken)",
+        "km": 171.4
+      }
+    ],
+    "Maltsch": [
+      {
+        "id": "206557",
+        "name": "Leopoldschlag",
+        "km": 619.24
+      }
+    ],
+    "Lainsitz": [
+      {
+        "id": "208462",
+        "name": "Ehrendorf",
+        "km": 481.8
+      },
+      {
+        "id": "214429",
+        "name": "St. Martin (Br\u00fccke P\u00f6lzl)",
+        "km": 619.14
+      }
+    ],
+    "Braunaubach": [
+      {
+        "id": "208579",
+        "name": "Hoheneich",
+        "km": 478.92
+      },
+      {
+        "id": "214296",
+        "name": "Altmanns (Br\u00fccke)",
+        "km": 535.88
+      }
+    ],
+    "Romaubach": [
+      {
+        "id": "208892",
+        "name": "Heidenreichstein (Kleinpertholz)",
+        "km": 540.71
+      }
+    ],
+    "Rei\u00dfbach": [
+      {
+        "id": "214338",
+        "name": "Gopprechts (Br\u00fccke)",
+        "km": 498.31
+      }
+    ],
+    "Deutsche Thaya": [
+      {
+        "id": "214460",
+        "name": "Dobersberg (B30)",
+        "km": 445.91
+      },
+      {
+        "id": "208611",
+        "name": "Schwarzenau (S\u00fcd)",
+        "km": 491.22
+      }
+    ],
+    "Taxenbach": [
+      {
+        "id": "209734",
+        "name": "Peigarten",
+        "km": 457.59
+      }
+    ],
+    "M\u00e4hrische Thaya": [
+      {
+        "id": "209601",
+        "name": "Alberndorf",
+        "km": 409.22
+      }
+    ],
+    "Thaya": [
+      {
+        "id": "207498",
+        "name": "Rabensburg",
+        "km": 150.9
+      },
+      {
+        "id": "207290",
+        "name": "Bernhardsthal (Staatsgrenzpunkt IX)",
+        "km": 152.51
+      },
+      {
+        "id": "209171",
+        "name": "Hardegg",
+        "km": 281.19
+      },
+      {
+        "id": "208629",
+        "name": "Raabs an der Thaya",
+        "km": 395.46
+      }
+    ],
+    "Seebsbach": [
+      {
+        "id": "209759",
+        "name": "Aigen",
+        "km": 434.67
+      }
+    ],
+    "Pulkau": [
+      {
+        "id": "209155",
+        "name": "Haugsdorf",
+        "km": 197.69
+      },
+      {
+        "id": "209510",
+        "name": "Pulkau",
+        "km": 261.89
+      }
+    ],
+    "Thayam\u00fchlbach": [
+      {
+        "id": "208652",
+        "name": "Blaustauden",
+        "km": 180.6
+      }
+    ],
+    "March": [
+      {
+        "id": "207332",
+        "name": "Marchegg (Fluss-km 14,98)",
+        "km": 136.44
+      },
+      {
+        "id": "207324",
+        "name": "Angern an der March",
+        "km": 139.74
+      },
+      {
+        "id": "207316",
+        "name": "D\u00fcrnkrut (Fluss-km 44,33)",
+        "km": 142.02
+      },
+      {
+        "id": "207308",
+        "name": "Hohenau an der March (Fluss-km 66,92)",
+        "km": 146.82
+      }
+    ],
+    "Zaya": [
+      {
+        "id": "209189",
+        "name": "Niederabsdorf",
+        "km": 151.42
+      },
+      {
+        "id": "209452",
+        "name": "Asparn an der Zaya",
+        "km": 212.9
+      }
+    ],
+    "Weidenbach": [
+      {
+        "id": "208678",
+        "name": "Bad Pirawarth",
+        "km": 166.59
+      }
+    ],
+    "Wiesgraben": [
+      {
+        "id": "210435",
+        "name": "Deutsch-Jahrndorf (Neurie\u00df\u00e4cker)",
+        "km": 129.22
+      }
+    ],
+    "Schwarza": [
+      {
+        "id": "208785",
+        "name": "Loipersbach",
+        "km": 344.46
+      },
+      {
+        "id": "208710",
+        "name": "Gloggnitz (Adlerbr\u00fccke)",
+        "km": 435.38
+      },
+      {
+        "id": "208702",
+        "name": "Singerin (H\u00f6llental)",
+        "km": 568.99
+      },
+      {
+        "id": "208686",
+        "name": "Schwarzau im Gebirge (Bundesstra\u00dfe)",
+        "km": 601.8
+      }
+    ],
+    "Na\u00dfbach": [
+      {
+        "id": "208694",
+        "name": "Singerin",
+        "km": 576.71
+      }
+    ],
+    "Sierning": [
+      {
+        "id": "208736",
+        "name": "Stixenstein (Schlo\u00df)",
+        "km": 459.73
+      }
+    ],
+    "Gro\u00dfer Pestingbach": [
+      {
+        "id": "208819",
+        "name": "Aspang-H\u00f6ll",
+        "km": 439.73
+      }
+    ],
+    "Feistritz mit Kraftwerksdurchfluss": [
+      {
+        "id": "214353",
+        "name": "Feistritz am Wechsel (Summenpegel)",
+        "km": 447.86
+      }
+    ],
+    "Pitten": [
+      {
+        "id": "208843",
+        "name": "Bad Erlach",
+        "km": 306.96
+      },
+      {
+        "id": "214395",
+        "name": "Petersbaumgarten",
+        "km": 384.78
+      }
+    ],
+    "Schlattenbach": [
+      {
+        "id": "209544",
+        "name": "Scheiblingkirchen",
+        "km": 369.71
+      }
+    ],
+    "Leitha": [
+      {
+        "id": "210013",
+        "name": "Nickelsdorf (Kl\u00e4ranlage)",
+        "km": 127.22
+      },
+      {
+        "id": "209007",
+        "name": "Deutsch Haslau",
+        "km": 139.26
+      },
+      {
+        "id": "215517",
+        "name": "G\u00f6tzendorf",
+        "km": 167.62
+      },
+      {
+        "id": "214031",
+        "name": "Deutsch Brodersdorf (Messseilbahn)",
+        "km": 192.56
+      },
+      {
+        "id": "209288",
+        "name": "Zillingdorf",
+        "km": 238.03
+      },
+      {
+        "id": "208884",
+        "name": "Wiener Neustadt (Stra\u00dfenbr\u00fccke)",
+        "km": 263.97
+      },
+      {
+        "id": "215608",
+        "name": "Lanzenkirchen",
+        "km": 294.05
+      }
+    ],
+    "Prossetbach": [
+      {
+        "id": "209593",
+        "name": "Winzendorf (Siedlerstr.)",
+        "km": 323.48
+      }
+    ],
+    "Warme Fischa": [
+      {
+        "id": "214387",
+        "name": "Wiener Neustadt (Lichtenw\u00f6rtherg.)",
+        "km": 251.53
+      },
+      {
+        "id": "208926",
+        "name": "Wiener Neustadt (Ostende)",
+        "km": 255.52
+      },
+      {
+        "id": "208918",
+        "name": "Wiener Neustadt (Reitweg)",
+        "km": 262.68
+      },
+      {
+        "id": "208900",
+        "name": "Bad Fischau (Thermalbad)",
+        "km": 280.76
+      }
+    ],
+    "Frauenbach": [
+      {
+        "id": "209585",
+        "name": "Winzendorf (Frauenbachgasse)",
+        "km": 316.87
+      }
+    ],
+    "Johannesbach": [
+      {
+        "id": "215558",
+        "name": "Urschendorf (Schlosspark)",
+        "km": 342.41
+      }
+    ],
+    "Kehrbach": [
+      {
+        "id": "208983",
+        "name": "Wiener Neustadt (J. Strau\u00dfg.)",
+        "km": 255.44
+      },
+      {
+        "id": "208934",
+        "name": "Peisching (Br\u00fccke)",
+        "km": 355.52
+      }
+    ],
+    "Katzelsdorfer Werkskanal": [
+      {
+        "id": "208967",
+        "name": "Katzelsdorf (EVN)",
+        "km": 270.49
+      }
+    ],
+    "Wiener Neust\u00e4dter Kanal": [
+      {
+        "id": "208975",
+        "name": "Wiener Neustadt (Flu\u00dfbauhof)",
+        "km": 260.8
+      }
+    ],
+    "Kleine Leitha": [
+      {
+        "id": "210450",
+        "name": "Deutsch-Jahrndorf (Albrechtm\u00fchle)",
+        "km": 131.38
+      },
+      {
+        "id": "210443",
+        "name": "Gattendorf (Schleuse)",
+        "km": 136.1
+      }
+    ],
+    "Komitatskanal": [
+      {
+        "id": "210021",
+        "name": "Nickelsdorf (P\u00f6tschring)",
+        "km": 127.35
+      }
+    ],
+    "Rabnitz": [
+      {
+        "id": "210500",
+        "name": "Lutzmannsburg (Weingartenbr\u00fccke)",
+        "km": 194.53
+      },
+      {
+        "id": "210054",
+        "name": "Mannersdorf a. d. Rabnitz (Hans\u00e4cker)",
+        "km": 231.18
+      },
+      {
+        "id": "210039",
+        "name": "Piringsdorf (Pfarrbr\u00fccke)",
+        "km": 297.72
+      }
+    ],
+    "Stoober Bach": [
+      {
+        "id": "210062",
+        "name": "Oberpullendorf  (Fu\u00dfgeherbr\u00fccke)",
+        "km": 237.13
+      }
+    ],
+    "Wulka": [
+      {
+        "id": "210096",
+        "name": "Sch\u00fctzen am Gebirge",
+        "km": 122.17
+      },
+      {
+        "id": "210328",
+        "name": "Trausdorf an der Wulka",
+        "km": 142.68
+      },
+      {
+        "id": "210088",
+        "name": "Wulkaprodersdorf (Bundesstra\u00dfe B16)",
+        "km": 164.22
+      },
+      {
+        "id": "210070",
+        "name": "Walbersdorf",
+        "km": 218.52
+      }
+    ],
+    "Eisbach": [
+      {
+        "id": "210393",
+        "name": "Oslip",
+        "km": 129.6
+      }
+    ],
+    "Golser Kanal": [
+      {
+        "id": "210369",
+        "name": "Gols",
+        "km": 117.39
+      }
+    ],
+    "Neusiedler See": [
+      {
+        "id": "210351",
+        "name": "Breitenbrunn (Schilfzone)",
+        "km": 114.0
+      },
+      {
+        "id": "210138",
+        "name": "Breitenbrunn (Seebad)",
+        "km": 114.0
+      },
+      {
+        "id": "210146",
+        "name": "Neusiedl am See (Seebad)",
+        "km": 114.0
+      },
+      {
+        "id": "210153",
+        "name": "Podersdorf am See (Badebucht)",
+        "km": 114.0
+      },
+      {
+        "id": "210112",
+        "name": "Rust (Seebad)",
+        "km": 114.0
+      },
+      {
+        "id": "210179",
+        "name": "Illmitz (Biologische Station)",
+        "km": 114.0
+      },
+      {
+        "id": "210120",
+        "name": "M\u00f6rbisch am See (Zoll)",
+        "km": 114.0
+      },
+      {
+        "id": "210187",
+        "name": "Apetlon Staatsgrenzpunkt (A79)",
+        "km": 114.0
+      }
+    ],
+    "Goldbach": [
+      {
+        "id": "215020",
+        "name": "Deutschkreutz",
+        "km": 186.44
+      }
+    ],
+    "Moderbach": [
+      {
+        "id": "210955",
+        "name": "Arzberg (Moderbach)",
+        "km": 575.18
+      }
+    ],
+    "Raab": [
+      {
+        "id": "210468",
+        "name": "Neumarkt",
+        "km": 230.64
+      },
+      {
+        "id": "210989",
+        "name": "Feldbach",
+        "km": 276.22
+      },
+      {
+        "id": "210971",
+        "name": "Takern II",
+        "km": 319.0
+      },
+      {
+        "id": "211706",
+        "name": "St. Ruprecht an der Raab",
+        "km": 369.92
+      },
+      {
+        "id": "211599",
+        "name": "Mitterdorf an der Raab",
+        "km": 397.84
+      },
+      {
+        "id": "211698",
+        "name": "Arzberg (Raab)",
+        "km": 566.62
+      }
+    ],
+    "Weizbach": [
+      {
+        "id": "210963",
+        "name": "Unterfladnitz",
+        "km": 401.49
+      }
+    ],
+    "Rabnitzbach": [
+      {
+        "id": "211888",
+        "name": "Fl\u00f6cking",
+        "km": 354.18
+      }
+    ],
+    "Lafnitz": [
+      {
+        "id": "210401",
+        "name": "Eltendorf (Hackenwiesen)",
+        "km": 223.65
+      },
+      {
+        "id": "210211",
+        "name": "Dobersdorf",
+        "km": 234.0
+      },
+      {
+        "id": "211003",
+        "name": "W\u00f6rth an der Lafnitz",
+        "km": 299.68
+      },
+      {
+        "id": "211680",
+        "name": "Hammerkastell",
+        "km": 365.28
+      },
+      {
+        "id": "210997",
+        "name": "Rohrbach an der Lafnitz",
+        "km": 419.48
+      }
+    ],
+    "St\u00f6gersbach": [
+      {
+        "id": "210203",
+        "name": "Markt Allhau (Musserbr\u00fccke)",
+        "km": 337.29
+      }
+    ],
+    "Pr\u00e4tisbach": [
+      {
+        "id": "211623",
+        "name": "P\u00f6llau (Pr\u00e4tisbach-II)",
+        "km": 433.23
+      }
+    ],
+    "P\u00f6llauer Saifen": [
+      {
+        "id": "211631",
+        "name": "P\u00f6llau (Saifenbach)",
+        "km": 396.85
+      }
+    ],
+    "Safen": [
+      {
+        "id": "211011",
+        "name": "Waltersdorf in Oststeiermark",
+        "km": 283.16
+      }
+    ],
+    "Ilzbach": [
+      {
+        "id": "211037",
+        "name": "Neudorf bei Ilz",
+        "km": 277.85
+      }
+    ],
+    "Rittschein": [
+      {
+        "id": "211912",
+        "name": "Ottendorf",
+        "km": 289.51
+      }
+    ],
+    "Pinka": [
+      {
+        "id": "215038",
+        "name": "Moschendorf",
+        "km": 201.25
+      },
+      {
+        "id": "210260",
+        "name": "Burg",
+        "km": 237.88
+      },
+      {
+        "id": "210237",
+        "name": "Woppendorf",
+        "km": 242.0
+      },
+      {
+        "id": "210229",
+        "name": "Oberwart (Landeshauptstra\u00dfe L382)",
+        "km": 302.59
+      },
+      {
+        "id": "210419",
+        "name": "Pinkafeld",
+        "km": 384.05
+      }
+    ],
+    "Zickenbach OW": [
+      {
+        "id": "215012",
+        "name": "Siget in der Wart",
+        "km": 280.98
+      }
+    ],
+    "Tauchenbach": [
+      {
+        "id": "210252",
+        "name": "Hannersdorf",
+        "km": 246.96
+      },
+      {
+        "id": "210245",
+        "name": "Altschlaining",
+        "km": 315.78
+      }
+    ],
+    "Strem": [
+      {
+        "id": "210294",
+        "name": "Heiligenbrunn",
+        "km": 200.13
+      },
+      {
+        "id": "210286",
+        "name": "G\u00fcssing (Kulturzentrum)",
+        "km": 209.97
+      },
+      {
+        "id": "210484",
+        "name": "Rauchwart",
+        "km": 227.32
+      },
+      {
+        "id": "210476",
+        "name": "Bocksdorf",
+        "km": 237.02
+      }
+    ],
+    "Z\u00f6bernbach": [
+      {
+        "id": "210302",
+        "name": "Kirchschlag in der Buckl.Welt",
+        "km": 408.47
+      }
+    ],
+    "G\u00fcns": [
+      {
+        "id": "210310",
+        "name": "Rattersdorf",
+        "km": 285.24
+      }
+    ],
+    "Mur": [
+      {
+        "id": "211490",
+        "name": "Mureck (Schreibpegel)",
+        "km": 224.23
+      },
+      {
+        "id": "211466",
+        "name": "Spielfeld",
+        "km": 244.07
+      },
+      {
+        "id": "211847",
+        "name": "Mellach",
+        "km": 291.22
+      },
+      {
+        "id": "211326",
+        "name": "Graz",
+        "km": 341.28
+      },
+      {
+        "id": "211763",
+        "name": "Friesach",
+        "km": 379.7
+      },
+      {
+        "id": "211292",
+        "name": "Bruck an der Mur unter M\u00fcrz",
+        "km": 468.14
+      },
+      {
+        "id": "211185",
+        "name": "Leoben",
+        "km": 531.24
+      },
+      {
+        "id": "211136",
+        "name": "Zeltweg",
+        "km": 646.34
+      },
+      {
+        "id": "211102",
+        "name": "St. Georgen ob Judenburg",
+        "km": 700.15
+      },
+      {
+        "id": "211086",
+        "name": "Gest\u00fcthof",
+        "km": 776.3
+      },
+      {
+        "id": "203976",
+        "name": "Kendlbruck",
+        "km": 933.38
+      },
+      {
+        "id": "203794",
+        "name": "M\u00f6rtelsdorf",
+        "km": 1010.24
+      },
+      {
+        "id": "203752",
+        "name": "St. Michael i. Lg. (Mur)",
+        "km": 1041.75
+      },
+      {
+        "id": "203745",
+        "name": "Muhr",
+        "km": 1119.83
+      }
+    ],
+    "Zederhausbach": [
+      {
+        "id": "203828",
+        "name": "Unterwei\u00dfburg",
+        "km": 1059.67
+      }
+    ],
+    "Lonka": [
+      {
+        "id": "203778",
+        "name": "Wei\u00dfpriach",
+        "km": 1097.35
+      }
+    ],
+    "G\u00f6riachbach": [
+      {
+        "id": "203992",
+        "name": "St. Andr\u00e4",
+        "km": 1052.52
+      }
+    ],
+    "Lessachbach": [
+      {
+        "id": "204008",
+        "name": "Lessach",
+        "km": 1108.31
+      }
+    ],
+    "Thomataler Bach": [
+      {
+        "id": "203810",
+        "name": "Madling",
+        "km": 971.71
+      }
+    ],
+    "Rantenbach": [
+      {
+        "id": "211078",
+        "name": "Murau Schule",
+        "km": 796.09
+      }
+    ],
+    "Katschbach": [
+      {
+        "id": "211995",
+        "name": "Katsch",
+        "km": 764.65
+      }
+    ],
+    "Pusterwaldbach": [
+      {
+        "id": "214775",
+        "name": "Hinterwinkel",
+        "km": 1219.01
+      }
+    ],
+    "P\u00f6lsflu\u00df": [
+      {
+        "id": "211128",
+        "name": "P\u00f6ls",
+        "km": 788.29
+      }
+    ],
+    "Granitzenbach": [
+      {
+        "id": "211730",
+        "name": "Eppenstein",
+        "km": 708.15
+      }
+    ],
+    "Ingeringbach": [
+      {
+        "id": "211920",
+        "name": "Hammerj\u00e4ger",
+        "km": 748.95
+      }
+    ],
+    "Vordernberger Bach": [
+      {
+        "id": "211193",
+        "name": "St. Peter-Freienstein",
+        "km": 595.02
+      }
+    ],
+    "Stanzbach": [
+      {
+        "id": "211862",
+        "name": "Edelsdorf",
+        "km": 598.25
+      }
+    ],
+    "Th\u00f6rlbach": [
+      {
+        "id": "211250",
+        "name": "Hansenh\u00fctte",
+        "km": 541.75
+      }
+    ],
+    "Laming": [
+      {
+        "id": "211276",
+        "name": "Arndorf",
+        "km": 502.5
+      }
+    ],
+    "\u00dcbelbach": [
+      {
+        "id": "211649",
+        "name": "Deutschfeistritz",
+        "km": 397.12
+      }
+    ],
+    "Mur mit M\u00fchlkanal": [
+      {
+        "id": "211870",
+        "name": "Mellach mit MK (Summenpegel)",
+        "km": 290.8
+      },
+      {
+        "id": "211573",
+        "name": "Graz mit MK (Summenpegel)",
+        "km": 341.28
+      }
+    ],
+    "Kainach": [
+      {
+        "id": "211342",
+        "name": "Lieboch",
+        "km": 319.23
+      },
+      {
+        "id": "211334",
+        "name": "Voitsberg",
+        "km": 389.23
+      }
+    ],
+    "Liebochbach": [
+      {
+        "id": "211953",
+        "name": "Hitzendorf",
+        "km": 358.73
+      }
+    ],
+    "Stiefing": [
+      {
+        "id": "211896",
+        "name": "Gerbersdorf",
+        "km": 296.92
+      }
+    ],
+    "Wei\u00dfe Sulm": [
+      {
+        "id": "211391",
+        "name": "Wies",
+        "km": 328.3
+      }
+    ],
+    "Schwarze Sulm": [
+      {
+        "id": "211383",
+        "name": "Schwanberg",
+        "km": 402.48
+      }
+    ],
+    "Sulm": [
+      {
+        "id": "211458",
+        "name": "Leibnitz",
+        "km": 262.98
+      },
+      {
+        "id": "214783",
+        "name": "Prarath",
+        "km": 299.76
+      }
+    ],
+    "Saggaubach": [
+      {
+        "id": "211656",
+        "name": "G\u00fcndorf",
+        "km": 289.88
+      },
+      {
+        "id": "211961",
+        "name": "H\u00f6rmsdorf",
+        "km": 345.14
+      }
+    ],
+    "La\u00dfnitz": [
+      {
+        "id": "211441",
+        "name": "Tillmitsch",
+        "km": 272.15
+      },
+      {
+        "id": "211797",
+        "name": "Wettmannst\u00e4tten",
+        "km": 289.7
+      },
+      {
+        "id": "211664",
+        "name": "Frauental (La\u00dfnitz)",
+        "km": 323.4
+      }
+    ],
+    "Stainzbach": [
+      {
+        "id": "211854",
+        "name": "Wieselsdorf",
+        "km": 290.13
+      }
+    ],
+    "Gleinzbach": [
+      {
+        "id": "211805",
+        "name": "Zehndorf",
+        "km": 287.01
+      }
+    ],
+    "Schwarzaubach": [
+      {
+        "id": "211474",
+        "name": "Lipsch",
+        "km": 257.87
+      }
+    ],
+    "Mur mit Ausleitung": [
+      {
+        "id": "211516",
+        "name": "Mureck mit Ausleitung (Summenpegel)",
+        "km": 224.23
+      }
+    ],
+    "Gnasbach": [
+      {
+        "id": "211508",
+        "name": "Fluttendorf",
+        "km": 222.88
+      }
+    ],
+    "Winkeltalbach": [
+      {
+        "id": "212225",
+        "name": "Ausservillgraten",
+        "km": 1256.56
+      }
+    ],
+    "Isel": [
+      {
+        "id": "212167",
+        "name": "Lienz",
+        "km": 667.2
+      },
+      {
+        "id": "212159",
+        "name": "St. Johann im Walde (Br\u00fccke)",
+        "km": 744.14
+      },
+      {
+        "id": "212092",
+        "name": "Br\u00fchl",
+        "km": 919.58
+      },
+      {
+        "id": "212183",
+        "name": "Waier",
+        "km": 930.75
+      },
+      {
+        "id": "212043",
+        "name": "Hinterbichl",
+        "km": 1327.14
+      }
+    ],
+    "Dorferbach": [
+      {
+        "id": "212050",
+        "name": "Hinterbichl (M\u00fchle)",
+        "km": 1335.95
+      }
+    ],
+    "Dorferbach und KW-Einzug": [
+      {
+        "id": "212233",
+        "name": "Hinterbichl (M\u00fchle) (Summenpegel)",
+        "km": 1335.95
+      }
+    ],
+    "Gschl\u00f6ssbach": [
+      {
+        "id": "212068",
+        "name": "Innergschl\u00f6\u00df",
+        "km": 1686.16
+      }
+    ],
+    "Tauernbach": [
+      {
+        "id": "212084",
+        "name": "Prossegg",
+        "km": 939.05
+      },
+      {
+        "id": "212076",
+        "name": "Matreier Tauernhaus",
+        "km": 1502.29
+      }
+    ],
+    "Dorfer Bach": [
+      {
+        "id": "212118",
+        "name": "Sp\u00f6ttling",
+        "km": 1486.78
+      }
+    ],
+    "Teischnitzbach": [
+      {
+        "id": "212126",
+        "name": "Sp\u00f6ttling-Taurer",
+        "km": 1491.09
+      }
+    ],
+    "Tristacher See": [
+      {
+        "id": "202671",
+        "name": "Tristach (Seepegel)",
+        "km": 819.62
+      }
+    ],
+    "Debantbach": [
+      {
+        "id": "212217",
+        "name": "Obernu\u00dfdorf",
+        "km": 1169.17
+      }
+    ],
+    "Tauernbach-Mallnitz": [
+      {
+        "id": "213546",
+        "name": "Jamnigalm-Br\u00fccke",
+        "km": 1755.0
+      }
+    ],
+    "Mallnitzbach": [
+      {
+        "id": "212381",
+        "name": "Mallnitz",
+        "km": 1173.92
+      }
+    ],
+    "Riekenbach": [
+      {
+        "id": "213447",
+        "name": "Zandlacher H\u00fctte",
+        "km": 1495.0
+      }
+    ],
+    "Lieser": [
+      {
+        "id": "212530",
+        "name": "Spittal-Fasan",
+        "km": 556.21
+      },
+      {
+        "id": "212431",
+        "name": "Gm\u00fcnd-Ort",
+        "km": 738.6
+      },
+      {
+        "id": "213207",
+        "name": "Gries",
+        "km": 1178.49
+      }
+    ],
+    "Hochalmbach": [
+      {
+        "id": "212456",
+        "name": "Ochsenh\u00fctte-Hochalm",
+        "km": 1980.0
+      }
+    ],
+    "Malta": [
+      {
+        "id": "212498",
+        "name": "Sandriesen",
+        "km": 739.7
+      },
+      {
+        "id": "212472",
+        "name": "Pfl\u00fcglhof",
+        "km": 847.25
+      }
+    ],
+    "Riegerbach": [
+      {
+        "id": "213181",
+        "name": "D\u00f6briach",
+        "km": 590.97
+      }
+    ],
+    "Millst\u00e4tter See": [
+      {
+        "id": "212514",
+        "name": "Millstatt-See",
+        "km": 586.99
+      }
+    ],
+    "Seebach": [
+      {
+        "id": "212597",
+        "name": "Urlaken",
+        "km": 499.74
+      },
+      {
+        "id": "212522",
+        "name": "Seeboden-Seebr\u00fccke",
+        "km": 586.64
+      }
+    ],
+    "Wei\u00dfensee": [
+      {
+        "id": "212563",
+        "name": "Techendorf-See",
+        "km": 928.03
+      }
+    ],
+    "Tiebel": [
+      {
+        "id": "213876",
+        "name": "Feldkirchen",
+        "km": 536.26
+      },
+      {
+        "id": "213462",
+        "name": "Himmelberg",
+        "km": 652.57
+      }
+    ],
+    "Ossiacher See": [
+      {
+        "id": "213272",
+        "name": "St. Andr\u00e4-See",
+        "km": 500.25
+      }
+    ],
+    "Treffner Bach": [
+      {
+        "id": "213116",
+        "name": "T\u00f6bring",
+        "km": 512.55
+      }
+    ],
+    "Gail": [
+      {
+        "id": "212787",
+        "name": "Federaun",
+        "km": 498.52
+      },
+      {
+        "id": "212753",
+        "name": "N\u00f6tsch",
+        "km": 546.0
+      },
+      {
+        "id": "212670",
+        "name": "Rattendorf",
+        "km": 595.22
+      },
+      {
+        "id": "212647",
+        "name": "Mauthen",
+        "km": 693.2
+      },
+      {
+        "id": "212613",
+        "name": "Maria Luggau-Moos",
+        "km": 1087.41
+      }
+    ],
+    "Pressegger See": [
+      {
+        "id": "212746",
+        "name": "Presseggen-See",
+        "km": 558.77
+      }
+    ],
+    "Vorderberger Wildbach": [
+      {
+        "id": "217232",
+        "name": "Vorderberg-Grabenausgang",
+        "km": 591.2
+      }
+    ],
+    "Gailitz": [
+      {
+        "id": "212761",
+        "name": "Th\u00f6rl",
+        "km": 593.06
+      }
+    ],
+    "Faaker See": [
+      {
+        "id": "212795",
+        "name": "Faak Bundessportheim-See",
+        "km": 553.82
+      }
+    ],
+    "Faaker Seebach": [
+      {
+        "id": "213736",
+        "name": "Faak-Poglitsch",
+        "km": 553.86
+      }
+    ],
+    "Loiblbach": [
+      {
+        "id": "212837",
+        "name": "Tscheppaschlucht",
+        "km": 574.6
+      }
+    ],
+    "Ebriachbach": [
+      {
+        "id": "213611",
+        "name": "Bad Eisenkappel-Forsthaus",
+        "km": 539.22
+      }
+    ],
+    "Vellach": [
+      {
+        "id": "212852",
+        "name": "Miklauzhof",
+        "km": 459.05
+      }
+    ],
+    "Griffenbach": [
+      {
+        "id": "213769",
+        "name": "Deutsch Griffen",
+        "km": 750.03
+      }
+    ],
+    "Metnitz": [
+      {
+        "id": "212894",
+        "name": "Hirt",
+        "km": 602.15
+      },
+      {
+        "id": "213306",
+        "name": "Grades-Zwatshof",
+        "km": 729.3
+      }
+    ],
+    "Olsa": [
+      {
+        "id": "213405",
+        "name": "Guldendorf",
+        "km": 652.17
+      }
+    ],
+    "G\u00f6rtschitz": [
+      {
+        "id": "212936",
+        "name": "Br\u00fcckl",
+        "km": 497.3
+      },
+      {
+        "id": "212928",
+        "name": "H\u00fcttenberg",
+        "km": 777.7
+      }
+    ],
+    "Wimitz": [
+      {
+        "id": "213256",
+        "name": "Breitenstein",
+        "km": 516.54
+      }
+    ],
+    "L\u00e4ngsee": [
+      {
+        "id": "213801",
+        "name": "St. Georgen-See",
+        "km": 549.23
+      }
+    ],
+    "Moosburger Bach": [
+      {
+        "id": "213330",
+        "name": "W\u00f6lfnitz",
+        "km": 452.1
+      }
+    ],
+    "Keutschacher See": [
+      {
+        "id": "213488",
+        "name": "Keutschach-See",
+        "km": 504.64
+      }
+    ]
+  },
+  "station_count": 795,
+  "river_count": 469
+}

@@ -1,0 +1,478 @@
+{
+  "river_impacts": [
+    {
+      "river": "Donau",
+      "total_mw": 2253.8,
+      "weighted_impact": 676.14,
+      "plant_count": 11,
+      "types": {
+        "Laufkraftwerk": 2253.8
+      }
+    },
+    {
+      "river": "Ill",
+      "total_mw": 2237.0,
+      "weighted_impact": 1273.9,
+      "plant_count": 10,
+      "types": {
+        "Speicherkraftwerk": 777.0,
+        "Pumpspeicherkraftwerk": 1460.0
+      }
+    },
+    {
+      "river": "Inn",
+      "total_mw": 1294.3,
+      "weighted_impact": 588.29,
+      "plant_count": 12,
+      "types": {
+        "Laufkraftwerk": 794.3,
+        "Speicherkraftwerk": 500.0
+      }
+    },
+    {
+      "river": "M\u00f6ll",
+      "total_mw": 1174.9,
+      "weighted_impact": 584.47,
+      "plant_count": 3,
+      "types": {
+        "Laufkraftwerk": 14.9,
+        "Pumpspeicherkraftwerk": 1160.0
+      }
+    },
+    {
+      "river": "Kapruner Ache",
+      "total_mw": 852.8,
+      "weighted_impact": 478.4,
+      "plant_count": 2,
+      "types": {
+        "Speicherkraftwerk": 260.0,
+        "Pumpspeicherkraftwerk": 592.8
+      }
+    },
+    {
+      "river": "Unknown",
+      "total_mw": 761.0,
+      "weighted_impact": 424.1,
+      "plant_count": 7,
+      "types": {
+        "Speicherkraftwerk": 218.0,
+        "Pumpspeicherkraftwerk": 543.0
+      }
+    },
+    {
+      "river": "Drau",
+      "total_mw": 700.7,
+      "weighted_impact": 210.21,
+      "plant_count": 12,
+      "types": {
+        "Laufkraftwerk": 700.7
+      }
+    },
+    {
+      "river": "Enns",
+      "total_mw": 440.30000000000007,
+      "weighted_impact": 132.09,
+      "plant_count": 12,
+      "types": {
+        "Laufkraftwerk": 440.30000000000007
+      }
+    },
+    {
+      "river": "Fagge",
+      "total_mw": 392.0,
+      "weighted_impact": 274.4,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 392.0
+      }
+    },
+    {
+      "river": "Ziller",
+      "total_mw": 360.0,
+      "weighted_impact": 180.0,
+      "plant_count": 1,
+      "types": {
+        "Pumpspeicherkraftwerk": 360.0
+      }
+    },
+    {
+      "river": "Stilluppbach",
+      "total_mw": 355.0,
+      "weighted_impact": 248.49999999999997,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 355.0
+      }
+    },
+    {
+      "river": "Mur",
+      "total_mw": 312.3999999999999,
+      "weighted_impact": 104.51999999999998,
+      "plant_count": 18,
+      "types": {
+        "Speicherkraftwerk": 27.0,
+        "Laufkraftwerk": 285.4
+      }
+    },
+    {
+      "river": "Salzach",
+      "total_mw": 280.6,
+      "weighted_impact": 138.78,
+      "plant_count": 11,
+      "types": {
+        "Laufkraftwerk": 144.10000000000002,
+        "Speicherkraftwerk": 136.5
+      }
+    },
+    {
+      "river": "Zemmbach",
+      "total_mw": 237.1,
+      "weighted_impact": 119.77,
+      "plant_count": 2,
+      "types": {
+        "Speicherkraftwerk": 6.1,
+        "Pumpspeicherkraftwerk": 231.0
+      }
+    },
+    {
+      "river": "Gerlosbach",
+      "total_mw": 225.2,
+      "weighted_impact": 157.64,
+      "plant_count": 2,
+      "types": {
+        "Speicherkraftwerk": 225.2
+      }
+    },
+    {
+      "river": "Stubache",
+      "total_mw": 181.5,
+      "weighted_impact": 127.05,
+      "plant_count": 3,
+      "types": {
+        "Speicherkraftwerk": 181.5
+      }
+    },
+    {
+      "river": "Traun",
+      "total_mw": 134.38,
+      "weighted_impact": 40.314,
+      "plant_count": 6,
+      "types": {
+        "Laufkraftwerk": 134.38
+      }
+    },
+    {
+      "river": "Malta",
+      "total_mw": 120.0,
+      "weighted_impact": 60.0,
+      "plant_count": 1,
+      "types": {
+        "Pumpspeicherkraftwerk": 120.0
+      }
+    },
+    {
+      "river": "Bregenzerach",
+      "total_mw": 119.0,
+      "weighted_impact": 83.3,
+      "plant_count": 3,
+      "types": {
+        "Speicherkraftwerk": 119.0
+      }
+    },
+    {
+      "river": "Rotg\u00fcldensee",
+      "total_mw": 104.0,
+      "weighted_impact": 52.0,
+      "plant_count": 1,
+      "types": {
+        "Pumpspeicherkraftwerk": 104.0
+      }
+    },
+    {
+      "river": "Achensee",
+      "total_mw": 79.0,
+      "weighted_impact": 55.3,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 79.0
+      }
+    },
+    {
+      "river": "Alfenz",
+      "total_mw": 77.5,
+      "weighted_impact": 44.05,
+      "plant_count": 3,
+      "types": {
+        "Speicherkraftwerk": 52.0,
+        "Laufkraftwerk": 25.5
+      }
+    },
+    {
+      "river": "Nassfelder Ache",
+      "total_mw": 75.4,
+      "weighted_impact": 52.78,
+      "plant_count": 2,
+      "types": {
+        "Speicherkraftwerk": 75.4
+      }
+    },
+    {
+      "river": "Kamp",
+      "total_mw": 65.3,
+      "weighted_impact": 36.11,
+      "plant_count": 2,
+      "types": {
+        "Pumpspeicherkraftwerk": 48.0,
+        "Speicherkraftwerk": 17.3
+      }
+    },
+    {
+      "river": "Erzbach",
+      "total_mw": 63.0,
+      "weighted_impact": 44.099999999999994,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 63.0
+      }
+    },
+    {
+      "river": "S\u00f6lkbach",
+      "total_mw": 61.0,
+      "weighted_impact": 42.699999999999996,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 61.0
+      }
+    },
+    {
+      "river": "Feistrttzbach/Krumbach",
+      "total_mw": 55.0,
+      "weighted_impact": 27.5,
+      "plant_count": 1,
+      "types": {
+        "Pumpspeicherkraftwerk": 55.0
+      }
+    },
+    {
+      "river": "Sill",
+      "total_mw": 46.0,
+      "weighted_impact": 32.199999999999996,
+      "plant_count": 2,
+      "types": {
+        "Speicherkraftwerk": 46.0
+      }
+    },
+    {
+      "river": "Almbach",
+      "total_mw": 43.0,
+      "weighted_impact": 30.099999999999998,
+      "plant_count": 2,
+      "types": {
+        "Speicherkraftwerk": 43.0
+      }
+    },
+    {
+      "river": "Gro\u00dfe M\u00fchl",
+      "total_mw": 33.8,
+      "weighted_impact": 23.659999999999997,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 33.8
+      }
+    },
+    {
+      "river": "Bockhartsee",
+      "total_mw": 31.5,
+      "weighted_impact": 15.75,
+      "plant_count": 1,
+      "types": {
+        "Pumpspeicherkraftwerk": 31.5
+      }
+    },
+    {
+      "river": "Teigitsch",
+      "total_mw": 30.0,
+      "weighted_impact": 21.0,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 30.0
+      }
+    },
+    {
+      "river": "Die\u00dfbach",
+      "total_mw": 24.0,
+      "weighted_impact": 16.799999999999997,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 24.0
+      }
+    },
+    {
+      "river": "Krimmler Ache",
+      "total_mw": 23.5,
+      "weighted_impact": 16.45,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 23.5
+      }
+    },
+    {
+      "river": "Steyr",
+      "total_mw": 19.6,
+      "weighted_impact": 5.88,
+      "plant_count": 1,
+      "types": {
+        "Laufkraftwerk": 19.6
+      }
+    },
+    {
+      "river": "Ranna",
+      "total_mw": 19.0,
+      "weighted_impact": 9.5,
+      "plant_count": 1,
+      "types": {
+        "Pumpspeicherkraftwerk": 19.0
+      }
+    },
+    {
+      "river": "Lutz",
+      "total_mw": 19.0,
+      "weighted_impact": 13.299999999999999,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 19.0
+      }
+    },
+    {
+      "river": "Archbach",
+      "total_mw": 17.8,
+      "weighted_impact": 12.459999999999999,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 17.8
+      }
+    },
+    {
+      "river": "Freibach",
+      "total_mw": 17.0,
+      "weighted_impact": 8.5,
+      "plant_count": 1,
+      "types": {
+        "Pumpspeicherkraftwerk": 17.0
+      }
+    },
+    {
+      "river": "Wagrainer Bach",
+      "total_mw": 16.4,
+      "weighted_impact": 11.479999999999999,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 16.4
+      }
+    },
+    {
+      "river": "Ruetz",
+      "total_mw": 15.4,
+      "weighted_impact": 4.62,
+      "plant_count": 1,
+      "types": {
+        "Laufkraftwerk": 15.4
+      }
+    },
+    {
+      "river": "Fuscher Ache",
+      "total_mw": 14.96,
+      "weighted_impact": 10.472,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 14.96
+      }
+    },
+    {
+      "river": "Rosanna",
+      "total_mw": 13.5,
+      "weighted_impact": 4.05,
+      "plant_count": 1,
+      "types": {
+        "Laufkraftwerk": 13.5
+      }
+    },
+    {
+      "river": "Gosaubach",
+      "total_mw": 13.3,
+      "weighted_impact": 9.31,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 13.3
+      }
+    },
+    {
+      "river": "Ybbs",
+      "total_mw": 12.6,
+      "weighted_impact": 3.78,
+      "plant_count": 1,
+      "types": {
+        "Laufkraftwerk": 12.6
+      }
+    },
+    {
+      "river": "Gail",
+      "total_mw": 12.4,
+      "weighted_impact": 3.7199999999999998,
+      "plant_count": 1,
+      "types": {
+        "Laufkraftwerk": 12.4
+      }
+    },
+    {
+      "river": "Lech",
+      "total_mw": 12.3,
+      "weighted_impact": 8.61,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 12.3
+      }
+    },
+    {
+      "river": "Rellsbach",
+      "total_mw": 12.0,
+      "weighted_impact": 6.0,
+      "plant_count": 1,
+      "types": {
+        "Pumpspeicherkraftwerk": 12.0
+      }
+    },
+    {
+      "river": "Kalserbach",
+      "total_mw": 11.7,
+      "weighted_impact": 8.19,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 11.7
+      }
+    },
+    {
+      "river": "Gro\u00dfarlbach",
+      "total_mw": 11.25,
+      "weighted_impact": 3.375,
+      "plant_count": 1,
+      "types": {
+        "Laufkraftwerk": 11.25
+      }
+    },
+    {
+      "river": "Wei\u00dfenbach",
+      "total_mw": 10.0,
+      "weighted_impact": 7.0,
+      "plant_count": 1,
+      "types": {
+        "Speicherkraftwerk": 10.0
+      }
+    }
+  ],
+  "impact_factors": {
+    "Laufkraftwerk": 0.3,
+    "Speicherkraftwerk": 0.7,
+    "Pumpspeicherkraftwerk": 0.5
+  }
+}
