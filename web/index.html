@@ -1141,6 +1141,7 @@
             // Hydropower impact: scale 0-100% based on capacity
             // 1000 MW = 100% (99th percentile of Austrian municipalities)
             const hydroFactor = (muni.hydro_factor || 0) * 100;  // Use pre-calculated hydro_factor
+            const precipFactor = (muni.precip_risk || 0) * 100;  // Precipitation decline risk
             const riskScore = (muni.risk_score || 0) * 100;
             
             // Find nearby hydropower plants and their rivers
@@ -1286,11 +1287,18 @@
                             </div>
                             <span class="risk-factor-value" style="color: ${hydroFactor > 50 ? '#e94560' : hydroFactor > 25 ? '#f39c12' : '#27ae60'}">${hydroFactor.toFixed(0)}%</span>
                         </div>
+                        <div class="risk-factor">
+                            <span class="risk-factor-label">Precipitation Decline</span>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" style="width: ${precipFactor}%; background: ${precipFactor > 50 ? '#e94560' : precipFactor > 25 ? '#f39c12' : '#27ae60'}"></div>
+                            </div>
+                            <span class="risk-factor-value" style="color: ${precipFactor > 50 ? '#e94560' : precipFactor > 25 ? '#f39c12' : '#27ae60'}">${precipFactor.toFixed(0)}%</span>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="detail-section">
-                    <h4>Infrastructure</h4>
+                    <h4>Infrastructure & Climate</h4>
                     <div class="detail-grid">
                         <div class="detail-item">
                             <div class="label">Hydropower Plants</div>
@@ -1301,12 +1309,20 @@
                             <div class="value">${muni.hydro_capacity || 0} MW</div>
                         </div>
                         <div class="detail-item">
-                            <div class="label">Pump Storage</div>
-                            <div class="value">${muni.pump_storage || 0} MW</div>
-                        </div>
-                        <div class="detail-item">
                             <div class="label">GW Stations</div>
                             <div class="value">${stationsInMuni.length}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Precip Stations</div>
+                            <div class="value">${muni.precip_stations || 0}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Mean Precipitation</div>
+                            <div class="value">${muni.precip_mean_mm ? muni.precip_mean_mm + ' mm/yr' : 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Precip Trend</div>
+                            <div class="value" style="color: ${muni.precip_trend_mm < -20 ? '#e94560' : muni.precip_trend_mm < 0 ? '#f39c12' : '#27ae60'}">${muni.precip_trend_mm ? (muni.precip_trend_mm > 0 ? '+' : '') + muni.precip_trend_mm.toFixed(0) + ' mm/dec' : 'N/A'}</div>
                         </div>
                     </div>
                 </div>
@@ -1602,6 +1618,7 @@
                         <li>Groundwater levels (2,074 monitoring stations)</li>
                         <li>Surface water stations (795 OWF stations on 469 rivers)</li>
                         <li>Sediment transport (34 stations with daily measurements)</li>
+                        <li>Precipitation (861 stations with daily data since 1971)</li>
                         <li>100+ years of measurements</li>
                     </ul>
                 </li>
@@ -1610,10 +1627,11 @@
             </ul>
             
             <h3>Risk Calculation</h3>
-            <p>The drought risk score combines:</p>
+            <p>The drought risk score combines three factors:</p>
             <ul>
-                <li><b>Groundwater trend (50%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
-                <li><b>Hydropower impact (50%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
+                <li><b>Groundwater trend (40%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
+                <li><b>Hydropower impact (30%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
+                <li><b>Precipitation trend (30%)</b>: Long-term precipitation trends from nearby stations. Declining precipitation increases drought risk.</li>
             </ul>
             
             <h3>Hydropower Impact Factor</h3>
@@ -1648,6 +1666,23 @@
                         <li>Enns at Steyr: -64% decline</li>
                         <li>Inn at Schärding: 12,674 t/day average</li>
                         <li>Salzach at Ach: +98% increase</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <h3>Precipitation Trend Analysis</h3>
+            <ul>
+                <li>861 precipitation stations analyzed (daily data since 1971)</li>
+                <li>Annual totals calculated (minimum 300 days/year required)</li>
+                <li>Linear trend over 10+ years, outliers removed</li>
+                <li>Risk factor: -100 mm/decade = 100% risk, +100 mm/decade = 0% risk</li>
+                <li>Distance-weighted average from stations within 30km</li>
+                <li>Finding: 231/861 stations show declining precipitation</li>
+                <li>Example trends:
+                    <ul>
+                        <li>Zürs-Hexenboden: -449 mm/decade (Alpine decline)</li>
+                        <li>Pfänder: +313 mm/decade (Lake Constance increase)</li>
+                        <li>Mean trend: +9 mm/decade</li>
                     </ul>
                 </li>
             </ul>
