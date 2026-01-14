@@ -787,20 +787,27 @@
         let powerplantsData = [];
         let gwStationsData = [];
         let geojsonData = null;
+        let sedimentData = [];
+        let riverImpactData = [];
         
         async function loadData() {
             try {
-                const [muniResp, ppResp, gwResp, geoResp] = await Promise.all([
+                const [muniResp, ppResp, gwResp, geoResp, sedResp, riverResp] = await Promise.all([
                     fetch('data/municipalities.json'),
                     fetch('data/powerplants.json'),
                     fetch('data/gw_stations_trends.json'),
-                    fetch('data/municipalities_risk.geojson')
+                    fetch('data/municipalities_risk.geojson'),
+                    fetch('data/sediment_analysis.json'),
+                    fetch('data/river_hydro_impact.json')
                 ]);
                 
                 municipalitiesData = await muniResp.json();
                 powerplantsData = await ppResp.json();
                 gwStationsData = await gwResp.json();
                 geojsonData = await geoResp.json();
+                sedimentData = await sedResp.json();
+                const riverData = await riverResp.json();
+                riverImpactData = riverData.river_impacts || [];
                 
                 updateStats();
                 renderLayers();
@@ -1136,6 +1143,31 @@
             const hydroFactor = (muni.hydro_factor || 0) * 100;  // Use pre-calculated hydro_factor
             const riskScore = (muni.risk_score || 0) * 100;
             
+            // Find nearby hydropower plants and their rivers
+            const nearbyPlants = powerplantsData
+                .map(p => ({
+                    ...p,
+                    dist: Math.sqrt(Math.pow(p.lat - muni.lat, 2) + Math.pow(p.lon - muni.lon, 2)) * 111
+                }))
+                .filter(p => p.dist <= 30)
+                .sort((a, b) => a.dist - b.dist);
+            
+            // Get unique rivers from nearby plants
+            const nearbyRivers = [...new Set(nearbyPlants.map(p => p.river).filter(r => r && r !== '-'))];
+            
+            // Get river impact data for these rivers
+            const riverInfo = nearbyRivers.map(r => {
+                const impact = riverImpactData.find(ri => ri.river === r);
+                return impact ? { name: r, ...impact } : { name: r, total_mw: 0, plant_count: 0 };
+            }).sort((a, b) => b.total_mw - a.total_mw).slice(0, 4);
+            
+            // Find nearby sediment stations (very rough coordinate matching)
+            // Note: sediment data doesn't have coords, so we match via river names
+            const nearbySediment = sedimentData
+                .filter(s => nearbyRivers.includes(s.river))
+                .sort((a, b) => b.mean_daily_t - a.mean_daily_t)
+                .slice(0, 3);
+            
             const riskClass = muni.risk_score > 0.7 ? 'risk-high' : muni.risk_score > 0.4 ? 'risk-medium' : 'risk-low';
             const gwClass = gwTrend !== null ? (gwTrend < 0 ? 'declining' : 'rising') : '';
             
@@ -1278,6 +1310,44 @@
                         </div>
                     </div>
                 </div>
+                
+                ${riverInfo.length > 0 ? `
+                <div class="detail-section">
+                    <h4>🌊 Nearby Rivers & Hydropower</h4>
+                    <div class="stations-list" style="max-height: 150px;">
+                        ${riverInfo.map(r => {
+                            const impactClass = r.total_mw > 500 ? 'high' : r.total_mw > 100 ? 'medium' : 'low';
+                            return `
+                                <div class="municipality-item" style="padding: 6px 8px;">
+                                    <span class="municipality-name" style="font-size: 0.85em;">🏞️ ${r.name}</span>
+                                    <span style="font-size: 0.75em; color: #6a6a8a;">${r.plant_count} plants</span>
+                                    <span class="municipality-score ${impactClass}" style="font-size: 0.75em;">${r.total_mw.toFixed(0)} MW</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${nearbySediment.length > 0 ? `
+                <div class="detail-section">
+                    <h4>🪨 Sediment Transport</h4>
+                    <div class="stations-list" style="max-height: 130px;">
+                        ${nearbySediment.map(s => {
+                            const trendClass = s.trend_pct < -20 ? 'high' : s.trend_pct < 0 ? 'medium' : 'low';
+                            const trendIcon = s.trend_pct < 0 ? '📉' : '📈';
+                            return `
+                                <div class="municipality-item" style="padding: 6px 8px;">
+                                    <span class="municipality-name" style="font-size: 0.85em;">${s.station}</span>
+                                    <span style="font-size: 0.75em; color: #6a6a8a;">${s.river}</span>
+                                    <span class="municipality-score ${trendClass}" style="font-size: 0.75em;" title="${s.mean_daily_t.toFixed(0)} t/day avg">${trendIcon} ${s.trend_pct > 0 ? '+' : ''}${s.trend_pct.toFixed(0)}%</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 6px;">📉 Declining sediment may indicate upstream dam trapping</p>
+                </div>
+                ` : ''}
                 
                 ${stationsHtml}
                 
@@ -1498,7 +1568,7 @@
         <div class="modal" style="max-width: 500px;">
             <button class="modal-close">&times;</button>
             <h2 id="detail-muni-title">Municipality Details</h2>
-            <div id="detail-muni-content"></div>
+            <div id="detail-muni-content" style="max-height: 65vh; overflow-y: auto;"></div>
         </div>
     </div>
     

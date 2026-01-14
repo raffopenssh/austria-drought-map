@@ -1,0 +1,274 @@
+[
+  {
+    "station": "Gisingen",
+    "hzb": "200147",
+    "river": "Ill",
+    "mean_daily_t": 727.2,
+    "trend_pct": -34.7,
+    "data_points": 5112
+  },
+  {
+    "station": "Lustenau (H\u00f6chster Br\u00fccke)",
+    "hzb": "200196",
+    "river": "Rhein",
+    "mean_daily_t": 5796.0,
+    "trend_pct": 2.0,
+    "data_points": 5107
+  },
+  {
+    "station": "Kennelbach",
+    "hzb": "200329",
+    "river": "Bregenzerach",
+    "mean_daily_t": 987.4,
+    "trend_pct": -37.2,
+    "data_points": 5105
+  },
+  {
+    "station": "Lechaschau",
+    "hzb": "201087",
+    "river": "Lech",
+    "mean_daily_t": 1125.1,
+    "trend_pct": 12.9,
+    "data_points": 5107
+  },
+  {
+    "station": "Vent (oberh. Niedertalbach)",
+    "hzb": "201350",
+    "river": "Rofenache",
+    "mean_daily_t": 798.2,
+    "trend_pct": 0.4,
+    "data_points": 2523
+  },
+  {
+    "station": "Tumpen",
+    "hzb": "201434",
+    "river": "\u00d6tztaler Ache",
+    "mean_daily_t": 2076.5,
+    "trend_pct": 51.4,
+    "data_points": 5418
+  },
+  {
+    "station": "Innsbruck (oberh. Sill)",
+    "hzb": "201525",
+    "river": "Inn",
+    "mean_daily_t": 5182.5,
+    "trend_pct": -36.6,
+    "data_points": 5479
+  },
+  {
+    "station": "Innsbruck-Reichenau",
+    "hzb": "201624",
+    "river": "Sill",
+    "mean_daily_t": 797.2,
+    "trend_pct": 315.4,
+    "data_points": 5111
+  },
+  {
+    "station": "Hart im Zillertal",
+    "hzb": "201780",
+    "river": "Ziller",
+    "mean_daily_t": 731.8,
+    "trend_pct": 205.8,
+    "data_points": 5108
+  },
+  {
+    "station": "Rattenberg",
+    "hzb": "201814",
+    "river": "Inn",
+    "mean_daily_t": 7562.2,
+    "trend_pct": -2.2,
+    "data_points": 5479
+  },
+  {
+    "station": "Bruckh\u00e4usl",
+    "hzb": "201863",
+    "river": "Brixentaler Ache",
+    "mean_daily_t": 466.4,
+    "trend_pct": 240.6,
+    "data_points": 5479
+  },
+  {
+    "station": "Landeck-Bruggen",
+    "hzb": "202036",
+    "river": "Sanna",
+    "mean_daily_t": 674.9,
+    "trend_pct": 4.5,
+    "data_points": 5112
+  },
+  {
+    "station": "K\u00f6ssen-H\u00fctte",
+    "hzb": "202382",
+    "river": "Gro\u00dfache",
+    "mean_daily_t": 740.0,
+    "trend_pct": 0.2,
+    "data_points": 5111
+  },
+  {
+    "station": "Golling",
+    "hzb": "203323",
+    "river": "Salzach",
+    "mean_daily_t": 1781.3,
+    "trend_pct": 5.2,
+    "data_points": 4383
+  },
+  {
+    "station": "J\u00e4gerberg",
+    "hzb": "205757",
+    "river": "Enns",
+    "mean_daily_t": 856.0,
+    "trend_pct": -74.1,
+    "data_points": 4382
+  },
+  {
+    "station": "Pergern",
+    "hzb": "205914",
+    "river": "Steyr",
+    "mean_daily_t": 63.1,
+    "trend_pct": -54.7,
+    "data_points": 4382
+  },
+  {
+    "station": "Steyr (Ortskai)",
+    "hzb": "205922",
+    "river": "Enns",
+    "mean_daily_t": 1054.6,
+    "trend_pct": -63.8,
+    "data_points": 5479
+  },
+  {
+    "station": "Sch\u00e4rding (Schreibpegel)",
+    "hzb": "206201",
+    "river": "Inn",
+    "mean_daily_t": 12674.2,
+    "trend_pct": -2.1,
+    "data_points": 5475
+  },
+  {
+    "station": "Wels-Lichtenegg",
+    "hzb": "206391",
+    "river": "Traun",
+    "mean_daily_t": 232.8,
+    "trend_pct": -57.2,
+    "data_points": 5476
+  },
+  {
+    "station": "Ach",
+    "hzb": "206847",
+    "river": "Salzach",
+    "mean_daily_t": 4082.8,
+    "trend_pct": 98.0,
+    "data_points": 3300
+  },
+  {
+    "station": "Hainburg Stra\u00dfenbr\u00fccke",
+    "hzb": "207480",
+    "river": "Donau",
+    "mean_daily_t": 12346.7,
+    "trend_pct": -30.2,
+    "data_points": 5475
+  },
+  {
+    "station": "Trautenfels",
+    "hzb": "210740",
+    "river": "Enns",
+    "mean_daily_t": 413.2,
+    "trend_pct": -62.2,
+    "data_points": 5478
+  },
+  {
+    "station": "Gest\u00fcthof",
+    "hzb": "211086",
+    "river": "Mur",
+    "mean_daily_t": 157.1,
+    "trend_pct": 69.0,
+    "data_points": 5108
+  },
+  {
+    "station": "Kapfenberg-Diemlach",
+    "hzb": "211268",
+    "river": "M\u00fcrz",
+    "mean_daily_t": 91.5,
+    "trend_pct": -67.1,
+    "data_points": 5113
+  },
+  {
+    "station": "Leibnitz",
+    "hzb": "211458",
+    "river": "Sulm",
+    "mean_daily_t": 117.2,
+    "trend_pct": -76.5,
+    "data_points": 5474
+  },
+  {
+    "station": "Mureck (Schreibpegel)",
+    "hzb": "211490",
+    "river": "Mur",
+    "mean_daily_t": 911.4,
+    "trend_pct": -66.4,
+    "data_points": 5477
+  },
+  {
+    "station": "Lienz",
+    "hzb": "212167",
+    "river": "Isel",
+    "mean_daily_t": 1196.0,
+    "trend_pct": -14.6,
+    "data_points": 5476
+  },
+  {
+    "station": "Federaun",
+    "hzb": "212787",
+    "river": "Gail",
+    "mean_daily_t": 751.7,
+    "trend_pct": -42.9,
+    "data_points": 5466
+  },
+  {
+    "station": "Krottendorf",
+    "hzb": "213090",
+    "river": "Lavant",
+    "mean_daily_t": 120.8,
+    "trend_pct": -75.3,
+    "data_points": 2191
+  },
+  {
+    "station": "Lavam\u00fcnd Ort",
+    "hzb": "213173",
+    "river": "Drau",
+    "mean_daily_t": 703.6,
+    "trend_pct": 99.2,
+    "data_points": 5805
+  },
+  {
+    "station": "Amlach",
+    "hzb": "213215",
+    "river": "Drau",
+    "mean_daily_t": 1881.3,
+    "trend_pct": 28.1,
+    "data_points": 5790
+  },
+  {
+    "station": "Dellach",
+    "hzb": "213660",
+    "river": "Drau",
+    "mean_daily_t": 1397.3,
+    "trend_pct": 19.2,
+    "data_points": 5102
+  },
+  {
+    "station": "Oberaudorf",
+    "hzb": "230102",
+    "river": "Inn",
+    "mean_daily_t": 8762.5,
+    "trend_pct": -8.0,
+    "data_points": 5472
+  },
+  {
+    "station": "Lienz-Falkensteinsteg",
+    "hzb": "231092",
+    "river": "Drau",
+    "mean_daily_t": 475.4,
+    "trend_pct": 70.9,
+    "data_points": 5479
+  }
+]
