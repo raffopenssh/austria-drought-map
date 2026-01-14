@@ -1131,7 +1131,9 @@
                 gwFactor = Math.min(Math.abs(gwTrend) / 0.2, 1) * 100;
             }
             
-            const hydroFactor = Math.min((muni.hydro_capacity || 0) / 500, 1) * 100;
+            // Hydropower impact: scale 0-100% based on capacity
+            // 1000 MW = 100% (99th percentile of Austrian municipalities)
+            const hydroFactor = Math.min((muni.hydro_capacity || 0) / 1000, 1) * 100;
             const riskScore = (muni.risk_score || 0) * 100;
             
             const riskClass = muni.risk_score > 0.7 ? 'risk-high' : muni.risk_score > 0.4 ? 'risk-medium' : 'risk-low';
