@@ -145,7 +145,7 @@
         }
         .gradient-bar {
             height: 15px;
-            background: linear-gradient(to right, #1a9850, #66bd63, #a6d96a, #d9ef8b, #fee08b, #fdae61, #f46d43, #d73027, #a50026);
+            background: linear-gradient(to right, #440154, #482878, #3e4989, #31688e, #26828e, #1f9e89, #35b779, #6ece58, #b4de2c, #fde725);
             border-radius: 3px;
         }
         .gradient-bar.hydro-gradient {
@@ -695,17 +695,34 @@
         
         // Choropleth color function (gradient)
         function getChoroplethColor(risk) {
-            // Color scale from green (low risk) through yellow/orange to red (high risk)
-            if (risk <= 0) return '#1a9850';  // Dark green
-            if (risk <= 0.1) return '#66bd63'; // Green
-            if (risk <= 0.2) return '#a6d96a'; // Light green
-            if (risk <= 0.3) return '#d9ef8b'; // Yellow-green
-            if (risk <= 0.4) return '#fee08b'; // Yellow
-            if (risk <= 0.5) return '#fdae61'; // Orange
-            if (risk <= 0.6) return '#f46d43'; // Dark orange
-            if (risk <= 0.7) return '#d73027'; // Red-orange
-            if (risk <= 0.8) return '#a50026'; // Dark red
-            return '#67001f';  // Very dark red
+            // Viridis color scale: purple (low risk) to yellow (high risk)
+            // Using inverted viridis so high risk = yellow (warning)
+            const t = Math.max(0, Math.min(1, risk));
+            
+            const viridis = [
+                [68, 1, 84],      // 0.0 - dark purple (low risk)
+                [72, 40, 120],    // 0.1
+                [62, 74, 137],    // 0.2
+                [49, 104, 142],   // 0.3
+                [38, 130, 142],   // 0.4
+                [31, 158, 137],   // 0.5
+                [53, 183, 121],   // 0.6
+                [109, 205, 89],   // 0.7
+                [180, 222, 44],   // 0.8
+                [253, 231, 37]    // 1.0 - yellow (high risk)
+            ];
+            
+            const idx = t * (viridis.length - 1);
+            const i = Math.floor(idx);
+            const f = idx - i;
+            
+            if (i >= viridis.length - 1) return `rgb(${viridis[viridis.length-1].join(',')})`;
+            
+            const r = Math.round(viridis[i][0] + f * (viridis[i+1][0] - viridis[i][0]));
+            const g = Math.round(viridis[i][1] + f * (viridis[i+1][1] - viridis[i][1]));
+            const b = Math.round(viridis[i][2] + f * (viridis[i+1][2] - viridis[i][2]));
+            
+            return `rgb(${r}, ${g}, ${b})`;
         }
         
         function getRiskCategory(risk) {
