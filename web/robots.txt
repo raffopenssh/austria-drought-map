@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /data/*.json
+Disallow: /data/*.gpkg
+
+Sitemap: https://groundwater-at.exe.xyz:8000/sitemap.xml

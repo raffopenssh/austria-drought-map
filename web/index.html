@@ -3,7 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Austria Drought Risk Map</title>
+    <title>Austria Drought Risk Map | Municipality-Level Groundwater Analysis</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Interactive choropleth map showing drought risk across 2,118 Austrian municipalities based on 100-year groundwater monitoring data and hydropower infrastructure analysis.">
+    <meta name="keywords" content="Austria, drought, groundwater, water scarcity, hydropower, climate change, heat pump, municipality, risk map, eHYD, water table">
+    <meta name="author" content="Austria Drought Risk Project">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://groundwater-at.exe.xyz:8000/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://groundwater-at.exe.xyz:8000/">
+    <meta property="og:title" content="Austria Drought Risk Map">
+    <meta property="og:description" content="Interactive map showing drought risk across Austrian municipalities based on 100-year groundwater data and hydropower analysis.">
+    <meta property="og:image" content="https://groundwater-at.exe.xyz:8000/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://groundwater-at.exe.xyz:8000/">
+    <meta name="twitter:title" content="Austria Drought Risk Map">
+    <meta name="twitter:description" content="Interactive map showing drought risk across Austrian municipalities based on 100-year groundwater data.">
+    <meta name="twitter:image" content="https://groundwater-at.exe.xyz:8000/og-image.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💧</text></svg>">
+    
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Austria Drought Risk Map",
+        "description": "Interactive choropleth map showing drought risk across Austrian municipalities",
+        "url": "https://groundwater-at.exe.xyz:8000/",
+        "applicationCategory": "Environmental Data Visualization",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0"
+        },
+        "about": {
+            "@type": "Thing",
+            "name": "Groundwater drought risk in Austria"
+        }
+    }
+    </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -190,6 +237,110 @@
         .popup-label {
             color: #a0a0c0;
         }
+        .footer-links {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #0f3460;
+            text-align: center;
+            font-size: 0.75em;
+        }
+        .footer-links a {
+            color: #6a6a8a;
+            text-decoration: none;
+        }
+        .footer-links a:hover {
+            color: #a0a0c0;
+        }
+        .footer-links .separator {
+            margin: 0 8px;
+            color: #3a3a5a;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid #0f3460;
+        }
+        .modal h2 {
+            color: #e94560;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .modal h3 {
+            color: #f39c12;
+            margin: 15px 0 8px;
+            font-size: 1em;
+        }
+        .modal p, .modal li {
+            color: #a0a0c0;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        .modal ul {
+            margin-left: 20px;
+        }
+        .modal a {
+            color: #3498db;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #a0a0c0;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: #fff;
+        }
+        .password-form {
+            margin-top: 15px;
+        }
+        .password-form input {
+            background: #1a1a2e;
+            border: 1px solid #0f3460;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .password-form button {
+            background: #e94560;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .password-form button:hover {
+            background: #c73e54;
+        }
+        .error-msg {
+            color: #e94560;
+            font-size: 0.8em;
+            margin-top: 8px;
+        }
         @media (max-width: 768px) {
             #container {
                 flex-direction: column;
@@ -220,28 +371,24 @@
                     <div class="stat-label">Hydropower Plants</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" id="stat-gw">-</div>
-                    <div class="stat-label">GW Stations</div>
+                    <div class="stat-value" id="stat-medium">-</div>
+                    <div class="stat-label">Medium Risk</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value" id="stat-highrisk">-</div>
-                    <div class="stat-label">At-Risk Areas</div>
+                    <div class="stat-label">High Risk</div>
                 </div>
             </div>
             
             <div class="layer-group">
                 <h3>Map Layers</h3>
                 <div class="layer-toggle">
+                    <input type="checkbox" id="layer-boundaries" checked>
+                    <label for="layer-boundaries">Drought Risk</label>
+                </div>
+                <div class="layer-toggle">
                     <input type="checkbox" id="layer-hydro" checked>
                     <label for="layer-hydro">Hydropower Plants</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-gw">
-                    <label for="layer-gw">Groundwater Stations</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-boundaries" checked>
-                    <label for="layer-boundaries">Municipality Boundaries</label>
                 </div>
             </div>
             
@@ -293,19 +440,10 @@
                 <div id="info-content"></div>
             </div>
             
-            <div class="layer-group" style="margin-top: 15px;">
-                <h3>About This Map</h3>
-                <p style="font-size: 0.8em; color: #a0a0c0; line-height: 1.5;">
-                    This map visualizes drought risk across Austrian municipalities based on:
-                    <br>• <b>Groundwater trends</b> from 100-year eHYD monitoring data
-                    <br>• <b>Hydropower impact</b> from pump storage and run-of-river plants
-                    <br>• <b>Precipitation patterns</b>
-                    <br><br>
-                    Areas with declining groundwater combined with high hydropower activity face elevated risk for:
-                    <br>• Water rationing measures
-                    <br>• Groundwater heat pump failures
-                    <br>• Reduced drinking water availability
-                </p>
+            <div class="footer-links">
+                <a href="#" id="sources-link">Sources & Methods</a>
+                <span class="separator">•</span>
+                <a href="#" id="download-link">Download Data</a>
             </div>
         </div>
         
@@ -327,9 +465,7 @@
         }).addTo(map);
         
         // Layer groups
-        const riskLayer = L.layerGroup().addTo(map);
         const hydroLayer = L.layerGroup().addTo(map);
-        const gwLayer = L.layerGroup();
         const boundaryLayer = L.layerGroup().addTo(map);
         
         // Risk color function (categorical)
@@ -378,21 +514,18 @@
         // Load data
         let municipalitiesData = [];
         let powerplantsData = [];
-        let gwStationsData = [];
         let geojsonData = null;
         
         async function loadData() {
             try {
-                const [muniResp, ppResp, gwResp, geoResp] = await Promise.all([
+                const [muniResp, ppResp, geoResp] = await Promise.all([
                     fetch('data/municipalities.json'),
                     fetch('data/powerplants.json'),
-                    fetch('data/gw_stations.json'),
                     fetch('data/municipalities_risk.geojson')
                 ]);
                 
                 municipalitiesData = await muniResp.json();
                 powerplantsData = await ppResp.json();
-                gwStationsData = await gwResp.json();
                 geojsonData = await geoResp.json();
                 
                 updateStats();
@@ -405,19 +538,17 @@
         function updateStats() {
             document.getElementById('stat-municipalities').textContent = municipalitiesData.length;
             document.getElementById('stat-hydro').textContent = powerplantsData.length;
-            document.getElementById('stat-gw').textContent = gwStationsData.length;
             
             // Count risk categories
             const highRisk = municipalitiesData.filter(m => m.risk_category === 'high').length;
             const medRisk = municipalitiesData.filter(m => m.risk_category === 'medium').length;
-            document.getElementById('stat-highrisk').textContent = highRisk + medRisk;
+            document.getElementById('stat-medium').textContent = medRisk;
+            document.getElementById('stat-highrisk').textContent = highRisk;
         }
         
         function renderLayers() {
             // Clear layers
-            riskLayer.clearLayers();
             hydroLayer.clearLayers();
-            gwLayer.clearLayers();
             boundaryLayer.clearLayers();
             
             // Render choropleth - municipalities colored by risk score
@@ -487,23 +618,7 @@
                 marker.addTo(hydroLayer);
             });
             
-            // Render groundwater stations
-            gwStationsData.forEach(gw => {
-                const marker = L.circleMarker([gw.lat, gw.lon], {
-                    radius: 3,
-                    fillColor: '#00ff88',
-                    fillOpacity: 0.6,
-                    color: 'none'
-                });
-                
-                marker.bindPopup(`
-                    <div class="popup-title">${gw.name || 'GW Station'}</div>
-                    <div class="popup-row"><span class="popup-label">ID:</span> ${gw.id}</div>
-                    <div class="popup-row"><span class="popup-label">Area:</span> ${gw.area || 'N/A'}</div>
-                `);
-                
-                marker.addTo(gwLayer);
-            });
+            
         }
         
         function showMunicipalityInfo(props) {
@@ -559,11 +674,6 @@
             else map.removeLayer(hydroLayer);
         });
         
-        document.getElementById('layer-gw').addEventListener('change', function() {
-            if (this.checked) map.addLayer(gwLayer);
-            else map.removeLayer(gwLayer);
-        });
-        
         document.getElementById('layer-boundaries').addEventListener('change', function() {
             if (this.checked) map.addLayer(boundaryLayer);
             else map.removeLayer(boundaryLayer);
@@ -571,6 +681,105 @@
         
         // Load data on page load
         loadData();
+        
+        // Modal handlers
+        document.getElementById('sources-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('sources-modal').classList.add('active');
+        });
+        
+        document.getElementById('download-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('download-modal').classList.add('active');
+        });
+        
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.modal-overlay').classList.remove('active');
+            });
+        });
+        
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+        });
+        
+        // Password protected download
+        document.getElementById('download-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const pwd = document.getElementById('download-pwd').value;
+            const errorEl = document.getElementById('pwd-error');
+            
+            if (pwd === 'flo2026') {
+                errorEl.textContent = '';
+                window.location.href = 'data/austria_drought_risk.gpkg';
+            } else {
+                errorEl.textContent = 'Incorrect password';
+            }
+        });
     </script>
+    
+    <!-- Sources Modal -->
+    <div class="modal-overlay" id="sources-modal">
+        <div class="modal">
+            <button class="modal-close">&times;</button>
+            <h2>Sources & Methods</h2>
+            
+            <h3>Data Sources</h3>
+            <ul>
+                <li><a href="https://ehyd.gv.at" target="_blank">eHYD Portal</a> - Austrian hydrographic service
+                    <ul>
+                        <li>Groundwater levels (2,074 monitoring stations)</li>
+                        <li>100+ years of monthly measurements</li>
+                    </ul>
+                </li>
+                <li><a href="https://oesterreichsenergie.at" target="_blank">Oesterreichs Energie</a> - Power plant registry (156 hydropower plants)</li>
+                <li>Municipality boundaries from <a href="https://github.com/ginseng666/GeoJSON-TopoJSON-Austria" target="_blank">GeoJSON Austria</a></li>
+            </ul>
+            
+            <h3>Risk Calculation</h3>
+            <p>The drought risk score combines:</p>
+            <ul>
+                <li><b>Groundwater trend (50%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
+                <li><b>Hydropower impact (50%)</b>: Normalized capacity of nearby hydropower plants. Higher capacity = potentially higher impact on local hydrology.</li>
+            </ul>
+            
+            <h3>Trend Analysis</h3>
+            <ul>
+                <li>Minimum 10 years of data required</li>
+                <li>Outliers filtered (trends > 5m/decade excluded)</li>
+                <li>Stations with unrealistic variance excluded</li>
+                <li>Result: 94 stations with valid trends</li>
+                <li>Finding: 54 declining, 40 rising (mean: -4.7cm/decade)</li>
+            </ul>
+            
+            <h3>Limitations</h3>
+            <ul>
+                <li>Coordinate transformation (BMN to WGS84) is approximate</li>
+                <li>Risk interpolated to municipalities without direct monitoring</li>
+                <li>Hydropower impact is proximity-based, not hydrologically modeled</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Download Modal -->
+    <div class="modal-overlay" id="download-modal">
+        <div class="modal">
+            <button class="modal-close">&times;</button>
+            <h2>Download Data</h2>
+            <p>Download the complete dataset as a GeoPackage file containing:</p>
+            <ul>
+                <li>Municipality boundaries with risk scores</li>
+                <li>Hydropower plant locations and capacities</li>
+                <li>Groundwater station locations and trends</li>
+            </ul>
+            <form class="password-form" id="download-form">
+                <input type="password" id="download-pwd" placeholder="Enter password">
+                <button type="submit">Download</button>
+                <div class="error-msg" id="pwd-error"></div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
