@@ -93,13 +93,18 @@ def check_sediment_correlation(flow_rivers, sediment_data):
 def calculate_flow_risk(trend_pct):
     """Convert flow trend to risk factor.
     
-    Declining flow = higher drought risk
-    Scale: -20% per decade = 100% risk, +20% = 0% risk
+    Only declining flow = risk. Stable or increasing = no risk.
+    Scale: -20% per decade = 100% risk, 0 or positive = 0% risk
     """
     if trend_pct is None:
         return None
-    clamped = max(-20, min(20, trend_pct))
-    risk = (20 - clamped) / 40  # Maps -20..+20 to 1..0
+    
+    # Only negative trends contribute to risk
+    if trend_pct >= 0:
+        return 0.0
+    
+    # Scale: -20%/dec = 100% risk, 0 = 0% risk
+    risk = min(1.0, abs(trend_pct) / 20)
     return round(risk, 3)
 
 def recalculate_risk_score(muni):

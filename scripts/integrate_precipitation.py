@@ -67,16 +67,19 @@ def find_nearby_precip(muni, precip_stations, max_dist_km=30):
 def calculate_precip_risk(trend_mm, mean_mm):
     """Convert precipitation trend to risk factor (0-1).
     
-    Declining precipitation = higher risk
-    Scale: -100 mm/decade = 1.0 risk, +100 mm/decade = 0.0 risk
+    Only declining precipitation = risk. Stable or increasing = no risk.
+    Scale: -100 mm/decade = 1.0 risk, 0 or positive = 0.0 risk
     """
     if trend_mm is None:
         return None
     
-    # Normalize: -100mm/dec -> 1.0, +100mm/dec -> 0.0
-    # Clamp to reasonable range
-    clamped = max(-100, min(100, trend_mm))
-    risk = (100 - clamped) / 200  # Maps -100..+100 to 1..0
+    # Only negative trends contribute to risk
+    # -100mm/dec -> 1.0, 0 or positive -> 0.0
+    if trend_mm >= 0:
+        return 0.0
+    
+    # Scale: -100mm/dec = 100% risk, 0 = 0% risk
+    risk = min(1.0, abs(trend_mm) / 100)
     return round(risk, 3)
 
 def recalculate_risk_score(muni):
