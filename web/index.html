@@ -852,7 +852,7 @@
                     onEachFeature: function(feature, layer) {
                         const props = feature.properties;
                         const risk = props.risk_score || 0;
-                        const gwTrend = props.gw_trend ? (props.gw_trend * 100).toFixed(1) + ' cm/dec' : 'N/A';
+                        const gwTrend = props.gw_trend != null ? (props.gw_trend * 100).toFixed(1) + ' cm/dec' : 'N/A';
                         
                         layer.bindTooltip(`
                             <b>${props.name}</b><br>
@@ -942,7 +942,7 @@
             const riskClass = props.risk_score > 0.7 ? 'risk-high' : 
                              props.risk_score > 0.4 ? 'risk-medium' : 'risk-low';
             
-            const gwTrend = props.gw_trend ? (props.gw_trend * 100).toFixed(1) : 'N/A';
+            const gwTrend = props.gw_trend != null ? (props.gw_trend * 100).toFixed(1) : 'N/A';
             const gwTrendClass = props.gw_trend < 0 ? 'risk-high' : 'risk-low';
             
             content.innerHTML = `
@@ -1334,7 +1334,7 @@
                         </div>
                         <div class="detail-item">
                             <div class="label">Precip Trend${muni.precip_estimated ? ' *' : ''}</div>
-                            <div class="value" style="color: ${muni.precip_trend_mm < -20 ? '#e94560' : muni.precip_trend_mm < 0 ? '#f39c12' : '#27ae60'}">${muni.precip_trend_mm ? (muni.precip_trend_mm > 0 ? '+' : '') + muni.precip_trend_mm.toFixed(0) + ' mm/dec' : 'N/A'}</div>
+                            <div class="value" style="color: ${muni.precip_trend_mm < -20 ? '#e94560' : muni.precip_trend_mm < 0 ? '#f39c12' : '#27ae60'}">${muni.precip_trend_mm != null ? (muni.precip_trend_mm > 0 ? '+' : '') + muni.precip_trend_mm.toFixed(0) + ' mm/dec' : 'N/A'}</div>
                         </div>
                         <div class="detail-item">
                             <div class="label">Flow Stations${muni.flow_estimated ? ' *' : ''}</div>
@@ -1342,11 +1342,11 @@
                         </div>
                         <div class="detail-item">
                             <div class="label">Mean Flow</div>
-                            <div class="value">${muni.flow_mean_m3s ? muni.flow_mean_m3s.toFixed(1) + ' m³/s' : 'N/A'}</div>
+                            <div class="value">${muni.flow_mean_m3s != null ? muni.flow_mean_m3s.toFixed(1) + ' m³/s' : 'N/A'}</div>
                         </div>
                         <div class="detail-item">
                             <div class="label">Flow Trend${muni.flow_estimated ? ' *' : ''}</div>
-                            <div class="value" style="color: ${muni.flow_trend_pct < -10 ? '#e94560' : muni.flow_trend_pct < 0 ? '#f39c12' : '#27ae60'}">${muni.flow_trend_pct ? (muni.flow_trend_pct > 0 ? '+' : '') + muni.flow_trend_pct.toFixed(1) + '%/dec' : 'N/A'}</div>
+                            <div class="value" style="color: ${muni.flow_trend_pct < -10 ? '#e94560' : muni.flow_trend_pct < 0 ? '#f39c12' : '#27ae60'}">${muni.flow_trend_pct != null ? (muni.flow_trend_pct > 0 ? '+' : '') + muni.flow_trend_pct.toFixed(1) + '%/dec' : 'N/A'}</div>
                         </div>
                         ${muni.flow_hydro_mw > 0 ? `
                         <div class="detail-item">
@@ -1497,11 +1497,11 @@
                         </div>
                         <div class="detail-item">
                             <div class="label">Data Years</div>
-                            <div class="value">${gw.data_years ? gw.data_years.toFixed(1) : 'N/A'}</div>
+                            <div class="value">${gw.data_years != null ? gw.data_years.toFixed(1) : 'N/A'}</div>
                         </div>
                         <div class="detail-item">
                             <div class="label">P-Value</div>
-                            <div class="value">${gw.p_value ? gw.p_value.toFixed(4) : 'N/A'}</div>
+                            <div class="value">${gw.p_value != null ? gw.p_value.toFixed(4) : 'N/A'}</div>
                         </div>
                     </div>
                 </div>
@@ -1511,11 +1511,11 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <div class="label">Mean Level</div>
-                            <div class="value">${gw.mean_level ? gw.mean_level.toFixed(2) + ' m' : 'N/A'}</div>
+                            <div class="value">${gw.mean_level != null ? gw.mean_level.toFixed(2) + ' m' : 'N/A'}</div>
                         </div>
                         <div class="detail-item">
                             <div class="label">Current Level</div>
-                            <div class="value">${gw.current_level ? gw.current_level.toFixed(2) + ' m' : 'N/A'}</div>
+                            <div class="value">${gw.current_level != null ? gw.current_level.toFixed(2) + ' m' : 'N/A'}</div>
                         </div>
                     </div>
                 </div>
