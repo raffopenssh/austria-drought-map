@@ -2,9 +2,9 @@
 
 ## Executive Summary
 
-Analysis of combined data from eHYD (groundwater/river monitoring), EEA WISE (water quality), and Austrian ammonia emissions reveals a **critical feedback loop** between agricultural intensification, groundwater depletion, and water quality degradation.
+Analysis of combined data from eHYD (groundwater/river monitoring), EEA WISE (water quality), and Austrian ammonia emissions reveals important relationships between agricultural activity, groundwater levels, and water quality.
 
-**Key Finding:** The same regions with highest agricultural emissions (measured by NH3) have both the **worst groundwater decline** AND the **worst water quality** - indicating agriculture is simultaneously extracting and contaminating Austria's groundwater.
+**Key Finding:** Regions with highest agricultural emissions (measured by NH3) tend to have the worst groundwater level decline AND the highest proportion of at-risk groundwater bodies.
 
 ---
 
@@ -20,19 +20,51 @@ Analysis of combined data from eHYD (groundwater/river monitoring), EEA WISE (wa
 
 ---
 
+## CORRECTED Water Quality Assessment
+
+### Groundwater Bodies (142 total)
+Based on Austria's NGP 2021 and WISE WFD 2022 data:
+
+| Status | Bodies | Percentage |
+|--------|--------|------------|
+| **Good** chemical status | 120 | 84.5% |
+| **Poor/At Risk** (nitrate, pesticides) | 17 | 12.0% |
+| Unknown | 5 | 3.5% |
+| **Good** quantitative status | 142 | 100% |
+
+### Monitoring Sites (by water body status)
+Of 6,408 groundwater monitoring sites:
+- **5,150 sites** (80.4%) in water bodies with Good status
+- **1,079 sites** (16.8%) in water bodies with Poor/At Risk status
+- **179 sites** (2.8%) in water bodies with Unknown status
+
+### River Water Bodies (8,116 total)
+Ecological status distribution:
+
+| Status | Count | Percentage |
+|--------|-------|------------|
+| High | 1,537 | 18.9% |
+| Good | 2,447 | 30.2% |
+| Moderate | 3,050 | 37.6% |
+| Poor | 754 | 9.3% |
+| Bad | 227 | 2.8% |
+| Unknown | 101 | 1.2% |
+
+**Note:** Only 49.1% of river water bodies achieve High or Good ecological status.
+
+---
+
 ## Regional Risk Assessment
 
-### Critical Risk: Oberösterreich 🔴
+### High Risk: Oberösterreich 🔴
 - **NH3 Emissions:** 1.19 tonnes/km²/year (highest in Austria)
 - **Wells Declining:** 71.6% (highest in Austria)
 - **GW Trend:** -0.093 m/decade
-- **Chemical Status:** ~94% of monitoring sites "Failing"
 
 ### High Risk: Niederösterreich 🟠
 - **NH3 Emissions:** 0.82 tonnes/km²/year
 - **Wells Declining:** 66.0%
 - **GW Trend:** -0.056 m/decade
-- **Chemical Status:** ~94% of monitoring sites "Failing"
 
 ### Medium Risk: Steiermark, Vorarlberg, Salzburg 🟡
 - NH3: 0.34-0.73 tonnes/km²/year
@@ -54,42 +86,22 @@ Analysis of combined data from eHYD (groundwater/river monitoring), EEA WISE (wa
 | R-squared | 0.235 |
 | Interpretation | Moderate positive correlation |
 
-**The correlation is not perfect because:**
-1. Alpine areas have natural groundwater decline from climate
-2. Urban areas (Wien) have different extraction patterns
-3. Time lags between emissions and groundwater impacts
+**The correlation suggests:**
+1. Higher agricultural activity (NH3 as proxy) is associated with more groundwater decline
+2. But other factors (climate, geology) also play significant roles
+3. The relationship is not deterministic
 
 ---
 
-## The Feedback Loop Mechanism
+## Key Mechanisms
 
-```
-┌─────────────────────────────────────────────────────┐
-│     AGRICULTURAL INTENSIFICATION                    │
-│              ↓                                      │
-│  ┌───────────┴───────────┐                         │
-│  ↓                       ↓                         │
-│  NH3/N Fertilizer    Irrigation Demand             │
-│  Application         (Groundwater Pumping)         │
-│  ↓                       ↓                         │
-│  Nitrate Leaching    Water Table Decline           │
-│  into Groundwater    (60-70% of wells)             │
-│  ↓                       ↓                         │
-│  96.5% GW Bodies     River Baseflow Drops          │
-│  "Failing" Status    (-50 to -67%/decade)          │
-│  ↓                       ↓                         │
-│  DEGRADED QUANTITY + DEGRADED QUALITY              │
-│              ↓                                      │
-│  Drought Vulnerability Increases                    │
-│  (Less resilience in dry years)                    │
-└─────────────────────────────────────────────────────┘
-```
+### 1. Agricultural Water Demand
+- Irrigation increases groundwater extraction
+- Oberösterreich and Niederösterreich have highest agricultural intensity
+- These regions show 66-72% of wells with declining trends
 
----
-
-## Evidence: River Baseflow Collapse
-
-Rivers in the NÖ/OÖ agricultural region showing dramatic decline:
+### 2. River Baseflow Decline
+Rivers in agricultural regions showing dramatic decline:
 
 | River | Decline/Decade | Region |
 |-------|---------------|--------|
@@ -99,81 +111,51 @@ Rivers in the NÖ/OÖ agricultural region showing dramatic decline:
 | Badener Mühlbach | -48.7% | NÖ |
 | Warme Fischa | -48.1% | NÖ |
 
-These rivers are fed by **groundwater baseflow** - their decline directly reflects the falling water table.
-
----
-
-## Evidence: Ammonia Hotspots
-
-Highest NH3 measurements (indicating agricultural intensity):
-
-| Location | NH3 (µg/m³) | Type |
-|----------|------------|------|
-| Seibersdorf (ST) | 16.7 | Near barns |
-| Draßmarkt (B) | 16.0 | Near barns |
-| Hirnsdorf (ST) | 13.7 | Near barns |
-| Marchfeld (NÖ) | 7.3 | Fields |
-| Pyhra (NÖ) | 7.2 | Mixed |
-
-Background alpine stations show only 1-2 µg/m³.
-
----
-
-## Evidence: Water Quality Crisis
-
-In the NÖ/OÖ high-risk region:
-- **3,141 groundwater monitoring sites**
-- **94.3% show "Failing" chemical status**
-- **5.7% Unknown** (none rated "Good")
-
-Primary pollutant: **Nitrate** from agricultural runoff
+### 3. Water Quality Pressure
+- 17 groundwater bodies (12%) are at risk due to nitrate/pesticides
+- These are concentrated in agricultural lowlands
+- Affects ~1,079 monitoring sites
 
 ---
 
 ## Implications
 
 ### For Drought Risk
-1. Agricultural regions are **doubly vulnerable**:
-   - Less groundwater buffer for dry periods
-   - Contaminated water limits usable supply
+1. Agricultural regions face **higher vulnerability**:
+   - Greater groundwater extraction rates
+   - Less buffer for dry periods
    
-2. River baseflow decline means:
-   - Less summer water availability
-   - Ecosystem stress
-   - Reduced dilution capacity for pollutants
+2. River baseflow decline in NÖ indicates:
+   - Reduced summer water availability
+   - Less ecosystem resilience
 
 ### For Water Management
-1. **Quantity and quality must be managed together**
-   - Current policy treats them separately
-   
-2. Agricultural water use needs regulation
-   - Currently unmetered in many areas
-   
-3. Fertilizer application controls critical
-   - Nitrate directive compliance failing
+1. While overall groundwater quality is good (84.5%), the 12% at risk needs attention
+2. Agricultural water use regulation is important in hotspot regions
+3. Quantitative status is good nationwide, but trends are concerning
 
 ### For Climate Adaptation
-1. High-risk regions need priority adaptation
-2. Crop changes may be needed in NÖ/OÖ
-3. Water-efficient farming techniques essential
-
----
-
-## Recommended Monitoring Integration
-
-Priority metrics to display together:
-1. **Groundwater level trend** (eHYD)
-2. **Chemical status** (WISE)
-3. **NH3 density** (by region)
-4. **River baseflow trend** (eHYD)
-
-This allows users to see the **combined stress** rather than individual metrics.
+1. High-risk regions (OÖ, NÖ) need priority adaptation measures
+2. Water-efficient farming techniques would help most in these areas
+3. Early warning systems for groundwater decline
 
 ---
 
 ## Data Quality Notes
 
-- Correlation of 0.485 is moderate but significant
+- Correlation of 0.485 is moderate but statistically meaningful
 - NH3 data is by Bundesland (coarse spatial resolution)
-- Well-level NH3 measurements would improve analysis
-- Time series alignment needed for rigorous causality testing
+- Groundwater body boundaries don't perfectly match well locations
+- WFD assessments are at water body level, not individual well level
+
+---
+
+## Status Code Reference
+
+### Groundwater (WISE WFD 2022)
+- `gwChemicalStatusValue='2'` + `gwAtRiskChemical='No'` = **Good**
+- `gwChemicalStatusValue='2'` + `gwAtRiskChemical='Yes'` = **Poor/At Risk**
+- `gwChemicalStatusValue='3'` = **Unknown**
+
+### Rivers (WISE WFD 2022)
+- `swEcologicalStatusOrPotentialValue`: 1=High, 2=Good, 3=Moderate, 4=Poor, 5=Bad

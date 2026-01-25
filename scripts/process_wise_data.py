@@ -2,6 +2,11 @@
 """
 Process WISE water quality data for Austria drought map webapp.
 Combines monitoring sites with quality status information.
+
+IMPORTANT: Status codes in WISE WFD2022:
+- gwChemicalStatusValue/gwQuantitativeStatusValue: '2' = Good, '3' = Unknown
+- The "Poor/Failing" status is indicated by gwAtRiskChemical='Yes'
+- swEcologicalStatusOrPotentialValue: 1=High, 2=Good, 3=Moderate, 4=Poor, 5=Bad
 """
 
 import json
@@ -41,20 +46,31 @@ def main():
     print(f"  River lookup: {len(river_lookup)} water bodies")
     
     # Create groundwater body lookup - use euGroundWaterBodyCode
+    # IMPORTANT: Status '2' = Good, AtRiskChemical='Yes' = Poor/At Risk
     gw_lookup = {}
     for f in gw_chemical['features']:
         attrs = f['attributes']
         gb_code = attrs.get('euGroundWaterBodyCode')
         if gb_code:
+            # Determine actual status: Good vs Poor based on AtRisk flag
+            status_value = attrs.get('gwChemicalStatusValue')
+            at_risk = attrs.get('gwAtRiskChemical')
+            
+            if status_value == '3':
+                actual_status = 'Unknown'
+            elif at_risk == 'Yes':
+                actual_status = 'Poor'
+            else:
+                actual_status = 'Good'
+            
             gw_lookup[gb_code] = {
                 'name': attrs.get('groundWaterBodyName', 'Unknown'),
-                'chemicalStatus': attrs.get('gwChemicalStatusValue'),
-                'quantitativeStatus': attrs.get('gwQuantitativeStatusValue'),
+                'chemicalStatus': actual_status,
+                'chemicalStatusRaw': status_value,
+                'atRiskChemical': at_risk,
+                'quantitativeStatus': 'Good' if attrs.get('gwQuantitativeStatusValue') == '2' else 'Unknown',
                 'chemicalAssessmentYear': attrs.get('gwChemicalAssessmentYear'),
-                'quantitativeAssessmentYear': attrs.get('gwQuantitativeAssessmentYear'),
                 'area_km2': attrs.get('cArea'),
-                'atRiskChemical': attrs.get('gwAtRiskChemical'),
-                'atRiskQuantitative': attrs.get('gwAtRiskQuantitative')
             }
     print(f"  Groundwater lookup: {len(gw_lookup)} water bodies")
     
@@ -137,6 +153,10 @@ def main():
                 'groundwater': sum(1 for f in output_features if f['properties']['siteType'] == 'groundWaterBody'),
                 'river': sum(1 for f in output_features if f['properties']['siteType'] == 'riverWaterBody'),
                 'lake': sum(1 for f in output_features if f['properties']['siteType'] == 'lakeWaterBody')
+            },
+            'statusCodeNotes': {
+                'groundwater': 'chemicalStatus: Good/Poor/Unknown based on gwAtRiskChemical flag',
+                'river': 'ecologicalStatus: 1=High, 2=Good, 3=Moderate, 4=Poor, 5=Bad'
             }
         }
     }
@@ -153,10 +173,9 @@ def main():
     print(f"River sites: {geojson['metadata']['sitesByType']['river']}")
     print(f"Lake sites: {geojson['metadata']['sitesByType']['lake']}")
     
-    print("\n=== Groundwater Chemical Status ===")
-    status_names = {'1': 'Good', '2': 'Failing', '3': 'Unknown'}
+    print("\n=== Groundwater Chemical Status (CORRECTED) ===")
     for s, c in sorted(stats['groundwater'].items()):
-        print(f"  {status_names.get(s, s)}: {c}")
+        print(f"  {s}: {c}")
     
     print("\n=== River Ecological Status ===")
     eco_names = {'1': 'High', '2': 'Good', '3': 'Moderate', '4': 'Poor', '5': 'Bad'}
