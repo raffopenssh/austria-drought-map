@@ -581,6 +581,14 @@
                     <input type="checkbox" id="layer-gw">
                     <label for="layer-gw">Groundwater Trends</label>
                 </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-wise-gw">
+                    <label for="layer-wise-gw">Water Quality (GW)</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-wise-river">
+                    <label for="layer-wise-river">Water Quality (Rivers)</label>
+                </div>
             </div>
             
             
@@ -684,10 +692,12 @@
         // Initial legend render
         setTimeout(updateLegends, 100);
         
-        // Layer groups - order matters! Bottom to top: boundaries, hydro, gw
+        // Layer groups - order matters! Bottom to top: boundaries, hydro, gw, wise
         const boundaryLayer = L.layerGroup().addTo(map);
         const hydroLayer = L.layerGroup().addTo(map);
         const gwLayer = L.layerGroup();
+        const wiseGwLayer = L.layerGroup();  // WISE groundwater quality
+        const wiseRiverLayer = L.layerGroup();  // WISE river quality
         
         // Risk color function (categorical)
         function getRiskColor(risk) {
@@ -932,6 +942,153 @@
             });
         }
         
+        // WISE Water Quality Data (loaded on demand)
+        let wiseDataLoaded = false;
+        let wiseData = null;
+        
+        async function loadWiseData(siteType) {
+            // Load data once, then filter
+            if (!wiseDataLoaded) {
+                try {
+                    const resp = await fetch('data/wise_monitoring_sites.json');
+                    wiseData = await resp.json();
+                    wiseDataLoaded = true;
+                } catch (e) {
+                    console.error('Error loading WISE data:', e);
+                    return;
+                }
+            }
+            
+            // Render the appropriate layer
+            if (siteType === 'groundWaterBody') {
+                renderWiseGwLayer();
+            } else if (siteType === 'riverWaterBody') {
+                renderWiseRiverLayer();
+            }
+        }
+        
+        function getWiseGwColor(status) {
+            switch(status) {
+                case 'Good': return '#27ae60';  // Green
+                case 'Poor': return '#e74c3c';  // Red
+                default: return '#95a5a6';       // Gray for Unknown
+            }
+        }
+        
+        function getWiseRiverColor(ecoStatus) {
+            // Ecological status: 1=High, 2=Good, 3=Moderate, 4=Poor, 5=Bad
+            switch(ecoStatus) {
+                case '1': return '#1e88e5';  // Blue - High
+                case '2': return '#27ae60';  // Green - Good
+                case '3': return '#f39c12';  // Orange - Moderate
+                case '4': return '#e67e22';  // Dark Orange - Poor
+                case '5': return '#e74c3c';  // Red - Bad
+                default: return '#95a5a6';    // Gray - Unknown
+            }
+        }
+        
+        function renderWiseGwLayer() {
+            wiseGwLayer.clearLayers();
+            if (!wiseData) return;
+            
+            wiseData.features
+                .filter(f => f.properties.type === 'groundWaterBody')
+                .forEach(f => {
+                    const props = f.properties;
+                    const coords = f.geometry.coordinates;
+                    
+                    const marker = L.circleMarker([coords[1], coords[0]], {
+                        radius: 4,
+                        fillColor: getWiseGwColor(props.chemStatus),
+                        fillOpacity: 0.8,
+                        color: '#fff',
+                        weight: 0.5
+                    });
+                    
+                    const statusText = props.chemStatus || 'Unknown';
+                    const riskText = props.atRisk === 'Yes' ? ' (At Risk)' : '';
+                    
+                    marker.bindTooltip(`
+                        <b>${props.name || 'GW Site'}</b><br>
+                        Chemical Status: ${statusText}${riskText}
+                    `, { direction: 'top' });
+                    
+                    marker.on('click', function(e) {
+                        L.DomEvent.stopPropagation(e);
+                        showWiseDetailPopup(props, 'groundwater');
+                    });
+                    
+                    marker.addTo(wiseGwLayer);
+                });
+        }
+        
+        function renderWiseRiverLayer() {
+            wiseRiverLayer.clearLayers();
+            if (!wiseData) return;
+            
+            const ecoNames = {'1': 'High', '2': 'Good', '3': 'Moderate', '4': 'Poor', '5': 'Bad'};
+            
+            wiseData.features
+                .filter(f => f.properties.type === 'riverWaterBody')
+                .forEach(f => {
+                    const props = f.properties;
+                    const coords = f.geometry.coordinates;
+                    
+                    const marker = L.circleMarker([coords[1], coords[0]], {
+                        radius: 4,
+                        fillColor: getWiseRiverColor(props.ecoStatus),
+                        fillOpacity: 0.8,
+                        color: '#fff',
+                        weight: 0.5
+                    });
+                    
+                    const ecoText = ecoNames[props.ecoStatus] || 'Unknown';
+                    
+                    marker.bindTooltip(`
+                        <b>${props.name || 'River Site'}</b><br>
+                        Ecological Status: ${ecoText}
+                    `, { direction: 'top' });
+                    
+                    marker.on('click', function(e) {
+                        L.DomEvent.stopPropagation(e);
+                        showWiseDetailPopup(props, 'river');
+                    });
+                    
+                    marker.addTo(wiseRiverLayer);
+                });
+        }
+        
+        function showWiseDetailPopup(props, type) {
+            let content = `<div style="min-width: 200px;">`;
+            content += `<h4 style="margin: 0 0 8px 0;">${props.name || 'Monitoring Site'}</h4>`;
+            content += `<p style="margin: 4px 0; font-size: 12px; color: #666;">ID: ${props.id}</p>`;
+            
+            if (type === 'groundwater') {
+                const statusColor = getWiseGwColor(props.chemStatus);
+                content += `<p style="margin: 4px 0;"><b>Chemical Status:</b> <span style="color: ${statusColor}; font-weight: bold;">${props.chemStatus || 'Unknown'}</span></p>`;
+                if (props.atRisk === 'Yes') {
+                    content += `<p style="margin: 4px 0; color: #e74c3c;"><b>⚠ At Risk</b></p>`;
+                }
+            } else {
+                const ecoNames = {'1': 'High', '2': 'Good', '3': 'Moderate', '4': 'Poor', '5': 'Bad'};
+                const ecoText = ecoNames[props.ecoStatus] || 'Unknown';
+                const statusColor = getWiseRiverColor(props.ecoStatus);
+                content += `<p style="margin: 4px 0;"><b>Ecological Status:</b> <span style="color: ${statusColor}; font-weight: bold;">${ecoText}</span></p>`;
+            }
+            
+            if (props.wbCode) {
+                content += `<p style="margin: 4px 0; font-size: 11px; color: #888;">Water Body: ${props.wbCode}</p>`;
+            }
+            
+            content += `<p style="margin: 8px 0 0 0; font-size: 10px; color: #999;">Source: EEA WISE WFD 2022</p>`;
+            content += `</div>`;
+            
+            L.popup()
+                .setLatLng([props.lat || 0, props.lon || 0])
+                .setContent(content)
+                .openOn(map);
+        }
+        
         function showMunicipalityInfo(props) {
             const panel = document.getElementById('info-panel');
             const title = document.getElementById('info-title');
@@ -999,6 +1156,24 @@
             else map.removeLayer(gwLayer);
             legendState.gw = this.checked;
             updateLegends();
+        });
+        
+        document.getElementById('layer-wise-gw').addEventListener('change', function() {
+            if (this.checked) {
+                map.addLayer(wiseGwLayer);
+                loadWiseData('groundWaterBody');
+            } else {
+                map.removeLayer(wiseGwLayer);
+            }
+        });
+        
+        document.getElementById('layer-wise-river').addEventListener('change', function() {
+            if (this.checked) {
+                map.addLayer(wiseRiverLayer);
+                loadWiseData('riverWaterBody');
+            } else {
+                map.removeLayer(wiseRiverLayer);
+            }
         });
         
         // Stats click handlers
@@ -1652,6 +1827,14 @@
                         <li>Sediment transport (34 stations with daily measurements)</li>
                         <li>Precipitation (861 stations with daily data since 1971)</li>
                         <li>100+ years of measurements</li>
+                    </ul>
+                </li>
+                <li><a href="https://www.eea.europa.eu/en/datahub/datahubitem-view/fbf3717c-cd7b-4785-933a-d0cf510542e1" target="_blank">European Environment Agency - WISE WFD 2022</a> - Water quality status
+                    <ul>
+                        <li>6,408 groundwater monitoring sites with chemical status</li>
+                        <li>3,176 river monitoring sites with ecological status</li>
+                        <li>Water Framework Directive compliance assessment</li>
+                        <li>Citation: European Environment Agency. Waterbase - Water Framework Directive. 2022.</li>
                     </ul>
                 </li>
                 <li><a href="https://oesterreichsenergie.at" target="_blank">Oesterreichs Energie</a> - Power plant registry (156 hydropower plants)</li>
