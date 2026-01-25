@@ -53,6 +53,7 @@
     </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -620,6 +621,14 @@
                 <div id="info-content"></div>
             </div>
             
+            <div class="layer-group">
+                <h3>EDO Drought Index</h3>
+                <div id="edo-chart-container" style="height: 120px; margin: 10px 0;">
+                    <canvas id="edo-chart"></canvas>
+                </div>
+                <div id="edo-stats" style="font-size: 0.8em; color: #a0a0c0;"></div>
+            </div>
+            
             <div class="footer-links">
                 <a href="#" id="sources-link">Sources & Methods</a>
                 <span class="separator">•</span>
@@ -859,16 +868,19 @@
         let geojsonData = null;
         let sedimentData = [];
         let riverImpactData = [];
+        let edoCdiData = null;
+        let edoChart = null;
         
         async function loadData() {
             try {
-                const [muniResp, ppResp, gwResp, geoResp, sedResp, riverResp] = await Promise.all([
+                const [muniResp, ppResp, gwResp, geoResp, sedResp, riverResp, edoResp] = await Promise.all([
                     fetch('data/municipalities.json'),
                     fetch('data/powerplants.json'),
                     fetch('data/gw_stations_trends.json'),
                     fetch('data/municipalities_risk.geojson'),
                     fetch('data/sediment_analysis.json'),
-                    fetch('data/river_hydro_impact.json')
+                    fetch('data/river_hydro_impact.json'),
+                    fetch('data/edo_cdi_austria.json')
                 ]);
                 
                 municipalitiesData = await muniResp.json();
@@ -878,9 +890,11 @@
                 sedimentData = await sedResp.json();
                 const riverData = await riverResp.json();
                 riverImpactData = riverData.river_impacts || [];
+                edoCdiData = await edoResp.json();
                 
                 updateStats();
                 renderLayers();
+                renderEdoChart();
             } catch (e) {
                 console.error('Error loading data:', e);
             }
@@ -895,6 +909,78 @@
             const medRisk = municipalitiesData.filter(m => m.risk_category === 'medium').length;
             document.getElementById('stat-medium').textContent = medRisk;
             document.getElementById('stat-highrisk').textContent = highRisk;
+        }
+        
+        function renderEdoChart() {
+            if (!edoCdiData || !edoCdiData.yearly_summary) return;
+            
+            const ctx = document.getElementById('edo-chart');
+            if (!ctx) return;
+            
+            const years = edoCdiData.yearly_summary.map(d => d.year);
+            const means = edoCdiData.yearly_summary.map(d => d.mean_cdi);
+            const maxs = edoCdiData.yearly_summary.map(d => d.max_cdi);
+            
+            // Color based on drought severity
+            const barColors = means.map(v => {
+                if (v < 0.5) return 'rgba(76, 175, 80, 0.8)';  // Green - no drought
+                if (v < 1.0) return 'rgba(255, 235, 59, 0.8)'; // Yellow - watch
+                if (v < 1.5) return 'rgba(255, 152, 0, 0.8)';  // Orange - warning
+                return 'rgba(244, 67, 54, 0.8)';               // Red - alert
+            });
+            
+            if (edoChart) edoChart.destroy();
+            
+            edoChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Mean CDI',
+                        data: means,
+                        backgroundColor: barColors,
+                        borderColor: barColors.map(c => c.replace('0.8', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const idx = ctx.dataIndex;
+                                    const d = edoCdiData.yearly_summary[idx];
+                                    return [`Mean: ${d.mean_cdi}`, `Max: ${d.max_cdi}`];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 3,
+                            title: { display: true, text: 'CDI', color: '#a0a0c0', font: { size: 10 } },
+                            ticks: { color: '#a0a0c0', font: { size: 9 } },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#a0a0c0', font: { size: 9 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+            
+            // Update stats text
+            const statsEl = document.getElementById('edo-stats');
+            if (statsEl) {
+                const worstYear = edoCdiData.yearly_summary.reduce((a, b) => a.mean_cdi > b.mean_cdi ? a : b);
+                statsEl.innerHTML = `Worst year: <strong>${worstYear.year}</strong> (CDI: ${worstYear.mean_cdi})<br>` +
+                    `<span style="font-size:0.75em">CDI: 0=none, 1=watch, 2=warning, 3=alert</span>`;
+            }
         }
         
         function renderLayers() {
