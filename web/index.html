@@ -157,6 +157,28 @@
         .gradient-bar.risk-gradient {
             background: linear-gradient(to right, #27ae60, #82c341, #dcc028, #f39c12, #f07832, #e94560);
         }
+        .gradient-bar.wise-gw-gradient {
+            background: linear-gradient(to right, #e74c3c, #ec7063, #f5b7b1, #d5dbdb, #aed6f1, #5dade2, #2980b9);
+        }
+        .gradient-bar.wise-river-gradient {
+            background: linear-gradient(to right, #145a32, #1e8449, #27ae60, #58d68d, #abebc6);
+        }
+        .legend-item-row {
+            display: flex;
+            align-items: center;
+            margin: 3px 0;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .legend-label {
+            font-size: 9px;
+            color: #a0a0c0;
+        }
         .map-legend {
             background: rgba(22, 33, 62, 0.92);
             padding: 10px 12px;
@@ -635,7 +657,9 @@
         const legendState = {
             drought: true,
             hydro: true,
-            gw: false
+            gw: false,
+            wiseGw: false,
+            wiseRiver: false
         };
         
         function updateLegends() {
@@ -681,6 +705,38 @@
                             <span>0%</span>
                             <span>32%</span>
                             <span>63%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.wiseGw) {
+                html += `
+                    <div class="map-legend">
+                        <h4>GW Quality</h4>
+                        <div class="gradient-bar wise-gw-gradient"></div>
+                        <div class="gradient-labels">
+                            <span>Poor</span>
+                            <span></span>
+                            <span>Good</span>
+                        </div>
+                        <div class="legend-item-row" style="margin-top: 4px;">
+                            <div class="legend-dot" style="background: #95a5a6;"></div>
+                            <span class="legend-label">Unknown</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.wiseRiver) {
+                html += `
+                    <div class="map-legend">
+                        <h4>River Ecology</h4>
+                        <div class="gradient-bar wise-river-gradient"></div>
+                        <div class="gradient-labels">
+                            <span>Bad</span>
+                            <span>Moderate</span>
+                            <span>High</span>
                         </div>
                     </div>
                 `;
@@ -968,21 +1024,23 @@
         }
         
         function getWiseGwColor(status) {
+            // Red (Poor) to Blue (Good) gradient, Gray for Unknown
             switch(status) {
-                case 'Good': return '#27ae60';  // Green
-                case 'Poor': return '#e74c3c';  // Red
+                case 'Good': return '#2980b9';  // Blue - Good
+                case 'Poor': return '#e74c3c';  // Red - Poor
                 default: return '#95a5a6';       // Gray for Unknown
             }
         }
         
         function getWiseRiverColor(ecoStatus) {
-            // Ecological status: 1=High, 2=Good, 3=Moderate, 4=Poor, 5=Bad
+            // Continuous green gradient: dark green (High) to light green (Bad)
+            // 1=High (best), 5=Bad (worst)
             switch(ecoStatus) {
-                case '1': return '#1e88e5';  // Blue - High
-                case '2': return '#27ae60';  // Green - Good
-                case '3': return '#f39c12';  // Orange - Moderate
-                case '4': return '#e67e22';  // Dark Orange - Poor
-                case '5': return '#e74c3c';  // Red - Bad
+                case '1': return '#145a32';  // Dark green - High (best)
+                case '2': return '#1e8449';  // Green - Good
+                case '3': return '#27ae60';  // Medium green - Moderate
+                case '4': return '#58d68d';  // Light green - Poor
+                case '5': return '#abebc6';  // Very light green - Bad (worst)
                 default: return '#95a5a6';    // Gray - Unknown
             }
         }
@@ -1165,6 +1223,8 @@
             } else {
                 map.removeLayer(wiseGwLayer);
             }
+            legendState.wiseGw = this.checked;
+            updateLegends();
         });
         
         document.getElementById('layer-wise-river').addEventListener('change', function() {
@@ -1174,6 +1234,8 @@
             } else {
                 map.removeLayer(wiseRiverLayer);
             }
+            legendState.wiseRiver = this.checked;
+            updateLegends();
         });
         
         // Stats click handlers
