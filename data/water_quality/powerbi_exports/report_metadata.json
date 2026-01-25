@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-01-23T06:31:32.614648",
+  "reports": {
+    "grundwasser": {
+      "name": "GZUEV_Grundwasser_oeffentlich",
+      "url": "https://www.umweltbundesamt.at/dashboard-grundwasser",
+      "embed_url": "https://secure.umweltbundesamt.at/powerbi-embed/start?reportName=GZUEV_Grundwasser_oeffentlich",
+      "report_id": "58693000-4103-49a3-b311-dca5d162fdc6",
+      "description": "Groundwater quality monitoring data"
+    },
+    "fliessgewaesser": {
+      "name": "GZUEV_Fliessgewaesser_oeffentlich",
+      "url": "https://www.umweltbundesamt.at/dashboard-fliessgewaesser-ueberwachung",
+      "embed_url": "https://secure.umweltbundesamt.at/powerbi-embed/start?reportName=GZUEV_Fliessgewaesser_oeffentlich",
+      "report_id": "574b58ae-7f98-407a-af08-2a339eb9d1f4",
+      "description": "River water quality monitoring data"
+    }
+  },
+  "notes": [
+    "Power BI embeds do not expose raw data via API",
+    "Options: 1) Browser automation to navigate and export",
+    "         2) Request data directly from opendata@umweltbundesamt.at",
+    "         3) Use H2O Fachdatenbank: https://wasser.umweltbundesamt.at/h2odb/"
+  ]
+}
