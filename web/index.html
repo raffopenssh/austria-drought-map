@@ -53,7 +53,7 @@
     </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -622,11 +622,16 @@
             </div>
             
             <div class="layer-group">
-                <h3>EDO Drought Index</h3>
-                <div id="edo-chart-container" style="height: 120px; margin: 10px 0;">
-                    <canvas id="edo-chart"></canvas>
+                <h3>Risk Model</h3>
+                <div style="font-size: 0.8em; color: #a0a0c0; line-height: 1.6;">
+                    <div style="margin-bottom: 8px;"><strong>Components:</strong></div>
+                    <div>• GW Trend: <span style="color:#4fc3f7">40%</span></div>
+                    <div>• Hydro Impact: <span style="color:#4fc3f7">30%</span></div>
+                    <div>• EDO CDI: <span style="color:#4fc3f7">30%</span></div>
+                    <div style="margin-top: 10px; font-size: 0.75em;">
+                        EDO CDI: Combined Drought Indicator from Copernicus (2012-2023)
+                    </div>
                 </div>
-                <div id="edo-stats" style="font-size: 0.8em; color: #a0a0c0;"></div>
             </div>
             
             <div class="footer-links">
@@ -868,19 +873,17 @@
         let geojsonData = null;
         let sedimentData = [];
         let riverImpactData = [];
-        let edoCdiData = null;
-        let edoChart = null;
+
         
         async function loadData() {
             try {
-                const [muniResp, ppResp, gwResp, geoResp, sedResp, riverResp, edoResp] = await Promise.all([
+                const [muniResp, ppResp, gwResp, geoResp, sedResp, riverResp] = await Promise.all([
                     fetch('data/municipalities.json'),
                     fetch('data/powerplants.json'),
                     fetch('data/gw_stations_trends.json'),
                     fetch('data/municipalities_risk.geojson'),
                     fetch('data/sediment_analysis.json'),
-                    fetch('data/river_hydro_impact.json'),
-                    fetch('data/edo_cdi_austria.json')
+                    fetch('data/river_hydro_impact.json')
                 ]);
                 
                 municipalitiesData = await muniResp.json();
@@ -890,11 +893,9 @@
                 sedimentData = await sedResp.json();
                 const riverData = await riverResp.json();
                 riverImpactData = riverData.river_impacts || [];
-                edoCdiData = await edoResp.json();
                 
                 updateStats();
                 renderLayers();
-                renderEdoChart();
             } catch (e) {
                 console.error('Error loading data:', e);
             }
@@ -909,78 +910,6 @@
             const medRisk = municipalitiesData.filter(m => m.risk_category === 'medium').length;
             document.getElementById('stat-medium').textContent = medRisk;
             document.getElementById('stat-highrisk').textContent = highRisk;
-        }
-        
-        function renderEdoChart() {
-            if (!edoCdiData || !edoCdiData.yearly_summary) return;
-            
-            const ctx = document.getElementById('edo-chart');
-            if (!ctx) return;
-            
-            const years = edoCdiData.yearly_summary.map(d => d.year);
-            const means = edoCdiData.yearly_summary.map(d => d.mean_cdi);
-            const maxs = edoCdiData.yearly_summary.map(d => d.max_cdi);
-            
-            // Color based on drought severity
-            const barColors = means.map(v => {
-                if (v < 0.5) return 'rgba(76, 175, 80, 0.8)';  // Green - no drought
-                if (v < 1.0) return 'rgba(255, 235, 59, 0.8)'; // Yellow - watch
-                if (v < 1.5) return 'rgba(255, 152, 0, 0.8)';  // Orange - warning
-                return 'rgba(244, 67, 54, 0.8)';               // Red - alert
-            });
-            
-            if (edoChart) edoChart.destroy();
-            
-            edoChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: years,
-                    datasets: [{
-                        label: 'Mean CDI',
-                        data: means,
-                        backgroundColor: barColors,
-                        borderColor: barColors.map(c => c.replace('0.8', '1')),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const idx = ctx.dataIndex;
-                                    const d = edoCdiData.yearly_summary[idx];
-                                    return [`Mean: ${d.mean_cdi}`, `Max: ${d.max_cdi}`];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 3,
-                            title: { display: true, text: 'CDI', color: '#a0a0c0', font: { size: 10 } },
-                            ticks: { color: '#a0a0c0', font: { size: 9 } },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
-                        },
-                        x: {
-                            ticks: { color: '#a0a0c0', font: { size: 9 } },
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
-            
-            // Update stats text
-            const statsEl = document.getElementById('edo-stats');
-            if (statsEl) {
-                const worstYear = edoCdiData.yearly_summary.reduce((a, b) => a.mean_cdi > b.mean_cdi ? a : b);
-                statsEl.innerHTML = `Worst year: <strong>${worstYear.year}</strong> (CDI: ${worstYear.mean_cdi})<br>` +
-                    `<span style="font-size:0.75em">CDI: 0=none, 1=watch, 2=warning, 3=alert</span>`;
-            }
         }
         
         function renderLayers() {
@@ -1246,6 +1175,12 @@
             const gwTrend = props.gw_trend != null ? (props.gw_trend * 100).toFixed(1) : 'N/A';
             const gwTrendClass = props.gw_trend < 0 ? 'risk-high' : 'risk-low';
             
+            // EDO CDI display
+            const edoCdi = props.edo_cdi_mean != null ? props.edo_cdi_mean.toFixed(2) : 'N/A';
+            const edoMax = props.edo_cdi_max != null ? props.edo_cdi_max.toFixed(2) : 'N/A';
+            const edoClass = props.edo_cdi_mean > 1.2 ? 'risk-high' : 
+                            props.edo_cdi_mean > 0.8 ? 'risk-medium' : 'risk-low';
+            
             content.innerHTML = `
                 <div class="info-row">
                     <span class="info-label">Risk Score:</span>
@@ -1255,10 +1190,24 @@
                     <span class="info-label">Risk Category:</span>
                     <span class="info-value ${riskClass}">${props.risk_category || 'low'}</span>
                 </div>
+                <hr style="border-color: #333; margin: 8px 0;">
                 <div class="info-row">
                     <span class="info-label">GW Trend:</span>
                     <span class="info-value ${gwTrendClass}">${gwTrend} cm/decade</span>
                 </div>
+                <div class="info-row">
+                    <span class="info-label">EDO CDI (avg):</span>
+                    <span class="info-value ${edoClass}">${edoCdi}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">EDO CDI (max):</span>
+                    <span class="info-value">${edoMax}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Hydro Impact:</span>
+                    <span class="info-value">${props.hydro_factor ? props.hydro_factor.toFixed(0) : 0}</span>
+                </div>
+                <hr style="border-color: #333; margin: 8px 0;">
                 <div class="info-row">
                     <span class="info-label">GW Stations:</span>
                     <span class="info-value">${props.gw_stations || 0}</span>
@@ -1266,14 +1215,6 @@
                 <div class="info-row">
                     <span class="info-label">Hydro Plants:</span>
                     <span class="info-value">${props.hydro_plants || 0}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Hydro Capacity:</span>
-                    <span class="info-value">${props.hydro_capacity || 0} MW</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Pump Storage:</span>
-                    <span class="info-value">${props.pump_storage || 0} MW</span>
                 </div>
             `;
             
@@ -1470,6 +1411,9 @@
             const hydroFactor = (muni.hydro_factor || 0) * 100;  // Use pre-calculated hydro_factor
             const precipFactor = (muni.precip_risk || 0) * 100;  // Precipitation decline risk
             const flowFactor = (muni.flow_risk || 0) * 100;  // Surface water flow decline risk
+            const edoFactor = (muni.edo_risk || 0) * 100;  // EDO CDI drought risk
+            const edoCdi = muni.edo_cdi_mean || null;
+            const edoCdiMax = muni.edo_cdi_max || null;
             const riskScore = (muni.risk_score || 0) * 100;
             
             // Find nearby hydropower plants and their rivers
@@ -1623,11 +1567,11 @@
                             <span class="risk-factor-value" style="color: ${precipFactor > 50 ? '#e94560' : precipFactor > 25 ? '#f39c12' : '#27ae60'}">${precipFactor.toFixed(0)}%</span>
                         </div>
                         <div class="risk-factor">
-                            <span class="risk-factor-label">Surface Water Risk</span>
+                            <span class="risk-factor-label">EDO Drought Index</span>
                             <div class="risk-factor-bar">
-                                <div class="risk-factor-fill" style="width: ${flowFactor}%; background: ${flowFactor > 50 ? '#e94560' : flowFactor > 25 ? '#f39c12' : '#27ae60'}"></div>
+                                <div class="risk-factor-fill" style="width: ${edoFactor}%; background: ${edoFactor > 50 ? '#e94560' : edoFactor > 25 ? '#f39c12' : '#27ae60'}"></div>
                             </div>
-                            <span class="risk-factor-value" style="color: ${flowFactor > 50 ? '#e94560' : flowFactor > 25 ? '#f39c12' : '#27ae60'}">${flowFactor.toFixed(0)}%</span>
+                            <span class="risk-factor-value" style="color: ${edoFactor > 50 ? '#e94560' : edoFactor > 25 ? '#f39c12' : '#27ae60'}">${edoFactor.toFixed(0)}%</span>
                         </div>
                     </div>
                 </div>
@@ -1677,6 +1621,14 @@
                             <div class="value" style="color: #f39c12">${muni.flow_hydro_mw.toFixed(0)} MW</div>
                         </div>
                         ` : ''}
+                        <div class="detail-item">
+                            <div class="label">EDO CDI (avg)</div>
+                            <div class="value" style="color: ${edoCdi > 1.2 ? '#e94560' : edoCdi > 0.8 ? '#f39c12' : '#27ae60'}">${edoCdi != null ? edoCdi.toFixed(2) : 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">EDO CDI (max)</div>
+                            <div class="value">${edoCdiMax != null ? edoCdiMax.toFixed(2) : 'N/A'}</div>
+                        </div>
                     </div>
                     ${(muni.precip_estimated || muni.flow_estimated) ? '<p style="font-size: 0.65em; color: #6a6a8a; margin-top: 6px;">* Estimated from nearest stations</p>' : ''}
                 </div>
@@ -1985,6 +1937,14 @@
                         <li>Citation: European Environment Agency. Waterbase - Water Framework Directive. 2022.</li>
                     </ul>
                 </li>
+                <li><a href="https://drought.emergency.copernicus.eu/" target="_blank">Copernicus European Drought Observatory (EDO)</a> - Combined Drought Index
+                    <ul>
+                        <li>428 dekadal (10-day) observations from 2012-2023</li>
+                        <li>CDI integrates: Standardized Precipitation Index (SPI), Soil Moisture Anomaly, fAPAR Anomaly</li>
+                        <li>Scale: 0=no drought, 1=watch, 2=warning, 3=alert</li>
+                        <li>Zonal statistics calculated per municipality from 5km GeoTIFF rasters</li>
+                    </ul>
+                </li>
                 <li><a href="https://oesterreichsenergie.at" target="_blank">Oesterreichs Energie</a> - Power plant registry (156 hydropower plants)</li>
                 <li>Municipality boundaries from <a href="https://github.com/ginseng666/GeoJSON-TopoJSON-Austria" target="_blank">GeoJSON Austria</a></li>
             </ul>
@@ -1992,10 +1952,9 @@
             <h3>Risk Calculation</h3>
             <p>The drought risk score combines four factors:</p>
             <ul>
-                <li><b>Groundwater trend (35%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
-                <li><b>Hydropower impact (25%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
-                <li><b>Precipitation trend (25%)</b>: Long-term precipitation trends from nearby stations. Declining precipitation increases drought risk.</li>
-                <li><b>Surface water flow (15%)</b>: River discharge trends. Declining flow indicates reduced water availability, linked to dam operations.</li>
+                <li><b>Groundwater trend (40%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
+                <li><b>Hydropower impact (30%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
+                <li><b>EDO Combined Drought Index (30%)</b>: Satellite-derived drought indicator from Copernicus, integrating precipitation, soil moisture, and vegetation stress (2012-2023 average).</li>
             </ul>
             
             <h3>Hydropower Impact Factor</h3>
