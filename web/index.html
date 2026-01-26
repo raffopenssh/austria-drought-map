@@ -898,7 +898,7 @@
         async function loadData() {
             try {
                 const [muniResp, ppResp, gwResp, geoResp, sedResp, riverResp] = await Promise.all([
-                    fetch('data/municipalities.json'),
+                    fetch('data/municipalities.json?v=' + Date.now()),
                     fetch('data/powerplants.json'),
                     fetch('data/gw_stations_trends.json'),
                     fetch('data/municipalities_risk.geojson?v=' + Date.now()),
@@ -934,7 +934,7 @@
         
         function getWqColor(risk) {
             // Water quality color scale: blue (good) to red (bad)
-            if (risk === null || risk === undefined) return '#404040';
+            if (risk === null || risk === undefined) return '#2a2a3a';  // Subtle grey for no data
             if (risk <= 0.2) return '#3b82f6';  // Blue - good
             if (risk <= 0.4) return '#8b5cf6';  // Purple - fairly good
             if (risk <= 0.6) return '#f59e0b';  // Orange - moderate
@@ -955,30 +955,22 @@
                         weight: 0.5,
                         opacity: 0.8,
                         color: '#333',
-                        fillOpacity: risk !== null ? 0.7 : 0.1
+                        fillOpacity: risk !== null ? 0.7 : 0.3
                     };
                 },
                 onEachFeature: function(feature, layer) {
                     const props = feature.properties;
-                    const risk = props.wq_risk;
-                    const chemRisk = props.wq_chem_risk;
-                    const ecoRisk = props.wq_eco_risk;
-                    const stations = props.wq_stations || 0;
-                    
-                    let tooltip = `<b>${props.name}</b><br>`;
-                    if (risk !== null) {
-                        tooltip += `WQ Risk: ${(risk * 100).toFixed(0)}%<br>`;
-                        if (chemRisk !== null) tooltip += `Chemical: ${(chemRisk * 100).toFixed(0)}%<br>`;
-                        if (ecoRisk !== null) tooltip += `Ecological: ${(ecoRisk * 100).toFixed(0)}%<br>`;
-                        tooltip += `Stations: ${stations}`;
-                    } else {
-                        tooltip += 'No water quality data';
-                    }
-                    
-                    layer.bindTooltip(tooltip);
                     
                     layer.on('click', function() {
-                        showMunicipalityInfo(props);
+                        showWaterQualityModal(props.name);
+                    });
+                    
+                    layer.on('mouseover', function() {
+                        this.setStyle({ weight: 2, color: '#fff' });
+                    });
+                    
+                    layer.on('mouseout', function() {
+                        this.setStyle({ weight: 0.5, color: '#333' });
                     });
                 }
             }).addTo(wqChoroplethLayer);
@@ -1418,6 +1410,118 @@
                 return feature.geometry.coordinates.some(poly => pointInPolygon(point, poly[0]));
             }
             return false;
+        }
+        
+        function showWaterQualityModal(name) {
+            const muni = municipalitiesData.find(m => m.name === name);
+            if (!muni) return;
+            
+            const modal = document.getElementById('municipality-detail-modal');
+            const title = document.getElementById('detail-muni-title');
+            const content = document.getElementById('detail-muni-content');
+            
+            title.textContent = name + ' - Water Quality';
+            
+            const wqRisk = muni.wq_risk;
+            const chemRisk = muni.wq_chem_risk;
+            const ecoRisk = muni.wq_eco_risk;
+            const stations = muni.wq_stations || 0;
+            const gwStations = muni.wq_gw_stations || 0;
+            const swStations = muni.wq_sw_stations || 0;
+            
+            const hasData = wqRisk !== null && wqRisk !== undefined;
+            
+            const getRiskClass = (risk) => {
+                if (risk === null || risk === undefined) return '';
+                if (risk > 0.6) return 'risk-high';
+                if (risk > 0.3) return 'risk-medium';
+                return 'risk-low';
+            };
+            
+            const getRiskLabel = (risk) => {
+                if (risk === null || risk === undefined) return 'N/A';
+                if (risk <= 0.2) return 'Good';
+                if (risk <= 0.4) return 'Fairly Good';
+                if (risk <= 0.6) return 'Moderate';
+                if (risk <= 0.8) return 'Poor';
+                return 'Bad';
+            };
+            
+            const formatPct = (v) => v !== null && v !== undefined ? (v * 100).toFixed(0) + '%' : 'N/A';
+            
+            if (hasData) {
+                content.innerHTML = `
+                    <div class="detail-section">
+                        <h4>Water Quality Overview</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="label">Overall Risk</div>
+                                <div class="value ${getRiskClass(wqRisk)}" style="font-size: 1.4em;">${formatPct(wqRisk)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="label">Status</div>
+                                <div class="value ${getRiskClass(wqRisk)}">${getRiskLabel(wqRisk)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>Quality Components</h4>
+                        <div class="risk-breakdown">
+                            <div class="risk-factor">
+                                <span class="risk-factor-label">Chemical Status (60%)</span>
+                                <div class="risk-factor-bar">
+                                    <div class="risk-factor-fill" style="width: ${(chemRisk || 0) * 100}%; background: ${chemRisk > 0.5 ? '#ef4444' : chemRisk > 0.25 ? '#f59e0b' : '#3b82f6'}"></div>
+                                </div>
+                                <span class="risk-factor-value">${formatPct(chemRisk)}</span>
+                            </div>
+                            <div class="risk-factor">
+                                <span class="risk-factor-label">Ecological Status (40%)</span>
+                                <div class="risk-factor-bar">
+                                    <div class="risk-factor-fill" style="width: ${(ecoRisk || 0) * 100}%; background: ${ecoRisk > 0.5 ? '#ef4444' : ecoRisk > 0.25 ? '#f59e0b' : '#3b82f6'}"></div>
+                                </div>
+                                <span class="risk-factor-value">${formatPct(ecoRisk)}</span>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.7em; color: #6a6a8a; margin-top: 8px;">Chemical: Good/Poor from WFD. Ecological: 1-5 scale (High to Bad)</p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>Monitoring Stations</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="label">Total Stations</div>
+                                <div class="value">${stations}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="label">Groundwater</div>
+                                <div class="value">${gwStations}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="label">Surface Water</div>
+                                <div class="value">${swStations}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 12px;">Source: EEA WISE WFD 2022</p>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="detail-section">
+                        <h4>No Water Quality Data</h4>
+                        <p style="color: #6a6a8a;">No WISE WFD 2022 monitoring stations are located in or near this municipality.</p>
+                        <p style="color: #6a6a8a; margin-top: 10px;">This may indicate:</p>
+                        <ul style="color: #6a6a8a; margin-left: 20px; font-size: 0.85em;">
+                            <li>Remote or mountainous area</li>
+                            <li>No significant water bodies requiring monitoring</li>
+                            <li>Data gap in the monitoring network</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            modal.classList.add('active');
         }
         
         function showMunicipalityDetailModal(name) {
