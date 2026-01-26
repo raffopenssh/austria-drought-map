@@ -605,14 +605,6 @@
                     <label for="layer-gw">Groundwater Trends</label>
                 </div>
                 <div class="layer-toggle">
-                    <input type="checkbox" id="layer-wise-gw">
-                    <label for="layer-wise-gw">WQ Stations (GW)</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-wise-river">
-                    <label for="layer-wise-river">WQ Stations (Rivers)</label>
-                </div>
-                <div class="layer-toggle">
                     <input type="checkbox" id="layer-wq-choropleth">
                     <label for="layer-wq-choropleth">Water Quality Risk</label>
                 </div>
@@ -1311,28 +1303,6 @@
             updateLegends();
         });
         
-        document.getElementById('layer-wise-gw').addEventListener('change', function() {
-            if (this.checked) {
-                map.addLayer(wiseGwLayer);
-                loadWiseData('groundWaterBody');
-            } else {
-                map.removeLayer(wiseGwLayer);
-            }
-            legendState.wiseGw = this.checked;
-            updateLegends();
-        });
-        
-        document.getElementById('layer-wise-river').addEventListener('change', function() {
-            if (this.checked) {
-                map.addLayer(wiseRiverLayer);
-                loadWiseData('riverWaterBody');
-            } else {
-                map.removeLayer(wiseRiverLayer);
-            }
-            legendState.wiseRiver = this.checked;
-            updateLegends();
-        });
-        
         document.getElementById('layer-wq-choropleth').addEventListener('change', function() {
             if (this.checked) {
                 renderWqChoropleth();
@@ -1428,6 +1398,7 @@
             const stations = muni.wq_stations || 0;
             const gwStations = muni.wq_gw_stations || 0;
             const swStations = muni.wq_sw_stations || 0;
+            const stationList = muni.wq_station_list || [];
             
             const hasData = wqRisk !== null && wqRisk !== undefined;
             
@@ -1447,9 +1418,41 @@
                 return 'Bad';
             };
             
+            const getStatusColor = (status) => {
+                if (!status || status === 'N/A') return '#6a6a8a';
+                if (status === 'Good' || status === 'High') return '#3b82f6';
+                if (status === 'Moderate' || status === 'Fairly Good') return '#f59e0b';
+                return '#ef4444';  // Poor, Bad, Failing
+            };
+            
             const formatPct = (v) => v !== null && v !== undefined ? (v * 100).toFixed(0) + '%' : 'N/A';
             
             if (hasData) {
+                // Build station list HTML
+                let stationHtml = '';
+                if (stationList.length > 0) {
+                    stationHtml = `
+                        <div class="detail-section">
+                            <h4>Monitoring Station Details</h4>
+                            <div class="stations-list" style="max-height: 200px; overflow-y: auto;">
+                                ${stationList.map(s => `
+                                    <div style="padding: 8px; border-bottom: 1px solid #333; font-size: 0.8em;">
+                                        <div style="font-weight: 600; color: #fff;">${s.name}</div>
+                                        <div style="display: flex; gap: 12px; margin-top: 4px; flex-wrap: wrap;">
+                                            <span style="color: #6a6a8a;">${s.type}</span>
+                                            <span>Chem: <span style="color: ${getStatusColor(s.chem_status)}">${s.chem_status || 'N/A'}</span></span>
+                                            <span>Eco: <span style="color: ${getStatusColor(s.eco_status)}">${s.eco_status || 'N/A'}</span></span>
+                                            ${s.year ? `<span style="color: #6a6a8a;">Assessed: ${s.year}</span>` : ''}
+                                        </div>
+                                        ${s.start ? `<div style="color: #4a4a6a; font-size: 0.85em; margin-top: 2px;">Operating since: ${s.start}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ${stationList.length < stations ? `<p style="font-size: 0.7em; color: #6a6a8a; margin-top: 4px;">Showing ${stationList.length} of ${stations} stations</p>` : ''}
+                        </div>
+                    `;
+                }
+                
                 content.innerHTML = `
                     <div class="detail-section">
                         <h4>Water Quality Overview</h4>
@@ -1483,11 +1486,11 @@
                                 <span class="risk-factor-value">${formatPct(ecoRisk)}</span>
                             </div>
                         </div>
-                        <p style="font-size: 0.7em; color: #6a6a8a; margin-top: 8px;">Chemical: Good/Poor from WFD. Ecological: 1-5 scale (High to Bad)</p>
+                        <p style="font-size: 0.7em; color: #6a6a8a; margin-top: 8px;">Chemical: Good/Failing from WFD assessment. Ecological: High/Good/Moderate/Poor/Bad</p>
                     </div>
                     
                     <div class="detail-section">
-                        <h4>Monitoring Stations</h4>
+                        <h4>Station Summary</h4>
                         <div class="detail-grid">
                             <div class="detail-item">
                                 <div class="label">Total Stations</div>
@@ -1504,7 +1507,9 @@
                         </div>
                     </div>
                     
-                    <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 12px;">Source: EEA WISE WFD 2022</p>
+                    ${stationHtml}
+                    
+                    <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 12px;">Source: European Environment Agency, WISE WFD 2022<br>Austrian national data not publicly available at this detail level.</p>
                 `;
             } else {
                 content.innerHTML = `
