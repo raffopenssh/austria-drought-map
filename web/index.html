@@ -606,11 +606,15 @@
                 </div>
                 <div class="layer-toggle">
                     <input type="checkbox" id="layer-wise-gw">
-                    <label for="layer-wise-gw">Water Quality (GW)</label>
+                    <label for="layer-wise-gw">WQ Stations (GW)</label>
                 </div>
                 <div class="layer-toggle">
                     <input type="checkbox" id="layer-wise-river">
-                    <label for="layer-wise-river">Water Quality (Rivers)</label>
+                    <label for="layer-wise-river">WQ Stations (Rivers)</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-wq-choropleth">
+                    <label for="layer-wq-choropleth">Water Quality Risk</label>
                 </div>
             </div>
             
@@ -673,7 +677,8 @@
             hydro: true,
             gw: false,
             wiseGw: false,
-            wiseRiver: false
+            wiseRiver: false,
+            wqChoropleth: false
         };
         
         function updateLegends() {
@@ -756,6 +761,20 @@
                 `;
             }
             
+            if (legendState.wqChoropleth) {
+                html += `
+                    <div class="map-legend">
+                        <h4>Water Quality</h4>
+                        <div class="gradient-bar" style="background: linear-gradient(to right, #22c55e, #84cc16, #eab308, #f97316, #ef4444);"></div>
+                        <div class="gradient-labels">
+                            <span>Good</span>
+                            <span>Moderate</span>
+                            <span>Poor</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
             container.innerHTML = html;
         }
         
@@ -768,6 +787,7 @@
         const gwLayer = L.layerGroup();
         const wiseGwLayer = L.layerGroup();  // WISE groundwater quality
         const wiseRiverLayer = L.layerGroup();  // WISE river quality
+        const wqChoroplethLayer = L.layerGroup();  // Water quality choropleth
         
         // Risk color function (categorical)
         function getRiskColor(risk) {
@@ -881,7 +901,7 @@
                     fetch('data/municipalities.json'),
                     fetch('data/powerplants.json'),
                     fetch('data/gw_stations_trends.json'),
-                    fetch('data/municipalities_risk.geojson'),
+                    fetch('data/municipalities_risk.geojson?v=' + Date.now()),
                     fetch('data/sediment_analysis.json'),
                     fetch('data/river_hydro_impact.json')
                 ]);
@@ -910,6 +930,58 @@
             const medRisk = municipalitiesData.filter(m => m.risk_category === 'medium').length;
             document.getElementById('stat-medium').textContent = medRisk;
             document.getElementById('stat-highrisk').textContent = highRisk;
+        }
+        
+        function getWqColor(risk) {
+            // Water quality color scale: green (good) to red (poor)
+            if (risk === null || risk === undefined) return '#404040';
+            if (risk <= 0.2) return '#22c55e';  // Green - good
+            if (risk <= 0.4) return '#84cc16';  // Light green
+            if (risk <= 0.6) return '#eab308';  // Yellow - moderate
+            if (risk <= 0.8) return '#f97316';  // Orange - poor
+            return '#ef4444';                    // Red - bad
+        }
+        
+        function renderWqChoropleth() {
+            wqChoroplethLayer.clearLayers();
+            
+            if (!geojsonData) return;
+            
+            L.geoJSON(geojsonData, {
+                style: function(feature) {
+                    const risk = feature.properties.wq_risk;
+                    return {
+                        fillColor: getWqColor(risk),
+                        weight: 0.5,
+                        opacity: 0.8,
+                        color: '#333',
+                        fillOpacity: risk !== null ? 0.7 : 0.1
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    const risk = props.wq_risk;
+                    const chemRisk = props.wq_chem_risk;
+                    const ecoRisk = props.wq_eco_risk;
+                    const stations = props.wq_stations || 0;
+                    
+                    let tooltip = `<b>${props.name}</b><br>`;
+                    if (risk !== null) {
+                        tooltip += `WQ Risk: ${(risk * 100).toFixed(0)}%<br>`;
+                        if (chemRisk !== null) tooltip += `Chemical: ${(chemRisk * 100).toFixed(0)}%<br>`;
+                        if (ecoRisk !== null) tooltip += `Ecological: ${(ecoRisk * 100).toFixed(0)}%<br>`;
+                        tooltip += `Stations: ${stations}`;
+                    } else {
+                        tooltip += 'No water quality data';
+                    }
+                    
+                    layer.bindTooltip(tooltip);
+                    
+                    layer.on('click', function() {
+                        showMunicipalityInfo(props);
+                    });
+                }
+            }).addTo(wqChoroplethLayer);
         }
         
         function renderLayers() {
@@ -1209,12 +1281,16 @@
                 </div>
                 <hr style="border-color: #333; margin: 8px 0;">
                 <div class="info-row">
-                    <span class="info-label">GW Stations:</span>
-                    <span class="info-value">${props.gw_stations || 0}</span>
+                    <span class="info-label">WQ Risk:</span>
+                    <span class="info-value" style="color: ${props.wq_risk > 0.6 ? '#ef4444' : props.wq_risk > 0.3 ? '#eab308' : '#22c55e'}">${props.wq_risk != null ? (props.wq_risk * 100).toFixed(0) + '%' : 'N/A'}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Hydro Plants:</span>
-                    <span class="info-value">${props.hydro_plants || 0}</span>
+                    <span class="info-label">WQ Stations:</span>
+                    <span class="info-value">${props.wq_stations || 0}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">GW Stations:</span>
+                    <span class="info-value">${props.gw_stations || 0}</span>
                 </div>
             `;
             
@@ -1262,6 +1338,17 @@
                 map.removeLayer(wiseRiverLayer);
             }
             legendState.wiseRiver = this.checked;
+            updateLegends();
+        });
+        
+        document.getElementById('layer-wq-choropleth').addEventListener('change', function() {
+            if (this.checked) {
+                renderWqChoropleth();
+                map.addLayer(wqChoroplethLayer);
+            } else {
+                map.removeLayer(wqChoroplethLayer);
+            }
+            legendState.wqChoropleth = this.checked;
             updateLegends();
         });
         
