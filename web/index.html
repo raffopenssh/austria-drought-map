@@ -571,6 +571,14 @@
     
     <div id="container">
         <div id="sidebar">
+            <div class="search-box" style="margin-bottom: 15px; position: relative;">
+                <input type="text" id="municipality-search" placeholder="Search municipality..." 
+                    style="width: 100%; padding: 10px 12px; border: 1px solid #0f3460; border-radius: 6px; 
+                    background: #1a1a2e; color: #fff; font-size: 14px; outline: none;">
+                <div id="search-results" style="position: absolute; top: 100%; left: 0; right: 0; 
+                    background: #16213e; border: 1px solid #0f3460; border-radius: 0 0 6px 6px; 
+                    max-height: 200px; overflow-y: auto; display: none; z-index: 1000;"></div>
+            </div>
             <div class="stats-box">
                 <div class="stat">
                     <div class="stat-value" id="stat-municipalities">-</div>
@@ -606,7 +614,7 @@
                 </div>
                 <div class="layer-toggle">
                     <input type="checkbox" id="layer-wq-choropleth">
-                    <label for="layer-wq-choropleth">Water Quality Risk</label>
+                    <label for="layer-wq-choropleth">Water Quality</label>
                 </div>
             </div>
             
@@ -773,13 +781,11 @@
         // Initial legend render
         setTimeout(updateLegends, 100);
         
-        // Layer groups - order matters! Bottom to top: boundaries, hydro, gw, wise
-        const boundaryLayer = L.layerGroup().addTo(map);
-        const hydroLayer = L.layerGroup().addTo(map);
-        const gwLayer = L.layerGroup();
-        const wiseGwLayer = L.layerGroup();  // WISE groundwater quality
-        const wiseRiverLayer = L.layerGroup();  // WISE river quality
-        const wqChoroplethLayer = L.layerGroup();  // Water quality choropleth
+        // Layer groups - order matters! Bottom to top: choropleths, then point layers
+        const wqChoroplethLayer = L.layerGroup();  // Water quality choropleth (bottom)
+        const boundaryLayer = L.layerGroup().addTo(map);  // Drought risk choropleth
+        const hydroLayer = L.layerGroup().addTo(map);  // Hydropower plants (points)
+        const gwLayer = L.layerGroup();  // Groundwater trends (points)
         
         // Risk color function (categorical)
         function getRiskColor(risk) {
@@ -1290,8 +1296,16 @@
         });
         
         document.getElementById('layer-boundaries').addEventListener('change', function() {
-            if (this.checked) map.addLayer(boundaryLayer);
-            else map.removeLayer(boundaryLayer);
+            if (this.checked) {
+                // Disable water quality layer when drought risk is enabled
+                document.getElementById('layer-wq-choropleth').checked = false;
+                map.removeLayer(wqChoroplethLayer);
+                legendState.wqChoropleth = false;
+                
+                map.addLayer(boundaryLayer);
+            } else {
+                map.removeLayer(boundaryLayer);
+            }
             legendState.drought = this.checked;
             updateLegends();
         });
@@ -1304,14 +1318,77 @@
         });
         
         document.getElementById('layer-wq-choropleth').addEventListener('change', function() {
-            if (this.checked) {
+            const isChecked = this.checked;
+            if (isChecked) {
+                // Disable drought risk layer when water quality is enabled
+                document.getElementById('layer-boundaries').checked = false;
+                map.removeLayer(boundaryLayer);
+                legendState.drought = false;
+                
                 renderWqChoropleth();
                 map.addLayer(wqChoroplethLayer);
+                wqChoroplethLayer.bringToFront();
             } else {
                 map.removeLayer(wqChoroplethLayer);
             }
-            legendState.wqChoropleth = this.checked;
+            legendState.wqChoropleth = isChecked;
             updateLegends();
+        });
+        
+        // Municipality search
+        const searchInput = document.getElementById('municipality-search');
+        const searchResults = document.getElementById('search-results');
+        
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            const matches = municipalitiesData
+                .filter(m => m.name.toLowerCase().includes(query))
+                .slice(0, 10);
+            
+            if (matches.length === 0) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            searchResults.innerHTML = matches.map(m => `
+                <div class="search-result-item" data-name="${m.name}" data-lat="${m.lat}" data-lon="${m.lon}"
+                    style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #0f3460;"
+                    onmouseover="this.style.background='#1a1a2e'" onmouseout="this.style.background='transparent'">
+                    ${m.name}
+                </div>
+            `).join('');
+            searchResults.style.display = 'block';
+            
+            // Add click handlers
+            searchResults.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const name = this.dataset.name;
+                    const lat = parseFloat(this.dataset.lat);
+                    const lon = parseFloat(this.dataset.lon);
+                    
+                    // Smooth zoom to municipality
+                    map.flyTo([lat, lon], 12, { duration: 1.5 });
+                    
+                    // Open modal after zoom
+                    setTimeout(() => showMunicipalityDetailModal(name), 1600);
+                    
+                    // Clear search
+                    searchInput.value = '';
+                    searchResults.style.display = 'none';
+                });
+            });
+        });
+        
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
         });
         
         // Stats click handlers
@@ -1509,7 +1586,7 @@
                     
                     ${stationHtml}
                     
-                    <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 12px;">Source: European Environment Agency, WISE WFD 2022</p>
+                    <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 12px;">Source: WISE WFD Reference Spatial Datasets reported under Water Framework Directive 2022. EEA Data Hub. Accessed Jan 2025.</p>
                 `;
             } else {
                 content.innerHTML = `
@@ -2130,7 +2207,7 @@
                         <li>6,408 groundwater monitoring sites with chemical status</li>
                         <li>3,176 river monitoring sites with ecological status</li>
                         <li>Water Framework Directive compliance assessment</li>
-                        <li>Citation: European Environment Agency. Waterbase - Water Framework Directive. 2022.</li>
+                        <li>Citation: WISE WFD Reference Spatial Datasets reported under Water Framework Directive 2022. EEA Data Hub. Accessed Jan 2025.</li>
                     </ul>
                 </li>
                 <li><a href="https://drought.emergency.copernicus.eu/" target="_blank">Copernicus European Drought Observatory (EDO)</a> - Combined Drought Index
