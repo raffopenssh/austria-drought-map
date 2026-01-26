@@ -723,7 +723,7 @@
                         <div class="gradient-labels">
                             <span>0%</span>
                             <span>32%</span>
-                            <span>63%</span>
+                            <span>59%</span>
                         </div>
                     </div>
                 `;
@@ -795,7 +795,7 @@
         }
         
         // Choropleth color function (gradient)
-        const MAX_RISK = 0.63;  // Max risk in dataset (Gaschurn)
+        const MAX_RISK = 0.59;  // Max risk in dataset (St. Peter am Hart)
         
         function getChoroplethColor(risk) {
             // Viridis color scale, normalized to max risk for better differentiation
@@ -1374,8 +1374,14 @@
                     // Smooth zoom to municipality
                     map.flyTo([lat, lon], 12, { duration: 1.5 });
                     
-                    // Open modal after zoom
-                    setTimeout(() => showMunicipalityDetailModal(name), 1600);
+                    // Open appropriate modal based on active choropleth
+                    setTimeout(() => {
+                        if (legendState.wqChoropleth) {
+                            showWaterQualityModal(name);
+                        } else {
+                            showMunicipalityDetailModal(name);
+                        }
+                    }, 1600);
                     
                     // Clear search
                     searchInput.value = '';
