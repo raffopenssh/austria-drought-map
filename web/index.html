@@ -765,7 +765,7 @@
                 html += `
                     <div class="map-legend">
                         <h4>Water Quality</h4>
-                        <div class="gradient-bar" style="background: linear-gradient(to right, #22c55e, #84cc16, #eab308, #f97316, #ef4444);"></div>
+                        <div class="gradient-bar" style="background: linear-gradient(to right, #3b82f6, #8b5cf6, #f59e0b, #f97316, #ef4444);"></div>
                         <div class="gradient-labels">
                             <span>Good</span>
                             <span>Moderate</span>
@@ -933,12 +933,12 @@
         }
         
         function getWqColor(risk) {
-            // Water quality color scale: green (good) to red (poor)
+            // Water quality color scale: blue (good) to red (bad)
             if (risk === null || risk === undefined) return '#404040';
-            if (risk <= 0.2) return '#22c55e';  // Green - good
-            if (risk <= 0.4) return '#84cc16';  // Light green
-            if (risk <= 0.6) return '#eab308';  // Yellow - moderate
-            if (risk <= 0.8) return '#f97316';  // Orange - poor
+            if (risk <= 0.2) return '#3b82f6';  // Blue - good
+            if (risk <= 0.4) return '#8b5cf6';  // Purple - fairly good
+            if (risk <= 0.6) return '#f59e0b';  // Orange - moderate
+            if (risk <= 0.8) return '#f97316';  // Dark orange - poor
             return '#ef4444';                    // Red - bad
         }
         
