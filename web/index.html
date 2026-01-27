@@ -86,7 +86,7 @@
         #sidebar {
             width: 320px;
             background: #16213e;
-            padding: 15px;
+            padding: 12px;
             overflow-y: auto;
             border-right: 1px solid #0f3460;
         }
@@ -311,8 +311,8 @@
             color: #a0a0c0;
         }
         .footer-links {
-            margin-top: 20px;
-            padding-top: 15px;
+            margin-top: 5px;
+            padding-top: 5px;
             border-top: 1px solid #0f3460;
             text-align: center;
             font-size: 0.75em;
@@ -914,6 +914,13 @@
                 
                 updateStats();
                 renderLayers();
+                
+                // Sync legendState with checkbox state (in case browser restored checkbox states)
+                legendState.drought = document.getElementById('layer-boundaries').checked;
+                legendState.hydro = document.getElementById('layer-hydro').checked;
+                legendState.gw = document.getElementById('layer-gw').checked;
+                legendState.wqChoropleth = document.getElementById('layer-wq-choropleth').checked;
+                updateLegends();
             } catch (e) {
                 console.error('Error loading data:', e);
             }
@@ -1327,7 +1334,6 @@
                 
                 renderWqChoropleth();
                 map.addLayer(wqChoroplethLayer);
-                wqChoroplethLayer.bringToFront();
             } else {
                 map.removeLayer(wqChoroplethLayer);
             }
