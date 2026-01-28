@@ -931,7 +931,7 @@
                 const [muniResp, ppResp, gwResp, geoResp, sedResp, riverResp] = await Promise.all([
                     fetch('data/municipalities.json?v=' + Date.now()),
                     fetch('data/powerplants.json'),
-                    fetch('data/gw_stations_trends.json'),
+                    fetch('data/gw_stations_slim.json'),
                     fetch('data/municipalities_risk.geojson?v=' + Date.now()),
                     fetch('data/sediment_analysis.json'),
                     fetch('data/river_hydro_impact.json')
@@ -1434,7 +1434,7 @@
                     // Open appropriate modal
                     setTimeout(() => {
                         if (type === 'gw') {
-                            const station = gwStationsData.find(s => s.id === gwId);
+                            const station = gwStationsData.find(s => String(s.id) === String(gwId));
                             if (station) showGWStationDetailModal(station);
                         } else if (legendState.wqChoropleth) {
                             showWaterQualityModal(name);
@@ -2166,15 +2166,13 @@
                     </div>
                 </div>
                 
-                ${gw.annual_data ? `
-                <div class="detail-section">
+                <div class="detail-section" id="gw-chart-section">
                     <h4>Groundwater Level History</h4>
-                    <div style="height: 200px; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 10px;">
-                        <canvas id="gw-chart"></canvas>
+                    <div id="gw-chart-container" style="height: 200px; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 10px;">
+                        <div style="text-align: center; padding-top: 80px; color: #6a6a8a;">Loading chart data...</div>
                     </div>
-                    <p style="font-size: 0.7em; color: #6a6a8a; margin-top: 6px;">Blue: full history. Red shaded: last 10 years used for trend calculation.</p>
+                    <p style="font-size: 0.7em; color: #6a6a8a; margin-top: 6px;">Blue: full history. Red: last 10 years used for trend.</p>
                 </div>
-                ` : ''}
                 
                 <div class="detail-section">
                     <h4>Station Information</h4>
@@ -2203,19 +2201,42 @@
             
             modal.classList.add('active');
             
-            // Create chart if data available
-            if (gw.annual_data && Object.keys(gw.annual_data).length > 0) {
-                setTimeout(() => {
-                    const ctx = document.getElementById('gw-chart');
-                    if (!ctx) return;
-                    
-                    // Destroy previous chart if exists
-                    if (gwChart) {
-                        gwChart.destroy();
-                    }
-                    
-                    const years = Object.keys(gw.annual_data).sort();
-                    const values = years.map(y => gw.annual_data[y]);
+            // Load full station data for chart (on demand)
+            loadGwChartData(gw.id || gw.station_id);
+        }
+        
+        let gwTrendsCache = null;  // Cache the trends data
+        
+        async function loadGwChartData(stationId) {
+            const container = document.getElementById('gw-chart-container');
+            if (!container) return;
+            
+            try {
+                // Fetch full data file (with caching)
+                if (!gwTrendsCache) {
+                    const resp = await fetch('data/gw_stations_trends.json');
+                    gwTrendsCache = await resp.json();
+                }
+                const fullData = gwTrendsCache;
+                const station = fullData.find(s => String(s.id) === String(stationId) || String(s.station_id) === String(stationId));
+                
+                if (!station || !station.annual_data) {
+                    container.innerHTML = '<div style="text-align: center; padding-top: 80px; color: #6a6a8a;">No historical data available</div>';
+                    return;
+                }
+                
+                // Create canvas
+                container.innerHTML = '<canvas id="gw-chart"></canvas>';
+                const ctx = document.getElementById('gw-chart');
+                if (!ctx) return;
+                
+                // Destroy previous chart if exists
+                if (gwChart) {
+                    gwChart.destroy();
+                }
+                
+                const years = Object.keys(station.annual_data).sort();
+                const values = years.map(y => station.annual_data[y]);
                     
                     // Find cutoff for last 10 years
                     const maxYear = Math.max(...years.map(Number));
@@ -2274,7 +2295,8 @@
                             }
                         }
                     });
-                }, 100);
+            } catch (e) {
+                container.innerHTML = '<div style="text-align: center; padding-top: 80px; color: #6a6a8a;">Error loading chart data</div>';
             }
         }
         
@@ -2302,7 +2324,7 @@
             } else if (wq) {
                 setTimeout(() => showWaterQualityModal(decodeURIComponent(wq)), 500);
             } else if (gw) {
-                const station = gwStationsData.find(s => s.id === gw);
+                const station = gwStationsData.find(s => String(s.id) === String(gw));
                 if (station) setTimeout(() => showGWStationDetailModal(station), 500);
             }
         });
