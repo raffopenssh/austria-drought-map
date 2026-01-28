@@ -155,6 +155,9 @@
         .gradient-bar.viridis-gradient {
             background: linear-gradient(to right, #440154, #482878, #3e4989, #31688e, #26828e, #1f9e89, #35b779, #6ece58, #b4de2c, #fde725);
         }
+        .gradient-bar.gw-trend-gradient {
+            background: linear-gradient(to right, #dc3232, #c85050, #5082e6, #32c850, #1ee632);
+        }
         .gradient-bar.risk-gradient {
             background: linear-gradient(to right, #27ae60, #82c341, #dcc028, #f39c12, #f07832, #e94560);
         }
@@ -385,6 +388,22 @@
             cursor: pointer;
         }
         .modal-close:hover {
+            color: #fff;
+        }
+        .modal-share {
+            position: absolute;
+            top: 18px;
+            right: 50px;
+            background: #0f3460;
+            border: none;
+            color: #a0a0c0;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+        }
+        .modal-share:hover {
+            background: #1a4a80;
             color: #fff;
         }
         .share-btn {
@@ -706,11 +725,11 @@
                 html += `
                     <div class="map-legend">
                         <h4>GW Trend</h4>
-                        <div class="gradient-bar viridis-gradient"></div>
+                        <div class="gradient-bar gw-trend-gradient"></div>
                         <div class="gradient-labels">
-                            <span>-60 cm/dec</span>
+                            <span>-50 (decline)</span>
                             <span>0</span>
-                            <span>+30 cm/dec</span>
+                            <span>+30 (rise)</span>
                         </div>
                     </div>
                 `;
@@ -862,43 +881,41 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
         
-        // Color scale for groundwater trends (inverted to contrast with choropleth)
+        // Color scale for groundwater trends: red (decline) -> blue (stable) -> green (rising)
         // Trend range: approximately -0.6 to +0.3 m/decade
-        // Purple/blue = declining (dry/risky), Yellow/green = rising (wet/good)
-        // This is INVERTED from the risk choropleth for better visibility
-        function getViridisColor(trend) {
-            const minTrend = -0.6;
-            const maxTrend = 0.3;
-            // Direct mapping: declining (negative) = 0 (purple), rising (positive) = 1 (yellow)
+        function getGwTrendColor(trend) {
+            const minTrend = -0.5;  // Strong decline
+            const maxTrend = 0.3;   // Strong rise
+            
+            // Normalize: -0.5 -> 0, 0 -> 0.55, +0.3 -> 1
             const normalized = (trend - minTrend) / (maxTrend - minTrend);
-            const t = Math.max(0, Math.min(1, normalized)); // Direct scale (not inverted)
+            const t = Math.max(0, Math.min(1, normalized));
             
-            // Viridis colormap approximation
-            const viridis = [
-                [68, 1, 84],      // 0.0 - dark purple (rising/wet)
-                [72, 40, 120],    // 0.1
-                [62, 74, 137],    // 0.2
-                [49, 104, 142],   // 0.3
-                [38, 130, 142],   // 0.4
-                [31, 158, 137],   // 0.5
-                [53, 183, 121],   // 0.6
-                [109, 205, 89],   // 0.7
-                [180, 222, 44],   // 0.8
-                [253, 231, 37]    // 1.0 - yellow (declining/dry)
-            ];
-            
-            const idx = t * (viridis.length - 1);
-            const i = Math.floor(idx);
-            const f = idx - i;
-            
-            if (i >= viridis.length - 1) return `rgb(${viridis[viridis.length-1].join(',')})`;
-            
-            const r = Math.round(viridis[i][0] + f * (viridis[i+1][0] - viridis[i][0]));
-            const g = Math.round(viridis[i][1] + f * (viridis[i+1][1] - viridis[i][1]));
-            const b = Math.round(viridis[i][2] + f * (viridis[i+1][2] - viridis[i][2]));
+            // Red (decline) -> Blue (stable) -> Green (rising)
+            let r, g, b;
+            if (t < 0.55) {
+                // Red to Blue (decline to stable)
+                const ratio = t / 0.55;
+                r = Math.round(220 - ratio * 170);  // 220 -> 50
+                g = Math.round(50 + ratio * 80);    // 50 -> 130
+                b = Math.round(50 + ratio * 180);   // 50 -> 230
+            } else {
+                // Blue to Green (stable to rising)
+                const ratio = (t - 0.55) / 0.45;
+                r = Math.round(50 - ratio * 20);    // 50 -> 30
+                g = Math.round(130 + ratio * 100);  // 130 -> 230
+                b = Math.round(230 - ratio * 180);  // 230 -> 50
+            }
             
             return `rgb(${r}, ${g}, ${b})`;
         }
+        
+        // Keep old name for compatibility
+        function getViridisColor(trend) {
+            return getGwTrendColor(trend);
+        }
+        
+
         
         // Load data
         let municipalitiesData = [];
@@ -992,6 +1009,9 @@
                     
                     layer.on('mouseout', function() {
                         this.setStyle({ weight: 0.5, color: '#333' });
+                        // Bring point layers back to front
+                        if (map.hasLayer(gwLayer)) gwLayer.bringToFront();
+                        if (map.hasLayer(hydroLayer)) hydroLayer.bringToFront();
                     });
                 }
             }).addTo(wqChoroplethLayer);
@@ -1045,6 +1065,9 @@
                                 weight: 0.5,
                                 color: '#1a1a2e'
                             });
+                            // Bring point layers back to front
+                            if (map.hasLayer(gwLayer)) gwLayer.bringToFront();
+                            if (map.hasLayer(hydroLayer)) hydroLayer.bringToFront();
                         });
                     }
                 }).addTo(boundaryLayer);
@@ -1368,20 +1391,30 @@
                 return;
             }
             
-            const matches = municipalitiesData
+            // Search municipalities
+            const muniMatches = municipalitiesData
                 .filter(m => m.name.toLowerCase().includes(query))
-                .slice(0, 10);
+                .slice(0, 7)
+                .map(m => ({ type: 'muni', name: m.name, lat: m.lat, lon: m.lon }));
             
-            if (matches.length === 0) {
+            // Search GW stations
+            const gwMatches = gwStationsData
+                .filter(s => s.name && s.name.toLowerCase().includes(query))
+                .slice(0, 5)
+                .map(s => ({ type: 'gw', name: s.name, lat: s.lat, lon: s.lon, id: s.id }));
+            
+            const allMatches = [...muniMatches, ...gwMatches];
+            
+            if (allMatches.length === 0) {
                 searchResults.style.display = 'none';
                 return;
             }
             
-            searchResults.innerHTML = matches.map(m => `
-                <div class="search-result-item" data-name="${m.name}" data-lat="${m.lat}" data-lon="${m.lon}"
+            searchResults.innerHTML = allMatches.map(m => `
+                <div class="search-result-item" data-type="${m.type}" data-name="${m.name}" data-lat="${m.lat}" data-lon="${m.lon}" ${m.id ? `data-id="${m.id}"` : ''}
                     style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #0f3460;"
                     onmouseover="this.style.background='#1a1a2e'" onmouseout="this.style.background='transparent'">
-                    ${m.name}
+                    ${m.type === 'gw' ? '💧 ' : ''}${m.name}${m.type === 'gw' ? ' <span style="color:#666;font-size:0.8em">(GW Station)</span>' : ''}
                 </div>
             `).join('');
             searchResults.style.display = 'block';
@@ -1389,16 +1422,21 @@
             // Add click handlers
             searchResults.querySelectorAll('.search-result-item').forEach(item => {
                 item.addEventListener('click', function() {
+                    const type = this.dataset.type;
                     const name = this.dataset.name;
                     const lat = parseFloat(this.dataset.lat);
                     const lon = parseFloat(this.dataset.lon);
+                    const gwId = this.dataset.id;
                     
-                    // Smooth zoom to municipality
-                    map.flyTo([lat, lon], 12, { duration: 1.5 });
+                    // Smooth zoom
+                    map.flyTo([lat, lon], type === 'gw' ? 14 : 12, { duration: 1.5 });
                     
-                    // Open appropriate modal based on active choropleth
+                    // Open appropriate modal
                     setTimeout(() => {
-                        if (legendState.wqChoropleth) {
+                        if (type === 'gw') {
+                            const station = gwStationsData.find(s => s.id === gwId);
+                            if (station) showGWStationDetailModal(station);
+                        } else if (legendState.wqChoropleth) {
                             showWaterQualityModal(name);
                         } else {
                             showMunicipalityDetailModal(name);
@@ -2338,6 +2376,7 @@
     <!-- Municipality Detail Modal -->
     <div class="modal-overlay" id="municipality-detail-modal">
         <div class="modal" style="max-width: 500px;">
+            <button class="modal-share" onclick="copyShareLink()">🔗 Share</button>
             <button class="modal-close">&times;</button>
             <h2 id="detail-muni-title">Municipality Details</h2>
             <div id="detail-muni-content" style="max-height: 65vh; overflow-y: auto;"></div>
@@ -2355,7 +2394,8 @@
     
     <!-- Groundwater Station Detail Modal -->
     <div class="modal-overlay" id="gw-detail-modal">
-        <div class="modal" style="max-width: 450px;">
+        <div class="modal" style="max-width: 550px;">
+            <button class="modal-share" onclick="copyShareLink()">🔗 Share</button>
             <button class="modal-close">&times;</button>
             <h2 id="gw-detail-title">Groundwater Station</h2>
             <div id="gw-detail-content"></div>
