@@ -387,6 +387,20 @@
         .modal-close:hover {
             color: #fff;
         }
+        .share-btn {
+            background: #0f3460;
+            border: none;
+            color: #a0a0c0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+            margin-top: 10px;
+        }
+        .share-btn:hover {
+            background: #1a4a80;
+            color: #fff;
+        }
         .password-form {
             margin-top: 15px;
         }
@@ -796,7 +810,7 @@
         }
         
         // Choropleth color function (gradient)
-        const MAX_RISK = 0.59;  // Max risk in dataset (St. Peter am Hart)
+        const MAX_RISK = 0.587;  // Max risk in dataset (St. Peter am Hart)
         
         function getChoroplethColor(risk) {
             // Viridis color scale, normalized to max risk for better differentiation
@@ -1477,6 +1491,9 @@
             const muni = municipalitiesData.find(m => m.name === name);
             if (!muni) return;
             
+            // Update URL for sharing
+            updateShareUrl('wq', name);
+            
             const modal = document.getElementById('municipality-detail-modal');
             const title = document.getElementById('detail-muni-title');
             const content = document.getElementById('detail-muni-content');
@@ -1601,6 +1618,7 @@
                     ${stationHtml}
                     
                     <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 12px;">Source: WISE WFD Reference Spatial Datasets reported under Water Framework Directive 2022. EEA Data Hub. Accessed Jan 2025.</p>
+                    <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
                 `;
             } else {
                 content.innerHTML = `
@@ -1614,6 +1632,7 @@
                             <li>Data gap in the monitoring network</li>
                         </ul>
                     </div>
+                    <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
                 `;
             }
             
@@ -1624,6 +1643,9 @@
             // Find municipality data
             const muni = municipalitiesData.find(m => m.name === name);
             if (!muni) return;
+            
+            // Update URL for sharing
+            updateShareUrl('muni', name);
             
             // Find GeoJSON feature for bounds
             let feature = null;
@@ -1969,6 +1991,7 @@
                 <button class="zoom-btn" onclick="zoomToMunicipality('${name.replace(/'/g, "\\'")}')">
                     📍 Zoom to Location
                 </button>
+                <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
             `;
             
             modal.classList.add('active');
@@ -2039,6 +2062,9 @@
             const modal = document.getElementById('gw-detail-modal');
             const title = document.getElementById('gw-detail-title');
             const content = document.getElementById('gw-detail-content');
+            
+            // Update URL for sharing
+            updateShareUrl('gw', gw.id || gw.station_id);
             
             title.textContent = gw.name || 'Groundwater Station';
             
@@ -2134,6 +2160,7 @@
                         Full period trend shown for comparison. P-value indicates statistical significance (p < 0.05 = significant).
                     </p>
                 </div>
+                <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
             `;
             
             modal.classList.add('active');
@@ -2225,7 +2252,45 @@
         }
         
         // Load data on page load
-        loadData();
+        loadData().then(() => {
+            // Check URL for deep links after data loads
+            const params = new URLSearchParams(window.location.search);
+            const muni = params.get('muni');
+            const wq = params.get('wq');
+            const gw = params.get('gw');
+            
+            if (muni) {
+                setTimeout(() => showMunicipalityDetailModal(decodeURIComponent(muni)), 500);
+            } else if (wq) {
+                setTimeout(() => showWaterQualityModal(decodeURIComponent(wq)), 500);
+            } else if (gw) {
+                const station = gwStationsData.find(s => s.id === gw);
+                if (station) setTimeout(() => showGWStationDetailModal(station), 500);
+            }
+        });
+        
+        // URL sharing helper
+        function updateShareUrl(type, value) {
+            const url = new URL(window.location.href);
+            url.search = '';
+            url.searchParams.set(type, value);
+            history.replaceState(null, '', url);
+        }
+        
+        function clearShareUrl() {
+            const url = new URL(window.location.href);
+            url.search = '';
+            history.replaceState(null, '', url);
+        }
+        
+        function copyShareLink() {
+            navigator.clipboard.writeText(window.location.href);
+            // Brief visual feedback
+            const btn = event.target;
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = orig, 1500);
+        }
         
         // Modal handlers
         document.getElementById('sources-link').addEventListener('click', function(e) {
@@ -2238,10 +2303,12 @@
             // Close on X button click
             if (e.target.classList.contains('modal-close')) {
                 e.target.closest('.modal-overlay').classList.remove('active');
+                clearShareUrl();
             }
             // Close on overlay click (outside modal)
             if (e.target.classList.contains('modal-overlay')) {
                 e.target.classList.remove('active');
+                clearShareUrl();
             }
         });
         
@@ -2251,6 +2318,7 @@
                 document.querySelectorAll('.modal-overlay.active').forEach(modal => {
                     modal.classList.remove('active');
                 });
+                clearShareUrl();
             }
         });
         
