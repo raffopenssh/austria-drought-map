@@ -355,6 +355,21 @@
             overflow-y: auto;
             position: relative;
             border: 1px solid #0f3460;
+            scrollbar-width: thin;
+            scrollbar-color: #3a3a5a #16213e;
+        }
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: #16213e;
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #3a3a5a;
+            border-radius: 3px;
+        }
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #4a4a6a;
         }
         .modal h2 {
             color: #e94560;
@@ -1704,7 +1719,6 @@
                     ${stationHtml}
                     
                     <p style="font-size: 0.65em; color: #6a6a8a; margin-top: 12px;">Source: WISE WFD Reference Spatial Datasets reported under Water Framework Directive 2022. EEA Data Hub. Accessed Jan 2025.</p>
-                    <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
                 `;
             } else {
                 content.innerHTML = `
@@ -1718,7 +1732,6 @@
                             <li>Data gap in the monitoring network</li>
                         </ul>
                     </div>
-                    <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
                 `;
             }
             
@@ -2077,7 +2090,6 @@
                 <button class="zoom-btn" onclick="zoomToMunicipality('${name.replace(/'/g, "\\'")}')">
                     📍 Zoom to Location
                 </button>
-                <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
             `;
             
             modal.classList.add('active');
@@ -2247,7 +2259,6 @@
                         Full period trend shown for comparison. P-value indicates statistical significance (p < 0.05 = significant).
                     </p>
                 </div>
-                <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
             `;
             
             modal.classList.add('active');
