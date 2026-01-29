@@ -594,10 +594,30 @@
                 max-height: 200px;
             }
         }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #3a3a5a;
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Loading overlay -->
+    <div id="loading-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #1a1a2e; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div class="loading-spinner" style="width: 50px; height: 50px; margin-bottom: 20px;"></div>
+        <div style="color: #60a5fa; font-size: 1.2em;">Loading Austria Drought Risk Map...</div>
+        <div style="color: #6a6a8a; font-size: 0.9em; margin-top: 10px;">Fetching municipality and groundwater data</div>
+    </div>
+    
     <div id="header">
         <h1>🌊 Austria Drought Risk Map</h1>
         <p>Municipality-level analysis of groundwater, hydropower impact, and drought risk indicators</p>
@@ -924,6 +944,7 @@
         let geojsonData = null;
         let sedimentData = [];
         let riverImpactData = [];
+        let gwTrendsCache = null;  // Cache for GW trends data (pre-loaded in background)
 
         
         async function loadData() {
@@ -954,8 +975,35 @@
                 legendState.gw = document.getElementById('layer-gw').checked;
                 legendState.wqChoropleth = document.getElementById('layer-wq-choropleth').checked;
                 updateLegends();
+                
+                // Hide loading overlay
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    overlay.style.transition = 'opacity 0.3s';
+                    setTimeout(() => overlay.remove(), 300);
+                }
+                
+                // Pre-load GW trends data in background for faster modal opens
+                preloadGwTrendsData();
             } catch (e) {
                 console.error('Error loading data:', e);
+                // Hide loading overlay even on error
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) overlay.remove();
+            }
+        }
+        
+        // Pre-load GW trends data in background
+        function preloadGwTrendsData() {
+            if (!gwTrendsCache) {
+                fetch('data/gw_stations_trends.json')
+                    .then(r => r.json())
+                    .then(data => {
+                        gwTrendsCache = data;
+                        console.log('GW trends data pre-loaded');
+                    })
+                    .catch(e => console.warn('Failed to preload GW trends:', e));
             }
         }
         
@@ -2169,7 +2217,10 @@
                 <div class="detail-section" id="gw-chart-section">
                     <h4>Groundwater Level History</h4>
                     <div id="gw-chart-container" style="height: 200px; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 10px;">
-                        <div style="text-align: center; padding-top: 80px; color: #6a6a8a;">Loading chart data...</div>
+                        <div style="text-align: center; padding-top: 70px; color: #6a6a8a;">
+                            <div class="loading-spinner" style="width: 30px; height: 30px; border: 3px solid #3a3a5a; border-top-color: #60a5fa; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                            Loading chart...
+                        </div>
                     </div>
                     <p style="font-size: 0.7em; color: #6a6a8a; margin-top: 6px;">Blue: full history. Red: last 10 years used for trend.</p>
                 </div>
@@ -2205,8 +2256,6 @@
             loadGwChartData(gw.id || gw.station_id);
         }
         
-        let gwTrendsCache = null;  // Cache the trends data
-        
         async function loadGwChartData(stationId) {
             const container = document.getElementById('gw-chart-container');
             if (!container) return;
@@ -2214,7 +2263,15 @@
             try {
                 // Fetch full data file (with caching)
                 if (!gwTrendsCache) {
+                    // Show loading state
+                    container.innerHTML = `
+                        <div style="text-align: center; padding-top: 70px; color: #6a6a8a;">
+                            <div class="loading-spinner" style="margin: 0 auto 10px;"></div>
+                            Loading trend data...
+                        </div>`;
+                    
                     const resp = await fetch('data/gw_stations_trends.json');
+                    if (!resp.ok) throw new Error('Failed to fetch trends data');
                     gwTrendsCache = await resp.json();
                 }
                 const fullData = gwTrendsCache;
@@ -2296,7 +2353,8 @@
                         }
                     });
             } catch (e) {
-                container.innerHTML = '<div style="text-align: center; padding-top: 80px; color: #6a6a8a;">Error loading chart data</div>';
+                console.error('Error loading GW chart:', e);
+                container.innerHTML = '<div style="text-align: center; padding-top: 70px; color: #ff6b6b;">Failed to load chart<br><small style="color: #6a6a8a;">Please try again</small></div>';
             }
         }
         
