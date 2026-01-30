@@ -2228,7 +2228,7 @@
                 
                 <div class="detail-section" id="gw-chart-section">
                     <h4>Groundwater Level History</h4>
-                    <div id="gw-chart-container" style="height: 200px; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 10px;">
+                    <div id="gw-chart-container" style="height: 280px; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 10px;">
                         <div style="text-align: center; padding-top: 70px; color: #6a6a8a;">
                             <div class="loading-spinner" style="width: 30px; height: 30px; border: 3px solid #3a3a5a; border-top-color: #60a5fa; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
                             Loading chart...
@@ -2349,15 +2349,27 @@
                             },
                             scales: {
                                 x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Year',
+                                        color: '#aaa',
+                                        font: { size: 12 }
+                                    },
                                     ticks: { 
-                                        color: '#888',
+                                        color: '#aaa',
                                         maxTicksLimit: 10,
-                                        font: { size: 9 }
+                                        font: { size: 11 }
                                     },
                                     grid: { color: 'rgba(255,255,255,0.1)' }
                                 },
                                 y: {
-                                    ticks: { color: '#888', font: { size: 9 } },
+                                    title: {
+                                        display: true,
+                                        text: 'Level (m)',
+                                        color: '#aaa',
+                                        font: { size: 12 }
+                                    },
+                                    ticks: { color: '#aaa', font: { size: 11 } },
                                     grid: { color: 'rgba(255,255,255,0.1)' }
                                 }
                             }
