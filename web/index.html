@@ -698,9 +698,10 @@
                 <h3>Risk Model</h3>
                 <div style="font-size: 0.8em; color: #a0a0c0; line-height: 1.6;">
                     <div style="margin-bottom: 8px;"><strong>Components:</strong></div>
-                    <div>• GW Trend: <span style="color:#4fc3f7">40%</span></div>
-                    <div>• Hydro Impact: <span style="color:#4fc3f7">30%</span></div>
-                    <div>• EDO CDI: <span style="color:#4fc3f7">30%</span></div>
+                    <div>• GW Trend: <span style="color:#4fc3f7">35%</span></div>
+                    <div>• Hydro Impact: <span style="color:#4fc3f7">25%</span></div>
+                    <div>• EDO CDI: <span style="color:#4fc3f7">25%</span></div>
+                    <div>• Soil Perm: <span style="color:#4fc3f7">15%</span></div>
                     <div style="margin-top: 10px; font-size: 0.75em;">
                         EDO CDI: Combined Drought Indicator from Copernicus (2012-2023)
                     </div>
@@ -1824,6 +1825,7 @@
             const precipFactor = (muni.precip_risk || 0) * 100;  // Precipitation decline risk
             const flowFactor = (muni.flow_risk || 0) * 100;  // Surface water flow decline risk
             const edoFactor = (muni.edo_risk || 0) * 100;  // EDO CDI drought risk
+            const soilFactor = (muni.soil_risk || 0.5) * 100;  // Soil permeability risk (low perm = high risk)
             const edoCdi = muni.edo_cdi_mean || null;
             const edoCdiMax = muni.edo_cdi_max || null;
             const riskScore = (muni.risk_score || 0) * 100;
@@ -1990,6 +1992,13 @@
                                 <div class="risk-factor-fill" style="width: ${edoFactor}%; background: ${edoFactor > 50 ? '#e94560' : edoFactor > 25 ? '#f39c12' : '#27ae60'}"></div>
                             </div>
                             <span class="risk-factor-value" style="color: ${edoFactor > 50 ? '#e94560' : edoFactor > 25 ? '#f39c12' : '#27ae60'}">${edoFactor.toFixed(0)}%</span>
+                        </div>
+                        <div class="risk-factor">
+                            <span class="risk-factor-label">Soil Permeability</span>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" style="width: ${soilFactor}%; background: ${soilFactor > 50 ? '#e94560' : soilFactor > 25 ? '#f39c12' : '#27ae60'}"></div>
+                            </div>
+                            <span class="risk-factor-value" style="color: ${soilFactor > 50 ? '#e94560' : soilFactor > 25 ? '#f39c12' : '#27ae60'}">${soilFactor.toFixed(0)}%</span>
                         </div>
                     </div>
                 </div>
