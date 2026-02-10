@@ -1391,6 +1391,10 @@
                     <span class="info-label">GW Stations:</span>
                     <span class="info-value">${props.gw_stations || 0}</span>
                 </div>
+                <div class="info-row">
+                    <span class="info-label">Soil Perm:</span>
+                    <span class="info-value">${props.soil_permeability ? props.soil_permeability.toFixed(1) + '/9' : 'N/A'}</span>
+                </div>
             `;
             
             panel.classList.add('active');
@@ -1823,6 +1827,7 @@
             const edoCdi = muni.edo_cdi_mean || null;
             const edoCdiMax = muni.edo_cdi_max || null;
             const riskScore = (muni.risk_score || 0) * 100;
+            const soilPermeability = muni.soil_permeability;  // 1-9 scale, higher = more permeable
             
             // Find nearby hydropower plants and their rivers
             const nearbyPlants = powerplantsData
@@ -1946,8 +1951,13 @@
                             <div class="label">Monitoring Stations</div>
                             <div class="value">${stationsInMuni.length}${hasGWTrend ? ` (${stationsWithTrends.length} with data)` : ''}</div>
                         </div>
+                        <div class="detail-item">
+                            <div class="label">Soil Permeability</div>
+                            <div class="value">${soilPermeability ? soilPermeability.toFixed(1) + '/9' : 'No data'}</div>
+                        </div>
                     </div>
                     ${!hasDirectGW ? '<p style="font-size: 0.7em; color: #6a6a8a; margin-top: 8px;">* Estimated from nearby stations</p>' : ''}
+                    ${soilPermeability ? '<p style="font-size: 0.7em; color: #6a6a8a; margin-top: 4px;">Soil: Higher permeability (9) = faster groundwater recharge</p>' : ''}
                 </div>
                 
                 <div class="detail-section">
