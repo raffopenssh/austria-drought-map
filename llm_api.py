@@ -69,7 +69,81 @@ METRICS_SCHEMA = {
     "wq_risk": "number",
 }
 
+# ---- point datasets (granularity=point), snapped to KGs once via the cadastre
+# POST /api/v1/spatial/points (see scripts/snap_points.py) -------------------
+POINT_GLOSSARY = {
+    "gw_level_m": "groundwater level, m above adriatic (latest annual mean)",
+    "gw_trend_m_per_decade": "groundwater level trend, m/decade (neg = declining)",
+    "gw_p_value": "p-value of the groundwater trend",
+    "capacity_mw": "hydropower plant capacity, MW",
+    "chem_status": "WISE/WFD chemical status (Good|Poor|...)",
+    "eco_status": "WISE/WFD ecological status",
+    "at_risk": "WISE/WFD at-risk flag (Yes|No)",
+    "gw_station_count": "# groundwater stations in this KG",
+    "power_plant_count": "# hydropower plants in this KG",
+    "water_quality_site_count": "# WISE water-quality sites in this KG",
+}
+
 _state = {"loaded": False}
+
+
+def _gw_point(s, snap):
+    """Groundwater station -> point object with full annual history."""
+    metrics = {
+        "gw_level_m": s.get("current_level"),
+        "gw_trend_m_per_decade": s.get("trend_m_per_decade"),
+        "gw_p_value": s.get("p_value"),
+    }
+    history = []
+    for yr in sorted((s.get("annual_data") or {}).keys()):
+        history.append({"as_of": str(yr), "gw_level_m": s["annual_data"][yr]})
+    p = {
+        "id": "gw:" + str(s["id"]),
+        "category": "groundwater_station",
+        "name": s.get("name"),
+        "lon": s.get("lon"), "lat": s.get("lat"),
+        "metrics": {k: v for k, v in metrics.items() if v is not None},
+    }
+    if snap.get("parcel_id"):
+        p["parcel_id"] = snap["parcel_id"]
+    if history:
+        p["history"] = history
+    return p
+
+
+def _pp_point(idx, p, snap):
+    obj = {
+        "id": "pp:" + str(idx),
+        "category": "power_plant",
+        "name": p.get("type"),
+        "lon": p.get("lon"), "lat": p.get("lat"),
+        "metrics": {"capacity_mw": p.get("mw")},
+        "plant_type": p.get("type"),
+        "river": p.get("river"),
+    }
+    if snap.get("parcel_id"):
+        obj["parcel_id"] = snap["parcel_id"]
+    return obj
+
+
+def _wq_point(f, snap):
+    pr = f.get("properties") or {}
+    c = (f.get("geometry") or {}).get("coordinates") or [None, None]
+    obj = {
+        "id": "wq:" + str(pr.get("id")),
+        "category": "water_quality_site",
+        "name": pr.get("name"),
+        "lon": c[0], "lat": c[1],
+        "water_body_type": pr.get("type"),
+        "metrics": {
+            "chem_status": pr.get("chemStatus"),
+            "eco_status": pr.get("ecoStatus"),
+            "at_risk": pr.get("atRisk"),
+        },
+    }
+    if snap.get("parcel_id"):
+        obj["parcel_id"] = snap["parcel_id"]
+    return obj
 
 
 def _load():
@@ -78,13 +152,73 @@ def _load():
     munis = json.load(open(os.path.join(DATA, "municipalities.json")))
     _state["gem_by_code"] = {str(m["iso"]): m for m in munis}
     _state["kg2gem"] = json.load(open(os.path.join(DATA, "kg_to_gemeinde.json")))
-    covered = json.load(open(os.path.join(DATA, "covered_kgs.json")))
-    _state["covered"] = covered
+    covered = set(json.load(open(os.path.join(DATA, "covered_kgs.json"))))
+
+    # Build kg_code -> [point objects] from the snapped point datasets.
+    kg_points = {}
+    snap_path = os.path.join(DATA, "point_snap.json")
+    snap = json.load(open(snap_path)) if os.path.exists(snap_path) else {}
+
+    def add(pid, obj):
+        s = snap.get(pid)
+        if not s or not s.get("kg_code"):
+            return
+        kg = str(s["kg_code"])
+        kg_points.setdefault(kg, []).append(obj)
+        covered.add(kg)
+
+    gw_path = os.path.join(DATA, "gw_stations_trends.json")
+    if os.path.exists(gw_path):
+        for s in json.load(open(gw_path)):
+            pid = "gw:" + str(s["id"])
+            if snap.get(pid):
+                add(pid, _gw_point(s, snap[pid]))
+    pp_path = os.path.join(DATA, "powerplants.json")
+    if os.path.exists(pp_path):
+        for i, p in enumerate(json.load(open(pp_path))):
+            pid = "pp:" + str(i)
+            if snap.get(pid):
+                add(pid, _pp_point(i, p, snap[pid]))
+    wq_path = os.path.join(DATA, "wise_monitoring_sites.json")
+    if os.path.exists(wq_path):
+        for f in json.load(open(wq_path))["features"]:
+            pr = f.get("properties") or {}
+            pid = "wq:" + str(pr.get("id"))
+            if snap.get(pid):
+                add(pid, _wq_point(f, snap[pid]))
+
+    _state["kg_points"] = kg_points
+    _state["covered"] = sorted(covered)
     # updated_at: when the underlying data files were last recomputed.
     mtime = os.path.getmtime(os.path.join(DATA, "municipalities.json"))
     _state["updated_at"] = (datetime.datetime.utcfromtimestamp(mtime)
                             .strftime("%Y-%m-%dT%H:%M:%SZ"))
     _state["loaded"] = True
+
+
+def _point_rollup(points):
+    """KG-level roll-up metrics derived from the snapped points."""
+    gw = [p for p in points if p["category"] == "groundwater_station"]
+    pp = [p for p in points if p["category"] == "power_plant"]
+    wq = [p for p in points if p["category"] == "water_quality_site"]
+    out = {}
+    if gw:
+        out["gw_station_count"] = len(gw)
+        trends = [p["metrics"].get("gw_trend_m_per_decade") for p in gw
+                  if p["metrics"].get("gw_trend_m_per_decade") is not None]
+        if trends:
+            out["gw_trend_m_per_decade_mean"] = round(sum(trends) / len(trends), 4)
+    if pp:
+        out["power_plant_count"] = len(pp)
+        caps = [p["metrics"].get("capacity_mw") for p in pp
+                if p["metrics"].get("capacity_mw") is not None]
+        if caps:
+            out["power_capacity_mw_total"] = round(sum(caps), 1)
+    if wq:
+        out["water_quality_site_count"] = len(wq)
+        at_risk = sum(1 for p in wq if p["metrics"].get("at_risk") == "Yes")
+        out["water_quality_sites_at_risk"] = at_risk
+    return out
 
 
 def _history(m):
@@ -109,28 +243,43 @@ def _payload_for_kg(kg_code):
     gem_code = _state["kg2gem"].get(kg_code)
     if not gem_code:
         return {"kg_code": kg_code, "error": "no_data"}, 404
-    m = _state["gem_by_code"].get(gem_code)
-    if not m:
+    m = _state["gem_by_code"].get(gem_code) if gem_code else None
+    points = _state["kg_points"].get(kg_code, [])
+    # Nothing at all for this KG (no Gemeinde match AND no snapped points).
+    if not m and not points:
         return {"kg_code": kg_code, "error": "no_data"}, 404
+
     metrics = {}
-    for k in METRIC_KEYS:
-        if k in m and m[k] is not None:
-            metrics[k] = m[k]
-    return {
+    if m:
+        for k in METRIC_KEYS:
+            if k in m and m[k] is not None:
+                metrics[k] = m[k]
+    # Fold the point roll-up (station counts etc.) into the KG-level metrics.
+    metrics.update(_point_rollup(points))
+
+    glossary = dict(UNIT_GLOSSARY)
+    if points:
+        glossary.update(POINT_GLOSSARY)
+
+    payload = {
         "service": SERVICE,
         "dataset": DATASET,
         "kg_code": kg_code,
         "gemeinde_code": gem_code,
-        "gemeinde_name": m.get("name"),
+        "gemeinde_name": m.get("name") if m else None,
+        # Headline metrics are municipal; we also attach snapped point
+        # observations (stations/plants/sites) for this KG under 'points'.
         "granularity": "gemeinde",
         "as_of": AS_OF,
         "updated_at": _state["updated_at"],
         "source": SOURCE,
         "license": LICENSE,
-        "unit_glossary": UNIT_GLOSSARY,
+        "unit_glossary": glossary,
         "metrics": metrics,
-        "history": _history(m),
-    }, 200
+        "history": _history(m) if m else [],
+        "points": points,
+    }
+    return payload, 200
 
 
 def manifest():
@@ -143,6 +292,9 @@ def manifest():
         "kg_endpoint": "/llm/kg/{kg_code}",
         "batch_endpoint": "/llm/kgs?codes={kg_code,...}",
         "metrics_schema": METRICS_SCHEMA,
+        "point_categories": [
+            "groundwater_station", "power_plant", "water_quality_site"],
+        "point_kg_count": len(_state["kg_points"]),
         "kg_count": len(_state["covered"]),
         "gemeinde_count": len(set(_state["kg2gem"].values())),
         "covered_kgs_url": "/llm/covered_kgs.json",

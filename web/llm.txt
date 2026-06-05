@@ -22,12 +22,19 @@ Statistik Austria gemeinde_code.
 Implements the Austrian Cadastre "Integration Spec for Sibling Data Services"
 (https://cadastre-process-api.exe.xyz/api/v1/docs/llm.txt?section=integration).
 
-Because our data is per-municipality, every per-KG answer maps UP from kg_code
-to its gemeinde_code (resolved once through the canonical
-/api/v1/lookup EDM register, cached in data/kg_to_gemeinde.json) and returns the
-Gemeinde-level block. granularity is always "gemeinde"; every KG inside a
-Gemeinde returns the same metrics. No geometry, no parcels, no local fuzzy
+Our headline metrics are per-municipality, so every per-KG answer maps UP from
+kg_code to its gemeinde_code (resolved once through the canonical /api/v1/lookup
+EDM register, cached in data/kg_to_gemeinde.json) and returns the Gemeinde-level
+block; every KG inside a Gemeinde returns the same metrics. No local fuzzy
 matching of place names.
+
+In addition we carry three POINT datasets — groundwater stations, hydropower
+plants and WISE water-quality sites — each snapped ONCE to its Katastralgemeinde
+(and parcel) via the cadastre's POST /api/v1/spatial/points (exact
+point-in-polygon). Those observations are returned under 'points', grouped by
+KG, with each station's full annual history and (when confident) its parcel_id.
+KG-level roll-ups (station/plant/site counts, mean GW trend, total MW, #at-risk)
+are folded into 'metrics'.
 
   GET /llm/kg/{kg_code}            drought/water-stress metrics for one KG
   GET /llm/kg/{kg_code}.json       (alias; JSON is the only format)
@@ -59,10 +66,22 @@ matching of place names.
       "hydro_risk": 0.01, "soil_permeability": 6.29, "soil_risk": 0.34,
       "wq_risk": 0.8
     },
-    "history": [ { "as_of": "2012", "edo_cdi_mean": 0.23, "edo_cdi_max": 3.9 }, ... ]
+    "history": [ { "as_of": "2012", "edo_cdi_mean": 0.23, "edo_cdi_max": 3.9 }, ... ],
+    "points": [
+      { "id": "gw:374793", "category": "groundwater_station",
+        "name": "Pupping, Br 2156.022", "lon": 14.0, "lat": 48.3,
+        "parcel_id": "45025-1155",
+        "metrics": { "gw_level_m": 260.48, "gw_trend_m_per_decade": 0.29, "gw_p_value": 0.005 },
+        "history": [ { "as_of": "1990", "gw_level_m": 260.41 }, ... ] },
+      { "id": "pp:12", "category": "power_plant", "metrics": { "capacity_mw": 172.0 }, ... },
+      { "id": "wq:AT300012", "category": "water_quality_site",
+        "metrics": { "chem_status": "Good", "eco_status": null, "at_risk": "No" }, ... }
+    ]
   }
 
-'history' is the annual Copernicus EDO drought time series (2012–2023, ascending).
+'history' (KG level) is the annual Copernicus EDO drought series (2012–2023).
+Each groundwater station carries its own 'history' of annual levels (from 1990).
+Point categories: groundwater_station, power_plant, water_quality_site.
 
 ## Notes for consumers
 
