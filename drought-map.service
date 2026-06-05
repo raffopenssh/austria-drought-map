@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=exedev
-WorkingDirectory=/home/exedev/austria-drought-map/web
-ExecStart=/usr/bin/python3 -m http.server 8000
+WorkingDirectory=/home/exedev/austria-drought-map
+ExecStart=/usr/bin/python3 server.py 8000
 Restart=always
 RestartSec=3
 

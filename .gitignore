@@ -5,3 +5,7 @@ data/water_quality/ammonia_air_report.pdf
 data/water_quality/eea_wise/
 data/water_quality/wise_wfd2022_*.json
 data/water_quality/DataExtract.json
+
+# Python cache
+__pycache__/
+*.pyc

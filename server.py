@@ -2,9 +2,12 @@
 """Simple HTTP server with gzip support for pre-compressed files."""
 
 import http.server
+import json
 import os
 import urllib.parse
 import sys
+
+import llm_api
 
 class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -19,7 +22,29 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Cache-Control', 'public, max-age=3600')
         super().end_headers()
     
+    def _send_json(self, status, obj):
+        body = json.dumps(obj).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
+        parsed_full = urllib.parse.urlparse(self.path)
+        # Sibling-service integration endpoints (/llm/...)
+        if parsed_full.path.startswith('/llm/'):
+            try:
+                query = urllib.parse.parse_qs(parsed_full.query)
+                routed = llm_api.handle(parsed_full.path, query)
+            except Exception as exc:  # never 500 silently
+                self._send_json(500, {'error': 'internal_error', 'detail': str(exc)})
+                return
+            if routed is not None:
+                status, obj = routed
+                self._send_json(status, obj)
+                return
+
         # Check if client accepts gzip
         accept_encoding = self.headers.get('Accept-Encoding', '')
         

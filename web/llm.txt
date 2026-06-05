@@ -1,0 +1,74 @@
+# groundwater-at — Austrian Drought & Water-Stress Risk
+# LLM / sibling-service reference
+
+Base URL:    https://groundwater-at.exe.xyz/
+Service slug: groundwater-at
+License:     CC-BY-4.0
+CORS:        all origins allowed (read-only GETs)
+
+## What this dataset is
+
+A composite drought / water-stress risk model for all ~2,100 Austrian
+municipalities (Gemeinden). It fuses Copernicus EDO Combined Drought Indicator,
+eHYD groundwater & surface-flow station trends, GeoSphere precipitation,
+WISE water-quality status, INSPIRE soil permeability, and e-control hydropower
+exposure into a 0–1 risk_score (low/medium/high). Interactive map at the base URL.
+
+Granularity: per Gemeinde (municipality). Keyed on the official 5-digit
+Statistik Austria gemeinde_code.
+
+## Sibling-service integration endpoints (/llm/)
+
+Implements the Austrian Cadastre "Integration Spec for Sibling Data Services"
+(https://cadastre-process-api.exe.xyz/api/v1/docs/llm.txt?section=integration).
+
+Because our data is per-municipality, every per-KG answer maps UP from kg_code
+to its gemeinde_code (resolved once through the canonical
+/api/v1/lookup EDM register, cached in data/kg_to_gemeinde.json) and returns the
+Gemeinde-level block. granularity is always "gemeinde"; every KG inside a
+Gemeinde returns the same metrics. No geometry, no parcels, no local fuzzy
+matching of place names.
+
+  GET /llm/kg/{kg_code}            drought/water-stress metrics for one KG
+  GET /llm/kg/{kg_code}.json       (alias; JSON is the only format)
+  GET /llm/kgs?codes=a,b,c         batch (<=500 codes) -> {"results":[...]}
+  GET /llm/manifest.json           coverage + metrics schema (crawl entry point)
+  GET /llm/covered_kgs.json        array of every kg_code we can answer (7,545)
+
+404 with {"kg_code":"...","error":"no_data"} when a KG is outside our coverage.
+
+### Per-KG response shape
+
+  {
+    "service": "groundwater-at",
+    "dataset": "Austrian drought & water-stress risk",
+    "kg_code": "63349",
+    "gemeinde_code": "61631",
+    "gemeinde_name": "Köflach",
+    "granularity": "gemeinde",
+    "as_of": "2023-12-31",
+    "updated_at": "<ISO8601>",
+    "source": "...", "license": "CC-BY-4.0",
+    "unit_glossary": { "<metric>": "<unit/meaning>", ... },
+    "metrics": {
+      "risk_score": 0.14, "risk_category": "low",
+      "edo_cdi_mean": 0.70, "edo_cdi_max": 4.8, "edo_risk": 0.35,
+      "gw_risk": 0.02, "gw_trend": -0.005,
+      "precip_risk": 0.32, "precip_trend_mm": -32.0, "precip_mean_mm": 1044.0,
+      "flow_risk": 0.44, "flow_trend_pct": -8.9, "flow_mean_m3s": ...,
+      "hydro_risk": 0.01, "soil_permeability": 6.29, "soil_risk": 0.34,
+      "wq_risk": 0.8
+    },
+    "history": [ { "as_of": "2012", "edo_cdi_mean": 0.23, "edo_cdi_max": 3.9 }, ... ]
+  }
+
+'history' is the annual Copernicus EDO drought time series (2012–2023, ascending).
+
+## Notes for consumers
+
+- kg_code and gemeinde_code are different numbering systems; we never mix them.
+  All codes are 5-character strings — keep leading zeros, do not cast to int.
+- Codes are resolved through the cadastre API's /api/v1/lookup (BEV EDM /
+  Statistik Austria), the shared source of truth — we maintain no private
+  name/code table.
+- Version via as_of / updated_at, not by renaming keys.
