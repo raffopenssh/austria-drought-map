@@ -186,6 +186,7 @@ def main():
             "latest_year": ys[-1],
             "mean": round(sum(vals) / len(vals), 2),
             "trend_per_yr": round(slope, 4) if slope is not None else None,
+            "annual": {str(y): round(annual[y], 2) for y in ys},
         }
         if name and name.upper() != "NO INTERNATIONAL NAME":
             st["name"] = name

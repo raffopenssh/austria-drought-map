@@ -12,6 +12,7 @@ same/adjacent requests, maximising their 30-min server cache):
   gw : groundwater stations          (web/data/gw_stations_trends.json)
   pp : hydro power plants            (web/data/powerplants.json)
   wq : WISE water-quality sites      (web/data/wise_monitoring_sites.json)
+  no3: WISE nitrate stations         (web/data/nitrate_stations.json)
 
 IDs are namespaced "<src>:<localid>". Output (resumable):
   web/data/point_snap.json  { "gw:374793": {matched,kg_code,parcel_id}, ... }
@@ -47,6 +48,10 @@ def collect_points():
         if not c or pid is None:
             continue
         pts.append(("wq:" + str(pid), c[0], c[1]))
+    # WISE nitrate stations
+    for s in json.load(open(os.path.join(DATA, "nitrate_stations.json")))["stations"]:
+        if s.get("lat") is not None:
+            pts.append(("no3:" + s["id"], s["lon"], s["lat"]))
     return pts
 
 
