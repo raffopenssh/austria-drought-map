@@ -20,3 +20,9 @@ data/*.zip
 data/soil_permeability.gpkg
 logs/
 web/data/edo_municipality_timeseries.json
+
+# OSM/Geofabrik raw extracts (regenerate: wget geofabrik austria-latest + osmium tags-filter/export)
+data/osm/*.osm.pbf
+data/osm/*.geojsonseq
+data/osm/.dl_done
+data/osm/.ex_done

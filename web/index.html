@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Austria Drought Risk Map | Municipality-Level Groundwater Analysis</title>
+    <title>GW-Power | Groundwater × Hydropower Austria</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Interactive choropleth map showing drought risk across 2,118 Austrian municipalities based on 100-year groundwater monitoring data and hydropower infrastructure analysis.">
+    <meta name="description" content="GW-Power: how hydropower operations and drought couple with groundwater across Austria. Interactive choropleth of 2,118 municipalities, 100-year groundwater records, live eHYD stations, ENTSO-E generation and Copernicus EDO drought data.">
     <meta name="keywords" content="Austria, drought, groundwater, water scarcity, hydropower, climate change, heat pump, municipality, risk map, eHYD, water table">
-    <meta name="author" content="Austria Drought Risk Project">
+    <meta name="author" content="GW-Power Austria">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://groundwater-at.exe.xyz:8000/">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://groundwater-at.exe.xyz:8000/">
-    <meta property="og:title" content="Austria Drought Risk Map">
-    <meta property="og:description" content="Interactive map showing drought risk across Austrian municipalities based on 100-year groundwater data and hydropower analysis.">
+    <meta property="og:title" content="GW-Power | Groundwater × Hydropower Austria">
+    <meta property="og:description" content="How hydropower operations and drought couple with groundwater across Austria — interactive map with 100-year records, live stations and ENTSO-E data.">
     <meta property="og:image" content="https://groundwater-at.exe.xyz:8000/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -24,8 +24,8 @@
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://groundwater-at.exe.xyz:8000/">
-    <meta name="twitter:title" content="Austria Drought Risk Map">
-    <meta name="twitter:description" content="Interactive map showing drought risk across Austrian municipalities based on 100-year groundwater data.">
+    <meta name="twitter:title" content="GW-Power | Groundwater × Hydropower Austria">
+    <meta name="twitter:description" content="How hydropower operations and drought couple with groundwater across Austria.">
     <meta name="twitter:image" content="https://groundwater-at.exe.xyz:8000/og-image.png">
     
     <!-- Favicon -->
@@ -36,8 +36,8 @@
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Austria Drought Risk Map",
-        "description": "Interactive choropleth map showing drought risk across Austrian municipalities",
+        "name": "GW-Power",
+        "description": "Groundwater × hydropower coupling and drought risk across Austrian municipalities",
         "url": "https://groundwater-at.exe.xyz:8000/",
         "applicationCategory": "Environmental Data Visualization",
         "operatingSystem": "Web Browser",
@@ -47,7 +47,7 @@
         },
         "about": {
             "@type": "Thing",
-            "name": "Groundwater drought risk in Austria"
+            "name": "Groundwater, hydropower and drought risk in Austria"
         }
     }
     </script>
@@ -67,9 +67,24 @@
         }
         #header {
             background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
-            padding: 15px 20px;
+            padding: 12px 20px;
             border-bottom: 1px solid #0f3460;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
+        #share-view-btn {
+            background: #0f3460;
+            color: #cfe3ff;
+            border: 1px solid #2a4a7a;
+            border-radius: 6px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+        #share-view-btn:hover { background: #1a4a80; }
         #header h1 {
             font-size: 1.5em;
             font-weight: 600;
@@ -599,15 +614,46 @@
         .zoom-btn:hover {
             background: #c73e54;
         }
+        #sidebar-toggle { display: none; }
         @media (max-width: 768px) {
+            #header { padding: 8px 12px; }
+            #header h1 { font-size: 1.15em; margin-bottom: 2px; }
+            #header p { font-size: 0.7em; }
+            #share-view-btn { padding: 6px 10px; font-size: 0.75em; }
             #container {
                 flex-direction: column;
+                height: calc(100vh - 58px);
+                height: calc(100dvh - 58px);
             }
             #sidebar {
                 width: 100%;
                 height: auto;
-                max-height: 200px;
+                max-height: 38vh;
+                order: 2;
+                border-right: none;
+                border-top: 1px solid #0f3460;
+                display: none;
+                padding: 10px;
             }
+            #sidebar.open { display: block; }
+            #map { order: 1; min-height: 0; }
+            #sidebar-toggle {
+                display: block;
+                order: 3;
+                width: 100%;
+                background: #0f3460;
+                color: #cfe3ff;
+                border: none;
+                padding: 10px;
+                font-size: 0.9em;
+                cursor: pointer;
+            }
+            .stats-box { display: none; }
+            .map-legend { padding: 6px 8px !important; max-width: 45vw; }
+            .map-legend h4 { font-size: 0.6em !important; }
+            .map-legend .gradient-labels { font-size: 0.55em !important; }
+            .map-legend div[style*="font-size:0.65em"] { display: none; }
+            .legend-container { max-width: 48vw; }
         }
         
         @keyframes spin {
@@ -629,13 +675,16 @@
     <!-- Loading overlay -->
     <div id="loading-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #1a1a2e; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div class="loading-spinner" style="width: 50px; height: 50px; margin-bottom: 20px;"></div>
-        <div style="color: #60a5fa; font-size: 1.2em;">Loading Austria Drought Risk Map...</div>
+        <div style="color: #60a5fa; font-size: 1.2em;">Loading GW-Power…</div>
         <div style="color: #6a6a8a; font-size: 0.9em; margin-top: 10px;">Fetching municipality and groundwater data</div>
     </div>
     
     <div id="header">
-        <h1>🌊 Austria Drought Risk Map</h1>
-        <p>Municipality-level analysis of groundwater, hydropower impact, and drought risk indicators</p>
+        <div>
+            <h1>⚡💧 GW-Power</h1>
+            <p>Groundwater × hydropower coupling and drought risk across Austria</p>
+        </div>
+        <button id="share-view-btn" title="Copy a link to the current view">🔗 Share view</button>
     </div>
     
     <div id="container">
@@ -668,38 +717,54 @@
             </div>
             
             <div class="layer-group">
-                <h3>Map Layers</h3>
+                <h3>Background (choose one)</h3>
                 <div class="layer-toggle">
-                    <input type="checkbox" id="layer-boundaries" checked>
-                    <label for="layer-boundaries">Drought Risk</label>
+                    <input type="radio" name="base-layer" id="base-drought" value="drought" checked>
+                    <label for="base-drought">Drought Risk heatmap</label>
                 </div>
                 <div class="layer-toggle">
-                    <input type="checkbox" id="layer-hydro" checked>
+                    <input type="radio" name="base-layer" id="base-wq" value="wq">
+                    <label for="base-wq">Water Quality heatmap</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="radio" name="base-layer" id="base-none" value="none">
+                    <label for="base-none">None</label>
+                </div>
+            </div>
+
+            <div class="layer-group">
+                <h3>Stations (choose one)</h3>
+                <div class="layer-toggle">
+                    <input type="radio" name="station-layer" id="st-powergw" value="powergw" checked>
+                    <label for="st-powergw" title="Live eHYD stations: share of daily groundwater variation statistically added by national hydropower operations (ENTSO-E), beyond what precipitation and the along-river-matched river gauge explain">⚡ Hydropower ↔ GW Coupling</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="radio" name="station-layer" id="st-gw" value="gw">
+                    <label for="st-gw">Groundwater Trends</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="radio" name="station-layer" id="st-divergence" value="divergence">
+                    <label for="st-divergence" title="GW level vs NASA POWER precipitation: negative = groundwater lower than rainfall explains">Precip vs GW Divergence</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="radio" name="station-layer" id="st-flow" value="flow">
+                    <label for="st-flow">River Flow Trends</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="radio" name="station-layer" id="st-precip" value="precip">
+                    <label for="st-precip">Precipitation Trends</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="radio" name="station-layer" id="st-none" value="none">
+                    <label for="st-none">None</label>
+                </div>
+            </div>
+
+            <div class="layer-group">
+                <h3>Overlays</h3>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-hydro">
                     <label for="layer-hydro">Hydropower Plants</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-gw">
-                    <label for="layer-gw">Groundwater Trends</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-flow">
-                    <label for="layer-flow">River Flow Trends</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-precip">
-                    <label for="layer-precip">Precipitation Trends</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-divergence">
-                    <label for="layer-divergence" title="GW level vs NASA POWER precipitation: negative = groundwater lower than rainfall explains">Precip vs GW Divergence</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-powergw">
-                    <label for="layer-powergw" title="Live eHYD stations: share of daily groundwater variation statistically added by national hydropower operations (ENTSO-E), beyond what precipitation explains">Hydropower ↔ GW Coupling</label>
-                </div>
-                <div class="layer-toggle">
-                    <input type="checkbox" id="layer-wq-choropleth">
-                    <label for="layer-wq-choropleth">Water Quality</label>
                 </div>
                 <div class="layer-toggle">
                     <input type="checkbox" id="layer-protection">
@@ -736,6 +801,7 @@
         </div>
         
         <div id="map"></div>
+        <button id="sidebar-toggle">☰ Layers &amp; search</button>
     </div>
     
     <script>
@@ -764,7 +830,7 @@
         // Legend state tracking
         const legendState = {
             drought: true,
-            hydro: true,
+            hydro: false,
             gw: false,
             flow: false,
             precip: false,
@@ -948,7 +1014,7 @@
         // Layer groups - order matters! Bottom to top: choropleths, then point layers
         const wqChoroplethLayer = L.layerGroup();  // Water quality choropleth (bottom)
         const boundaryLayer = L.layerGroup().addTo(map);  // Drought risk choropleth
-        const hydroLayer = L.layerGroup().addTo(map);  // Hydropower plants (points)
+        const hydroLayer = L.layerGroup();  // Hydropower plants (points, overlay)
         const gwLayer = L.layerGroup();  // Groundwater trends (points)
         const flowLayer = L.layerGroup();  // River flow gauge trends (points)
         const precipLayer = L.layerGroup();  // Precipitation station trends (points)
@@ -1086,11 +1152,6 @@
                 updateStats();
                 renderLayers();
                 
-                // Sync legendState with checkbox state (in case browser restored checkbox states)
-                legendState.drought = document.getElementById('layer-boundaries').checked;
-                legendState.hydro = document.getElementById('layer-hydro').checked;
-                legendState.gw = document.getElementById('layer-gw').checked;
-                legendState.wqChoropleth = document.getElementById('layer-wq-choropleth').checked;
                 updateLegends();
                 
                 // Hide loading overlay
@@ -1416,7 +1477,7 @@
                 marker.bindTooltip(
                     `<b>${s.name}</b> (${s.bundesland})<br>` +
                     `Hydro ops add <b>${(100 * Math.max(0, s.excess_partial)).toFixed(1)}%</b> of daily GW variance<br>` +
-                    `<span style="color:#9aa">beyond precip (${(100 * s.r2_precip).toFixed(0)}%) + river ${s.nearest_gauge_river || '?'} @ ${s.nearest_gauge_km} km (→ ${(100 * s.r2_base).toFixed(0)}%)</span><br>` +
+                    `<span style="color:#9aa">beyond precip (${(100 * s.r2_precip).toFixed(0)}%) + river ${s.nearest_gauge_river || '?'} @ ${s.gauge_match === 'along_river' ? s.gauge_network_km + ' km along-river' : s.nearest_gauge_km + ' km straight-line'} (→ ${(100 * s.r2_base).toFixed(0)}%)</span><br>` +
                     `Placebo check: ${(100 * Math.max(0, s.excess_placebo)).toFixed(1)}% · Nearest plant: ${s.dist_hydro_km} km · ${s.n_days} days<br>` +
                     `<span style="color:#9aa">National ENTSO-E signal — correlation, not causation</span>`,
                     { direction: 'top' });
@@ -1668,71 +1729,60 @@
         }
         
         // Layer toggle handlers
+        // --- Base choropleth (exclusive) ---
+        async function setBaseLayer(v) {
+            map.removeLayer(boundaryLayer);
+            map.removeLayer(wqChoroplethLayer);
+            legendState.drought = false;
+            legendState.wqChoropleth = false;
+            if (v === 'drought') {
+                map.addLayer(boundaryLayer);
+                legendState.drought = true;
+            } else if (v === 'wq') {
+                renderWqChoropleth();
+                map.addLayer(wqChoroplethLayer);
+                legendState.wqChoropleth = true;
+            }
+            updateLegends();
+            updateViewUrl();
+        }
+
+        // --- Station layer (exclusive) ---
+        const stationLayers = {
+            powergw: { layer: powerGwLayer, render: renderPowerGwLayer, legend: 'powerGw' },
+            gw:      { layer: gwLayer, render: null, legend: 'gw' },
+            divergence: { layer: divergenceLayer, render: renderDivergenceLayer, legend: 'divergence' },
+            flow:    { layer: flowLayer, render: renderFlowLayer, legend: 'flow' },
+            precip:  { layer: precipLayer, render: renderPrecipLayer, legend: 'precip' },
+        };
+        async function setStationLayer(v) {
+            for (const k in stationLayers) {
+                map.removeLayer(stationLayers[k].layer);
+                legendState[stationLayers[k].legend] = false;
+            }
+            const sel = stationLayers[v];
+            if (sel) {
+                if (sel.render) await sel.render();
+                map.addLayer(sel.layer);
+                legendState[sel.legend] = true;
+            }
+            updateLegends();
+            updateViewUrl();
+        }
+
+        document.querySelectorAll('input[name="base-layer"]').forEach(r =>
+            r.addEventListener('change', function() { if (this.checked) setBaseLayer(this.value); }));
+        document.querySelectorAll('input[name="station-layer"]').forEach(r =>
+            r.addEventListener('change', function() { if (this.checked) setStationLayer(this.value); }));
+
         document.getElementById('layer-hydro').addEventListener('change', function() {
             if (this.checked) map.addLayer(hydroLayer);
             else map.removeLayer(hydroLayer);
             legendState.hydro = this.checked;
             updateLegends();
+            updateViewUrl();
         });
-        
-        document.getElementById('layer-boundaries').addEventListener('change', function() {
-            if (this.checked) {
-                // Disable water quality layer when drought risk is enabled
-                document.getElementById('layer-wq-choropleth').checked = false;
-                map.removeLayer(wqChoroplethLayer);
-                legendState.wqChoropleth = false;
-                
-                map.addLayer(boundaryLayer);
-            } else {
-                map.removeLayer(boundaryLayer);
-            }
-            legendState.drought = this.checked;
-            updateLegends();
-        });
-        
-        document.getElementById('layer-gw').addEventListener('change', function() {
-            if (this.checked) map.addLayer(gwLayer);
-            else map.removeLayer(gwLayer);
-            legendState.gw = this.checked;
-            updateLegends();
-        });
-        
-        document.getElementById('layer-flow').addEventListener('change', async function() {
-            if (this.checked) {
-                await renderFlowLayer();
-                map.addLayer(flowLayer);
-            } else map.removeLayer(flowLayer);
-            legendState.flow = this.checked;
-            updateLegends();
-        });
-        
-        document.getElementById('layer-precip').addEventListener('change', async function() {
-            if (this.checked) {
-                await renderPrecipLayer();
-                map.addLayer(precipLayer);
-            } else map.removeLayer(precipLayer);
-            legendState.precip = this.checked;
-            updateLegends();
-        });
-        
-        document.getElementById('layer-divergence').addEventListener('change', async function() {
-            if (this.checked) {
-                await renderDivergenceLayer();
-                map.addLayer(divergenceLayer);
-            } else map.removeLayer(divergenceLayer);
-            legendState.divergence = this.checked;
-            updateLegends();
-        });
-        
-        document.getElementById('layer-powergw').addEventListener('change', async function() {
-            if (this.checked) {
-                await renderPowerGwLayer();
-                map.addLayer(powerGwLayer);
-            } else map.removeLayer(powerGwLayer);
-            legendState.powerGw = this.checked;
-            updateLegends();
-        });
-        
+
         document.getElementById('layer-protection').addEventListener('change', async function() {
             if (this.checked) {
                 await renderProtectionLayer();
@@ -1740,23 +1790,7 @@
             } else map.removeLayer(protectionLayer);
             legendState.protection = this.checked;
             updateLegends();
-        });
-        
-        document.getElementById('layer-wq-choropleth').addEventListener('change', function() {
-            const isChecked = this.checked;
-            if (isChecked) {
-                // Disable drought risk layer when water quality is enabled
-                document.getElementById('layer-boundaries').checked = false;
-                map.removeLayer(boundaryLayer);
-                legendState.drought = false;
-                
-                renderWqChoropleth();
-                map.addLayer(wqChoroplethLayer);
-            } else {
-                map.removeLayer(wqChoroplethLayer);
-            }
-            legendState.wqChoropleth = isChecked;
-            updateLegends();
+            updateViewUrl();
         });
         
         // Municipality search
@@ -2740,7 +2774,8 @@
         }
         
         // Load data on page load
-        loadData().then(() => {
+        loadData().then(async () => {
+            await restoreViewFromUrl();
             // Check URL for deep links after data loads
             const params = new URLSearchParams(window.location.search);
             const muni = params.get('muni');
@@ -2757,18 +2792,68 @@
             }
         });
         
-        // URL sharing helper
+        // URL sharing helpers -----------------------------------------
+        const MODAL_KEYS = ['muni', 'wq', 'gw'];
         function updateShareUrl(type, value) {
             const url = new URL(window.location.href);
-            url.search = '';
+            MODAL_KEYS.forEach(k => url.searchParams.delete(k));
             url.searchParams.set(type, value);
             history.replaceState(null, '', url);
         }
         
         function clearShareUrl() {
             const url = new URL(window.location.href);
-            url.search = '';
+            MODAL_KEYS.forEach(k => url.searchParams.delete(k));
             history.replaceState(null, '', url);
+        }
+
+        // View state (layers + map position) in the URL, so any view is linkable
+        let viewUrlReady = false;
+        function updateViewUrl() {
+            if (!viewUrlReady) return;
+            const url = new URL(window.location.href);
+            const base = (document.querySelector('input[name="base-layer"]:checked') || {}).value || 'drought';
+            const st = (document.querySelector('input[name="station-layer"]:checked') || {}).value || 'powergw';
+            if (base !== 'drought') url.searchParams.set('base', base); else url.searchParams.delete('base');
+            if (st !== 'powergw') url.searchParams.set('st', st); else url.searchParams.delete('st');
+            const ov = [];
+            if (document.getElementById('layer-hydro').checked) ov.push('hydro');
+            if (document.getElementById('layer-protection').checked) ov.push('zones');
+            if (ov.length) url.searchParams.set('ov', ov.join(',')); else url.searchParams.delete('ov');
+            const c = map.getCenter();
+            url.searchParams.set('v', `${c.lat.toFixed(3)},${c.lng.toFixed(3)},${map.getZoom()}`);
+            history.replaceState(null, '', url);
+        }
+        map.on('moveend', updateViewUrl);
+
+        async function restoreViewFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const v = params.get('v');
+            if (v) {
+                const [lat, lng, z] = v.split(',').map(Number);
+                if (isFinite(lat) && isFinite(lng) && isFinite(z)) map.setView([lat, lng], z);
+            }
+            const base = params.get('base') || 'drought';
+            const st = params.get('st') || 'powergw';
+            const ov = (params.get('ov') || '').split(',');
+            const baseEl = document.querySelector(`input[name="base-layer"][value="${base}"]`);
+            if (baseEl) baseEl.checked = true;
+            const stEl = document.querySelector(`input[name="station-layer"][value="${st}"]`);
+            if (stEl) stEl.checked = true;
+            await setBaseLayer(baseEl ? base : 'drought');
+            await setStationLayer(stEl ? st : 'powergw');
+            if (ov.includes('hydro')) {
+                document.getElementById('layer-hydro').checked = true;
+                map.addLayer(hydroLayer); legendState.hydro = true;
+            }
+            if (ov.includes('zones')) {
+                document.getElementById('layer-protection').checked = true;
+                await renderProtectionLayer();
+                map.addLayer(protectionLayer); legendState.protection = true;
+            }
+            updateLegends();
+            viewUrlReady = true;
+            updateViewUrl();
         }
         
         function copyShareLink() {
@@ -2780,6 +2865,21 @@
             setTimeout(() => btn.textContent = orig, 1500);
         }
         
+        document.getElementById('sidebar-toggle').addEventListener('click', function() {
+            const sb = document.getElementById('sidebar');
+            sb.classList.toggle('open');
+            this.textContent = sb.classList.contains('open') ? '✕ Close panel' : '☰ Layers & search';
+            setTimeout(() => map.invalidateSize(), 50);
+        });
+
+        document.getElementById('share-view-btn').addEventListener('click', function() {
+            updateViewUrl();
+            navigator.clipboard.writeText(window.location.href);
+            const btn = this, orig = btn.textContent;
+            btn.textContent = '✓ Link copied';
+            setTimeout(() => btn.textContent = orig, 1500);
+        });
+
         // Modal handlers
         document.getElementById('sources-link').addEventListener('click', function(e) {
             e.preventDefault();
@@ -2931,13 +3031,13 @@
             <p>Question: how much of day-to-day groundwater variation moves with hydropower operations (pumping/turbining), beyond what rainfall explains?</p>
             <ul>
                 <li><b>Data</b>: 227 live eHYD groundwater stations (daily levels, current year, ~190 days) × 292 live eHYD river gauges (daily stage) × ENTSO-E Austrian generation (15-min → daily GWh) for run-of-river, reservoir, and pumped storage (generation and pumping consumption) × NASA POWER daily precipitation.</li>
-                <li><b>Method</b>: per-station OLS on daily first differences (ΔGW). Baseline model: precipitation (today, lags 1–3 days, 7-day sum) <b>plus the nearest live river gauge's Δstage</b> (today + yesterday; median distance 5.9 km) — this control absorbs the shared rain/snowmelt → river → bank-connected-aquifer pathway. Full model adds 6 power terms (each hydro class, today + yesterday). Reported value is the <b>excess partial R²</b>: variance uniquely added by the power terms, minus the k/(n−p−1) inflation expected from adding 6 regressors by chance.</li>
+                <li><b>Method</b>: per-station OLS on daily first differences (ΔGW). Baseline model: precipitation (today, lags 1–3 days, 7-day sum) <b>plus a live river gauge's Δstage</b> (today + yesterday), where the gauge is matched <b>along the river network</b> (Dijkstra on 338k OSM/Geofabrik waterway segments; ~85% of stations matched along-network, median ~10 km along-river, straight-line nearest as fallback) — this control absorbs the shared rain/snowmelt → river → bank-connected-aquifer pathway. Full model adds 6 power terms (each hydro class, today + yesterday). Reported value is the <b>excess partial R²</b>: variance uniquely added by the power terms, minus the k/(n−p−1) inflation expected from adding 6 regressors by chance.</li>
                 <li><b>Placebo check</b>: rerunning with the power series shifted back 100 days (keeps weekday/autocorrelation structure, breaks real-time coupling) yields a median excess of ~0.4% — versus ~6% for the real series — so the measured association is not a statistical artifact.</li>
                 <li><b>Result</b> (2026): precipitation alone explains a median 13% of daily ΔGW; adding the local river gauge raises the baseline to 27%; power terms add a median <b>~6% excess</b> on top. Stations within 5 km of a hydro plant show ~9% median excess vs ~5% beyond 5 km — a plausible proximity gradient.</li>
                 <li><b>Interpretation — read carefully</b>:
                     <ul>
                         <li>ENTSO-E data is a <i>national</i> aggregate; no plant-level attribution is possible.</li>
-                        <li>The nearest-gauge control cannot capture the full river network (assignment is straight-line, not along-river); residual shared hydrology may remain in the power signal. A denser network (e.g. OSM/Geofabrik waterways) would allow along-river matching — noted as future work.</li>
+                        <li>The gauge control is matched along the OSM waterway network (not straight-line), but a single gauge still cannot capture the full river system; residual shared hydrology may remain in the power signal.</li>
                         <li>Austrian pumped storage is mostly high-alpine, (semi-)closed-loop — direct aquifer coupling is physically expected to be near zero; any statistical association is likely weekday/price seasonality shared with other variables.</li>
                         <li>Bottom line for the risk model: we find <b>no evidence that power-plant pumping is a first-order driver of groundwater decline</b> at national scale; the dominant unexplained signal remains the negative precip-vs-GW divergence (abstraction/structural). Hydropower affects groundwater mainly indirectly — via impoundment, sediment trapping and altered river–aquifer exchange — which is what the hydro_factor (25%) already represents.</li>
                     </ul>

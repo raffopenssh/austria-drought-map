@@ -1,4 +1,4 @@
-# Austria Drought Risk Map
+# GW-Power (Austria groundwater × hydropower)
 
 Interactive municipality-level drought risk visualization for Austria, combining 100-year groundwater monitoring data with hydropower infrastructure analysis.
 

@@ -85,6 +85,23 @@ def nearest_gauge(lat, lon):
             best, bd = g, d
     return best, bd
 
+# along-river gauge assignment (OSM/Geofabrik waterway network, Dijkstra)
+# built by scripts/build_along_river_matching.py
+try:
+    along_river = json.load(open('data/osm/along_river_gauges.json'))
+except FileNotFoundError:
+    along_river = {}
+gauges_by_id = {g['id']: g for g in gauges}
+
+def pick_gauge(hzb, lat, lon):
+    """Prefer along-network match; fall back to straight-line nearest."""
+    ar = along_river.get(str(hzb))
+    if ar and ar['gauge_id'] in gauges_by_id:
+        g = gauges_by_id[ar['gauge_id']]
+        return g, ar['straight_km'], 'along_river', ar['network_km']
+    g, km = nearest_gauge(lat, lon)
+    return g, km, 'straight_line', None
+
 def ols_r2(X, y):
     X = np.column_stack([np.ones(len(y)), X])
     beta, *_ = np.linalg.lstsq(X, y, rcond=None)
@@ -102,7 +119,7 @@ for hzb, s in gw.items():
     ck = cell_key(lat, lon)
     pr = precip.get(ck)
     if not pr: continue
-    gauge, gauge_km = nearest_gauge(lat, lon)
+    gauge, gauge_km, gauge_method, gauge_net_km = pick_gauge(hzb, lat, lon)
     gd = gauge['diffs'] if gauge else {}
     # build aligned daily arrays
     level = dict(zip(pts, vals))
@@ -162,6 +179,8 @@ for hzb, s in gw.items():
         'dist_hydro_km': round(dmin,1) if dmin is not None else None,
         'nearest_gauge_km': round(gauge_km,1) if gauge else None,
         'nearest_gauge_river': gauge['gewasser'] if gauge else None,
+        'gauge_match': gauge_method,
+        'gauge_network_km': gauge_net_km,
     })
 
 # analytic null: E[ΔR² partial] ≈ k/(n-p_base-1) when adding k noise regressors
@@ -199,14 +218,16 @@ out = {
         'Overlap window is current-year daily eHYD data only (~190 days, 2026).',
         'Live eHYD network is 227 stations, a subset of the 3,800 monthly-archive stations.',
         'Pumped storage in AT is mostly high-alpine closed/semi-closed loops; direct aquifer coupling is physically expected to be near zero.',
-        'Run-of-river correlates with river discharge which itself drives bank-connected groundwater. We control for this with the nearest live eHYD river gauge (median 5.9 km), but a single gauge cannot capture the full river network; residual shared hydrology may remain. Still: correlation, not causation.',
-        'River network coverage: 292 live Pegel gauges; nearest-gauge assignment is straight-line distance, not along-network (a denser network, e.g. OSM/Geofabrik waterways, would allow along-river matching).',
+        'Run-of-river correlates with river discharge which itself drives bank-connected groundwater. We control for this with a live eHYD river gauge matched ALONG the OSM/Geofabrik waterway network (Dijkstra on 338k waterway segments; straight-line nearest as fallback), but a single gauge cannot capture the full river network; residual shared hydrology may remain. Still: correlation, not causation.',
+        'River network coverage: 292 live Pegel gauges; along-river matching covers ~85% of stations (median ~10 km along-network), the rest fall back to straight-line nearest.',
     ],
     'summary': {
         'n_stations': len(stations_out),
         'median_r2_precip': round(med(sorted(x['r2_precip'] for x in stations_out)),4),
         'median_r2_base': round(med(sorted(x['r2_base'] for x in stations_out)),4),
         'median_nearest_gauge_km': round(med(sorted(x['nearest_gauge_km'] for x in stations_out)),1),
+        'n_along_river_matched': sum(1 for x in stations_out if x['gauge_match'] == 'along_river'),
+        'median_gauge_network_km': round(med(sorted(x['gauge_network_km'] for x in stations_out if x['gauge_network_km'] is not None)),1),
         'median_partial_r2_power': round(med(parts),4),
         'median_excess_partial': round(med(excess),4),
         'median_excess_placebo': round(med(sorted(x['excess_placebo'] for x in stations_out)),4),

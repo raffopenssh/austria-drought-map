@@ -1,3 +1,40 @@
+# Handover — 2026-07-14 (later session, GW-Power rebrand)
+
+## Done
+
+1. **Along-river gauge matching (OSM/Geofabrik)** —
+   `scripts/build_along_river_matching.py`: downloads Geofabrik
+   austria-latest.osm.pbf, `osmium tags-filter waterway=river,stream,canal,
+   drain,ditch` → geojsonseq (338k ways), builds an undirected graph split at
+   junctions, snaps 292 live Pegel + 227 live GW stations, Dijkstra to nearest
+   gauge ALONG the network → `data/osm/along_river_gauges.json` (committed;
+   raw pbf/geojsonseq deleted + gitignored, regenerate as per script header).
+   Result: 193/227 stations matched along-river, median 9.9 km.
+   `scripts/analyze_power_gw.py` now prefers along-river gauge (fallback
+   straight-line); summary: 191/225 along-river, median excess partial R²
+   ~6.1% vs placebo 0.2% — conclusion unchanged.
+
+2. **App renamed to GW-Power**, UI simplified:
+   - Layer chaos → 3 groups: Background choropleth (radio: Drought Risk / Water
+     Quality / None), Stations (radio: Power↔GW coupling [default] / GW trends /
+     Divergence / Flow / Precip / None), Overlays (checkboxes: plants, zones).
+     Only one choropleth + one station legend visible at a time.
+   - Header share button; **view state in URL** (?base=&st=&ov=&v=lat,lng,zoom)
+     restored on load; modal deep links (?muni/?wq/?gw) still work and now
+     coexist with view params.
+   - Mobile: map-first layout, collapsible bottom sheet sidebar
+     (#sidebar-toggle), compact legends. Detail modals (GW trends chart, EDO
+     history etc.) untouched.
+
+## Still open (both external services down, retested this session)
+
+- **WISE nitrate**: EEA SDI datashare bulk download now returns HTTP 502
+  (subagent conv c7Y7X3P tried ranged requests too); discodata SQL API
+  limitations as documented below. Retry the datashare URL later.
+- **LFRZ WFS** still "General error"; **Kärnten GIS** still unreachable.
+
+---
+
 # Handover — 2026-07-14 session
 
 Live: https://groundwater-at.exe.xyz:8000 (systemd service `drought-map`, python3 server.py 8000)
