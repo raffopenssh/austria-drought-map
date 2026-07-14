@@ -176,9 +176,21 @@ def main():
     print(f"wrote gw_index_kg.json ({len(blob)/1e6:.1f} MB)")
 
     # ---- Gemeinde aggregation (mean over its KGs) for the choropleth ----
+    # kg_registry maps Vienna KGs to 90001 (and merged Gemeinden to codes
+    # absent from municipalities.json); reassign those KGs to the nearest
+    # municipality centroid so every Gemeinde gets a value.
+    gem_codes = list(gem.keys())
+    gem_lat = np.array([gem[g]["lat"] for g in gem_codes])
+    gem_lon = np.array([gem[g]["lon"] for g in gem_codes])
     per_gem = {}
     for code, rec in out.items():
-        per_gem.setdefault(kg_reg[code]["g"], []).append(rec)
+        g = kg_reg[code]["g"]
+        if g not in gem:
+            r = kg_reg[code]
+            d2 = ((gem_lat - r["lat"]) * 110.6) ** 2 + \
+                 ((gem_lon - r["lon"]) * 74.0) ** 2
+            g = gem_codes[int(np.argmin(d2))]
+        per_gem.setdefault(g, []).append(rec)
     n_match = 0
     for gcode, m in gem.items():
         recs = per_gem.get(gcode)

@@ -276,3 +276,35 @@
         <a href="explore.html">Advanced explorer</a>
         <span class="right">eHYD · EEA WISE · Copernicus EDO · BEV cadastre</span>
     </div>
+
+    <!-- KG / Gemeinde detail modal -->
+    <div class="modal-overlay" id="kg-modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('kg-modal')">&times;</button>
+            <button class="modal-share" onclick="copyShare(this)">🔗 Share</button>
+            <div id="kg-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Station detail modal -->
+    <div class="modal-overlay" id="st-modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('st-modal')">&times;</button>
+            <button class="modal-share" onclick="copyShare(this)">🔗 Share</button>
+            <div id="st-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Methods modal -->
+    <div class="modal-overlay" id="methods-modal">
+        <div class="modal" style="max-width: 760px;">
+            <button class="modal-close" onclick="closeModal('methods-modal')">&times;</button>
+            <div id="methods-body"></div>
+        </div>
+    </div>
+
+    <div id="toast" style="display:none; position:fixed; bottom:44px; left:50%; transform:translateX(-50%); background:#202a55; border:1px solid #4fc3f7; color:#cfe3ff; padding:8px 18px; border-radius:8px; z-index:3000; font-size:0.85em;"></div>
+
+    <script src="app.js?v=1"></script>
+</body>
+</html>
