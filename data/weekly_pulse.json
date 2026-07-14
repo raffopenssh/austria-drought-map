@@ -1,0 +1,466 @@
+{
+ "200147": {
+  "dow_pct": {
+   "0": 6.15,
+   "1": 6.97,
+   "2": 6.32,
+   "3": 4.59,
+   "4": 1.18,
+   "5": -15.68,
+   "6": -27.08
+  },
+  "weekend_dip_pct": 26.42,
+  "sunday_dip_pct": 32.12,
+  "n_days": 12053,
+  "cls": "storage",
+  "note": "Ill/Gisingen: Illwerke ps cascade"
+ },
+ "200196": {
+  "dow_pct": {
+   "0": -6.76,
+   "1": 4.56,
+   "2": 5.13,
+   "3": 4.66,
+   "4": 3.75,
+   "5": -10.42,
+   "6": -23.18
+  },
+  "weekend_dip_pct": 19.07,
+  "sunday_dip_pct": 25.45,
+  "n_days": 12053,
+  "cls": "storage",
+  "note": "Alpenrhein/Lustenau: CH storages + Ill"
+ },
+ "200329": {
+  "dow_pct": {
+   "0": -11.1,
+   "1": -11.5,
+   "2": -13.08,
+   "3": -13.91,
+   "4": -14.96,
+   "5": -28.63,
+   "6": -35.33
+  },
+  "weekend_dip_pct": 19.07,
+  "sunday_dip_pct": 22.42,
+  "n_days": 12053,
+  "cls": "storage",
+  "note": "Bregenzerach: illwerke vkw Langenegg/Bolgenach storage (weekend dip +19%)"
+ },
+ "201087": {
+  "dow_pct": {
+   "0": -6.16,
+   "1": -6.51,
+   "2": -6.56,
+   "3": -6.25,
+   "4": -5.94,
+   "5": -6.14,
+   "6": -6.43
+  },
+  "weekend_dip_pct": 0.0,
+  "sunday_dip_pct": 0.14,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Lech/Lechaschau: unregulated in AT"
+ },
+ "201350": {
+  "dow_pct": {
+   "0": -1.37,
+   "1": -1.44,
+   "2": -1.25,
+   "3": -1.32,
+   "4": -1.29,
+   "5": -1.26,
+   "6": -1.26
+  },
+  "weekend_dip_pct": -0.08,
+  "sunday_dip_pct": -0.08,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Rofenache/Vent: glacial, unregulated"
+ },
+ "201434": {
+  "dow_pct": {
+   "0": -2.25,
+   "1": -2.3,
+   "2": -2.45,
+   "3": -2.17,
+   "4": -2.18,
+   "5": -2.16,
+   "6": -2.26
+  },
+  "weekend_dip_pct": -0.06,
+  "sunday_dip_pct": -0.01,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Oetztaler Ache/Tumpen: minor"
+ },
+ "201525": {
+  "dow_pct": {
+   "0": -9.47,
+   "1": 5.3,
+   "2": 5.6,
+   "3": 5.41,
+   "4": 4.64,
+   "5": -6.41,
+   "6": -19.79
+  },
+  "weekend_dip_pct": 15.4,
+  "sunday_dip_pct": 22.08,
+  "n_days": 12053,
+  "cls": "storage",
+  "note": "Inn/Innsbruck: Engadin+Sellrain-Silz storages"
+ },
+ "201624": {
+  "dow_pct": {
+   "0": -2.2,
+   "1": -2.22,
+   "2": -2.22,
+   "3": -2.38,
+   "4": -1.75,
+   "5": -1.97,
+   "6": -2.33
+  },
+  "weekend_dip_pct": -0.01,
+  "sunday_dip_pct": 0.17,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Sill: minor"
+ },
+ "201780": {
+  "dow_pct": {
+   "0": 6.08,
+   "1": 7.83,
+   "2": 7.85,
+   "3": 6.39,
+   "4": 1.56,
+   "5": -20.07,
+   "6": -30.33
+  },
+  "weekend_dip_pct": 31.14,
+  "sunday_dip_pct": 36.27,
+  "n_days": 12053,
+  "cls": "storage",
+  "note": "Ziller/Hart: Zemm-Ziller ps/res cascade"
+ },
+ "201863": {
+  "dow_pct": {
+   "0": -7.0,
+   "1": -7.27,
+   "2": -7.37,
+   "3": -6.9,
+   "4": -6.61,
+   "5": -6.65,
+   "6": -6.82
+  },
+  "weekend_dip_pct": -0.29,
+  "sunday_dip_pct": -0.21,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Brixentaler Ache"
+ },
+ "202036": {
+  "dow_pct": {
+   "0": -3.08,
+   "1": -3.12,
+   "2": -3.33,
+   "3": -3.18,
+   "4": -2.87,
+   "5": -3.28,
+   "6": -3.73
+  },
+  "weekend_dip_pct": 0.38,
+  "sunday_dip_pct": 0.61,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Sanna/Landeck"
+ },
+ "202382": {
+  "dow_pct": {
+   "0": -9.41,
+   "1": -10.01,
+   "2": -10.15,
+   "3": -9.42,
+   "4": -9.22,
+   "5": -9.01,
+   "6": -8.58
+  },
+  "weekend_dip_pct": -0.85,
+  "sunday_dip_pct": -1.07,
+  "n_days": 10957,
+  "cls": "control",
+  "note": "Grossache"
+ },
+ "203323": {
+  "dow_pct": {
+   "0": -3.99,
+   "1": -2.92,
+   "2": -2.79,
+   "3": -2.66,
+   "4": -3.05,
+   "5": -6.22,
+   "6": -9.59
+  },
+  "weekend_dip_pct": 4.82,
+  "sunday_dip_pct": 6.51,
+  "n_days": 12053,
+  "cls": "storage",
+  "note": "Salzach/Golling: Kaprun group + Schwarzach"
+ },
+ "205757": {
+  "dow_pct": {
+   "0": -5.57,
+   "1": -5.53,
+   "2": -6.95,
+   "3": -7.45,
+   "4": -5.15,
+   "5": -9.36,
+   "6": -12.85
+  },
+  "weekend_dip_pct": 4.98,
+  "sunday_dip_pct": 6.72,
+  "n_days": 12053,
+  "cls": "ror",
+  "note": "Enns/Jaegerberg: lower Enns ror chain"
+ },
+ "205914": {
+  "dow_pct": {
+   "0": -10.76,
+   "1": -10.23,
+   "2": -10.83,
+   "3": -11.46,
+   "4": -10.46,
+   "5": -10.52,
+   "6": -10.06
+  },
+  "weekend_dip_pct": -0.46,
+  "sunday_dip_pct": -0.69,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Steyr river"
+ },
+ "205922": {
+  "dow_pct": {
+   "0": -6.27,
+   "1": -6.59,
+   "2": -7.54,
+   "3": -7.98,
+   "4": -5.41,
+   "5": -9.79,
+   "6": -12.41
+  },
+  "weekend_dip_pct": 4.34,
+  "sunday_dip_pct": 5.65,
+  "n_days": 10957,
+  "cls": "ror",
+  "note": "Enns/Steyr: Enns ror chain"
+ },
+ "206201": {
+  "dow_pct": {
+   "0": -9.73,
+   "1": -2.52,
+   "2": -1.28,
+   "3": -1.19,
+   "4": -1.16,
+   "5": -3.16,
+   "6": -8.54
+  },
+  "weekend_dip_pct": 2.67,
+  "sunday_dip_pct": 5.36,
+  "n_days": 12053,
+  "cls": "ror",
+  "note": "Inn/Schaerding: full Inn ror cascade"
+ },
+ "210740": {
+  "dow_pct": {
+   "0": -0.66,
+   "1": -2.01,
+   "2": -3.15,
+   "3": -3.29,
+   "4": -2.47,
+   "5": -11.71,
+   "6": -14.63
+  },
+  "weekend_dip_pct": 10.85,
+  "sunday_dip_pct": 12.31,
+  "n_days": 7670,
+  "cls": "storage",
+  "note": "Enns/Trautenfels: Salza storage upstream (weekend dip +11%)"
+ },
+ "211086": {
+  "dow_pct": {
+   "0": -4.85,
+   "1": -2.93,
+   "2": -3.38,
+   "3": -3.56,
+   "4": -2.69,
+   "5": -4.02,
+   "6": -6.45
+  },
+  "weekend_dip_pct": 1.75,
+  "sunday_dip_pct": 2.97,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Mur/Gestuethof: upper Mur"
+ },
+ "211268": {
+  "dow_pct": {
+   "0": -5.35,
+   "1": -4.72,
+   "2": -5.74,
+   "3": -5.83,
+   "4": -5.71,
+   "5": -5.71,
+   "6": -5.79
+  },
+  "weekend_dip_pct": 0.28,
+  "sunday_dip_pct": 0.31,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Muerz"
+ },
+ "211458": {
+  "dow_pct": {
+   "0": -10.68,
+   "1": -10.55,
+   "2": -10.51,
+   "3": -10.39,
+   "4": -10.73,
+   "5": -10.37,
+   "6": -11.04
+  },
+  "weekend_dip_pct": 0.13,
+  "sunday_dip_pct": 0.47,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Sulm"
+ },
+ "211490": {
+  "dow_pct": {
+   "0": -5.25,
+   "1": -4.2,
+   "2": -4.28,
+   "3": -4.2,
+   "4": -4.35,
+   "5": -5.34,
+   "6": -6.28
+  },
+  "weekend_dip_pct": 1.36,
+  "sunday_dip_pct": 1.83,
+  "n_days": 12053,
+  "cls": "ror",
+  "note": "Mur/Mureck: Mur ror chain"
+ },
+ "212167": {
+  "dow_pct": {
+   "0": -2.5,
+   "1": -2.89,
+   "2": -2.58,
+   "3": -2.71,
+   "4": -2.15,
+   "5": -2.88,
+   "6": -3.45
+  },
+  "weekend_dip_pct": 0.6,
+  "sunday_dip_pct": 0.89,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Isel: unregulated glacial"
+ },
+ "212787": {
+  "dow_pct": {
+   "0": -5.11,
+   "1": -4.85,
+   "2": -5.0,
+   "3": -5.43,
+   "4": -5.1,
+   "5": -5.21,
+   "6": -5.24
+  },
+  "weekend_dip_pct": 0.13,
+  "sunday_dip_pct": 0.14,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Gail"
+ },
+ "213090": {
+  "dow_pct": {
+   "0": -4.36,
+   "1": -4.54,
+   "2": -4.79,
+   "3": -4.81,
+   "4": -4.66,
+   "5": -4.69,
+   "6": -4.48
+  },
+  "weekend_dip_pct": -0.05,
+  "sunday_dip_pct": -0.15,
+  "n_days": 12053,
+  "cls": "control",
+  "note": "Lavant"
+ },
+ "213173": {
+  "dow_pct": {
+   "0": -1.19,
+   "1": -0.06,
+   "2": 0.23,
+   "3": -1.25,
+   "4": -0.88,
+   "5": -6.57,
+   "6": -14.44
+  },
+  "weekend_dip_pct": 9.87,
+  "sunday_dip_pct": 13.81,
+  "n_days": 5113,
+  "cls": "storage",
+  "note": "Drau/Lavamuend: Malta/Reisseck ps via Moell + Drau ror"
+ },
+ "213215": {
+  "dow_pct": {
+   "0": 2.27,
+   "1": 2.2,
+   "2": 1.18,
+   "3": 0.9,
+   "4": 0.18,
+   "5": -11.21,
+   "6": -16.41
+  },
+  "weekend_dip_pct": 15.16,
+  "sunday_dip_pct": 17.76,
+  "n_days": 12053,
+  "cls": "storage",
+  "note": "Drau/Amlach: TIWAG Strassen-Amlach diversion storage (weekend dip +15%)"
+ },
+ "213660": {
+  "dow_pct": {
+   "0": -2.99,
+   "1": -3.21,
+   "2": -3.56,
+   "3": -3.24,
+   "4": -2.82,
+   "5": -2.8,
+   "6": -2.98
+  },
+  "weekend_dip_pct": -0.27,
+  "sunday_dip_pct": -0.18,
+  "n_days": 3652,
+  "cls": "control",
+  "note": "Drau/Dellach: above ror chain"
+ },
+ "231092": {
+  "dow_pct": {
+   "0": -1.63,
+   "1": -2.62,
+   "2": -2.5,
+   "3": -2.39,
+   "4": -0.77,
+   "5": -2.0,
+   "6": -5.1
+  },
+  "weekend_dip_pct": 1.57,
+  "sunday_dip_pct": 3.12,
+  "n_days": 11688,
+  "cls": "control",
+  "note": "Drau/Lienz: upper Drau"
+ }
+}

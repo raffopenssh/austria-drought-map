@@ -1575,18 +1575,18 @@
  "t2_aggradation": {
   "summary": {
    "storage": {
-    "n": 5,
-    "median_cm_yr": -1.0
+    "n": 8,
+    "median_cm_yr": -0.761
    },
    "ror": {
     "n": 4,
     "median_cm_yr": -0.194
    },
    "control": {
-    "n": 19,
-    "median_cm_yr": -0.277
+    "n": 16,
+    "median_cm_yr": -0.332
    },
-   "perm_p_storage_vs_control": 0.2954
+   "perm_p_storage_vs_control": 0.4602
   },
   "gauges": [
    {
@@ -1651,8 +1651,8 @@
    },
    {
     "hzb": "200329",
-    "cls": "control",
-    "note": "Bregenzerach: minor regulation",
+    "cls": "storage",
+    "note": "Bregenzerach: illwerke vkw Langenegg/Bolgenach storage (weekend dip +19%)",
     "segments": [
      {
       "years": [
@@ -2025,8 +2025,8 @@
    },
    {
     "hzb": "210740",
-    "cls": "control",
-    "note": "Enns/Trautenfels: upper Enns",
+    "cls": "storage",
+    "note": "Enns/Trautenfels: Salza storage upstream (weekend dip +11%)",
     "segments": [
      {
       "years": [
@@ -2201,8 +2201,8 @@
    },
    {
     "hzb": "213215",
-    "cls": "control",
-    "note": "Drau/Amlach: above ror chain",
+    "cls": "storage",
+    "note": "Drau/Amlach: TIWAG Strassen-Amlach diversion storage (weekend dip +15%)",
     "segments": [
      {
       "years": [
@@ -2266,10 +2266,10 @@
  "t3_flushing": {
   "summary": {
    "storage": {
-    "n": 6,
-    "median_lowflow_spikes_per_yr": 1.18,
-    "median_resid_trend": 0.004,
-    "median_r_drawdown": -0.25
+    "n": 9,
+    "median_lowflow_spikes_per_yr": 1.36,
+    "median_resid_trend": 0.003,
+    "median_r_drawdown": -0.236
    },
    "ror": {
     "n": 4,
@@ -2278,10 +2278,10 @@
     "median_r_drawdown": -0.167
    },
    "control": {
-    "n": 19,
-    "median_lowflow_spikes_per_yr": 2.27,
+    "n": 16,
+    "median_lowflow_spikes_per_yr": 2.315,
     "median_resid_trend": 0.008,
-    "median_r_drawdown": -0.195
+    "median_r_drawdown": -0.191
    }
   },
   "gauges": [
@@ -2311,8 +2311,8 @@
    },
    {
     "hzb": "200329",
-    "cls": "control",
-    "note": "Bregenzerach: minor regulation",
+    "cls": "storage",
+    "note": "Bregenzerach: illwerke vkw Langenegg/Bolgenach storage (weekend dip +19%)",
     "n_days": 5105,
     "rating_slope": 2.28,
     "resid_trend_per_yr": -0.0282,
@@ -2491,8 +2491,8 @@
    },
    {
     "hzb": "210740",
-    "cls": "control",
-    "note": "Enns/Trautenfels: upper Enns",
+    "cls": "storage",
+    "note": "Enns/Trautenfels: Salza storage upstream (weekend dip +11%)",
     "n_days": 5478,
     "rating_slope": 2.46,
     "resid_trend_per_yr": -0.0156,
@@ -2599,8 +2599,8 @@
    },
    {
     "hzb": "213215",
-    "cls": "control",
-    "note": "Drau/Amlach: above ror chain",
+    "cls": "storage",
+    "note": "Drau/Amlach: TIWAG Strassen-Amlach diversion storage (weekend dip +15%)",
     "n_days": 5107,
     "rating_slope": 3.04,
     "resid_trend_per_yr": 0.009,
@@ -3166,16 +3166,16 @@
  },
  "t5_sediment_trend": {
   "storage": {
-   "n": 8,
-   "median_trend_pct": -0.1
+   "n": 11,
+   "median_trend_pct": -2.2
   },
   "ror": {
    "n": 7,
    "median_trend_pct": -57.2
   },
   "control": {
-   "n": 18,
-   "median_trend_pct": 2.45
+   "n": 15,
+   "median_trend_pct": 4.5
   }
  },
  "t6_matched_divergence": {
