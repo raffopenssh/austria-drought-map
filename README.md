@@ -40,6 +40,17 @@ In recent years, Austrian municipalities have had to implement water rationing m
 - [Oesterreichs Energie](https://oesterreichsenergie.at/) - Power plant registry
 - Austrian municipality boundaries from GeoJSON-Austria
 
+## API
+
+Sibling-service endpoints per the [cadastre integration spec](https://cadastre-process-api.exe.xyz/api/v1/docs/llm.txt?section=integration), keyed on official BEV/Statistik Austria codes (5-char zero-padded strings):
+
+- `GET /llm/kg/{kg_code}` — per Katastralgemeinde (maps up to its Gemeinde)
+- `GET /llm/gemeinde/{code_or_name}` — per municipality (alias `/llm/muni/`)
+- `GET /llm/kgs?codes=...` / `GET /llm/gemeinden?codes=...` — batch (≤500)
+- `GET /llm/manifest.json`, `/llm/covered_kgs.json`, `/llm/covered_gemeinden.json`
+
+Payloads include composite risk metrics, EDO drought history (2012–2023), and snapped point observations (GW stations with annual level history, hydropower plants, WISE water-quality sites). See [`web/llm.txt`](web/llm.txt).
+
 ## Technical Stack
 
 - **Frontend**: Leaflet.js, vanilla JavaScript
