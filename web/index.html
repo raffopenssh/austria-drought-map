@@ -694,8 +694,8 @@
                     <label for="layer-divergence" title="GW level vs NASA POWER precipitation: negative = groundwater lower than rainfall explains">Precip vs GW Divergence</label>
                 </div>
                 <div class="layer-toggle">
-                    <input type="checkbox" id="layer-nitrate">
-                    <label for="layer-nitrate">Nitrate (Groundwater)</label>
+                    <input type="checkbox" id="layer-powergw">
+                    <label for="layer-powergw" title="Live eHYD stations: share of daily groundwater variation statistically added by national hydropower operations (ENTSO-E), beyond what precipitation explains">Hydropower ↔ GW Coupling</label>
                 </div>
                 <div class="layer-toggle">
                     <input type="checkbox" id="layer-wq-choropleth">
@@ -771,7 +771,9 @@
             protection: false,
             wiseGw: false,
             wiseRiver: false,
-            wqChoropleth: false
+            wqChoropleth: false,
+            divergence: false,
+            powerGw: false
         };
         
         function updateLegends() {
@@ -818,6 +820,36 @@
                             <span>0</span>
                             <span>+150</span>
                         </div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.divergence) {
+                html += `
+                    <div class="map-legend">
+                        <h4>Precip vs GW Divergence</h4>
+                        <div class="gradient-bar" style="background: linear-gradient(to right, #d32f2f, #f5a623, #cccccc, #3282e6);"></div>
+                        <div class="gradient-labels">
+                            <span>&minus;2&sigma; (GW below precip)</span>
+                            <span>0</span>
+                            <span>+2&sigma;</span>
+                        </div>
+                        <div style="font-size:0.65em; color:#6a6a8a; margin-top:4px;">5-yr GW level vs what 12-mo rainfall predicts</div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.powerGw) {
+                html += `
+                    <div class="map-legend">
+                        <h4>Hydropower &harr; GW Coupling</h4>
+                        <div class="gradient-bar" style="background: linear-gradient(to right, #888888, #ffe082, #ff8f00, #d32f2f);"></div>
+                        <div class="gradient-labels">
+                            <span>0%</span>
+                            <span>10%</span>
+                            <span>&ge;20%</span>
+                        </div>
+                        <div style="font-size:0.65em; color:#6a6a8a; margin-top:4px;">Excess partial R&sup2;: daily GW variance added by national hydro ops beyond precipitation (correlation, not causation)</div>
                     </div>
                 `;
             }
@@ -921,6 +953,8 @@
         const flowLayer = L.layerGroup();  // River flow gauge trends (points)
         const precipLayer = L.layerGroup();  // Precipitation station trends (points)
         const protectionLayer = L.layerGroup();  // Drinking water protection zones (polygons)
+        const divergenceLayer = L.layerGroup();  // Precip vs GW divergence (points)
+        const powerGwLayer = L.layerGroup();  // Hydropower <-> GW coupling (points, live eHYD stations)
         
         // Risk color function (categorical)
         function getRiskColor(risk) {
@@ -1322,6 +1356,74 @@
             });
         }
         
+        // Precip vs GW divergence layer
+        let divergenceData = null;
+        async function renderDivergenceLayer() {
+            if (!divergenceData) {
+                try {
+                    divergenceData = await (await fetch('data/precip_gw_correlation.json')).json();
+                } catch (e) { console.error('divergence load failed', e); return; }
+            }
+            divergenceLayer.clearLayers();
+            divergenceData.stations.forEach(s => {
+                if (s.lat == null || s.divergence_5yr == null) return;
+                // -2sigma red .. 0 gray .. +2sigma blue
+                const d = Math.max(-2, Math.min(2, s.divergence_5yr));
+                let color;
+                if (d < -1) color = '#d32f2f';
+                else if (d < -0.4) color = '#f5a623';
+                else if (d <= 0.4) color = '#cccccc';
+                else color = '#3282e6';
+                const marker = L.circleMarker([s.lat, s.lon], {
+                    radius: 4,
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    color: '#222',
+                    weight: 0.5
+                });
+                marker.bindTooltip(
+                    `<b>${s.name}</b><br>` +
+                    `5-yr divergence: ${s.divergence_5yr > 0 ? '+' : ''}${s.divergence_5yr}σ ${s.divergence_5yr < -0.4 ? '(GW lower than rainfall explains)' : ''}<br>` +
+                    `Precip↔GW corr: r=${s.r} @ lag ${s.lag_months} mo · ${s.n_months} months`,
+                    { direction: 'top' });
+                marker.addTo(divergenceLayer);
+            });
+        }
+        
+        // Hydropower <-> GW coupling layer (live eHYD stations vs ENTSO-E)
+        let powerGwData = null;
+        async function renderPowerGwLayer() {
+            if (!powerGwData) {
+                try {
+                    powerGwData = await (await fetch('data/power_gw_analysis.json')).json();
+                } catch (e) { console.error('power-gw load failed', e); return; }
+            }
+            powerGwLayer.clearLayers();
+            powerGwData.stations.forEach(s => {
+                const e = Math.max(0, s.excess_partial);
+                let color;
+                if (e < 0.03) color = '#888888';
+                else if (e < 0.10) color = '#ffe082';
+                else if (e < 0.20) color = '#ff8f00';
+                else color = '#d32f2f';
+                const marker = L.circleMarker([s.lat, s.lon], {
+                    radius: 5,
+                    fillColor: color,
+                    fillOpacity: 0.85,
+                    color: '#222',
+                    weight: 0.5
+                });
+                marker.bindTooltip(
+                    `<b>${s.name}</b> (${s.bundesland})<br>` +
+                    `Hydro ops add <b>${(100 * Math.max(0, s.excess_partial)).toFixed(1)}%</b> of daily GW variance<br>` +
+                    `<span style="color:#9aa">beyond precip (${(100 * s.r2_precip).toFixed(0)}%) + river ${s.nearest_gauge_river || '?'} @ ${s.nearest_gauge_km} km (→ ${(100 * s.r2_base).toFixed(0)}%)</span><br>` +
+                    `Placebo check: ${(100 * Math.max(0, s.excess_placebo)).toFixed(1)}% · Nearest plant: ${s.dist_hydro_km} km · ${s.n_days} days<br>` +
+                    `<span style="color:#9aa">National ENTSO-E signal — correlation, not causation</span>`,
+                    { direction: 'top' });
+                marker.addTo(powerGwLayer);
+            });
+        }
+        
         // Water protection zones layer (loaded on demand)
         let protectionDataLoaded = false;
         async function renderProtectionLayer() {
@@ -1610,6 +1712,24 @@
                 map.addLayer(precipLayer);
             } else map.removeLayer(precipLayer);
             legendState.precip = this.checked;
+            updateLegends();
+        });
+        
+        document.getElementById('layer-divergence').addEventListener('change', async function() {
+            if (this.checked) {
+                await renderDivergenceLayer();
+                map.addLayer(divergenceLayer);
+            } else map.removeLayer(divergenceLayer);
+            legendState.divergence = this.checked;
+            updateLegends();
+        });
+        
+        document.getElementById('layer-powergw').addEventListener('change', async function() {
+            if (this.checked) {
+                await renderPowerGwLayer();
+                map.addLayer(powerGwLayer);
+            } else map.removeLayer(powerGwLayer);
+            legendState.powerGw = this.checked;
             updateLegends();
         });
         
@@ -2768,6 +2888,9 @@
                 </li>
                 <li><a href="https://oesterreichsenergie.at" target="_blank">Oesterreichs Energie</a> - Power plant registry (156 hydropower plants)</li>
                 <li>Municipality boundaries from <a href="https://github.com/ginseng666/GeoJSON-TopoJSON-Austria" target="_blank">GeoJSON Austria</a></li>
+                <li><a href="https://transparency.entsoe.eu/" target="_blank">ENTSO-E Transparency Platform</a> - Austrian electricity generation per production type (15-min resolution, 2023–present) via austria-power.exe.xyz mirror; used for the Hydropower ↔ GW coupling analysis</li>
+                <li><a href="https://ehyd.gv.at" target="_blank">eHYD live services</a> - 227 real-time groundwater stations with daily levels, historical percentile bands (services/GrundwasserAktuell, Diagram/grundwasserLongtermBgis)</li>
+                <li><a href="https://power.larc.nasa.gov/" target="_blank">NASA POWER</a> - Gridded precipitation (0.5°): monthly 1990–2024 for the divergence analysis, daily 2025–present as control variable in the power–GW regression</li>
                 <li>Drinking-water protection zones (Wasserschutz-/Wasserschongebiete) from provincial INSPIRE WFS services (via <a href="https://inspire-austria.exe.xyz" target="_blank">INSPIRE Österreich</a>): OÖ DORIS, Steiermark, Tirol, NÖ, Burgenland, Wien, Vorarlberg — 25,365 zones, 7 of 9 provinces</li>
             </ul>
             
@@ -2794,6 +2917,31 @@
                 </li>
                 <li><b>Sediment trends</b>: Declining sediment transport indicates upstream dam trapping, used as modifier</li>
                 <li>Normalized to 500 MW weighted impact = 100%</li>
+            </ul>
+            
+            <h3>Precip vs GW Divergence Layer</h3>
+            <ul>
+                <li>Per station (3,727 eHYD monthly stations): z-scored 12-month rolling precipitation sum from nearest NASA POWER cell vs monthly groundwater level; best correlation lag searched 0–24 months.</li>
+                <li>Median r = 0.34, median lag 0 months. <b>Divergence</b> = mean over last 5 years of (GW z-score − lagged precip z-score).</li>
+                <li>Finding: median divergence −0.55σ; ~70% of stations sit <i>below</i> where precipitation alone would put them — consistent with abstraction and structural losses, not just meteorological drought.</li>
+                <li>Caveats: 0.5° precipitation grid is coarse in Alpine terrain; z-score comparison assumes roughly linear precip→recharge response.</li>
+            </ul>
+            
+            <h3>Hydropower ↔ Groundwater Coupling Layer</h3>
+            <p>Question: how much of day-to-day groundwater variation moves with hydropower operations (pumping/turbining), beyond what rainfall explains?</p>
+            <ul>
+                <li><b>Data</b>: 227 live eHYD groundwater stations (daily levels, current year, ~190 days) × 292 live eHYD river gauges (daily stage) × ENTSO-E Austrian generation (15-min → daily GWh) for run-of-river, reservoir, and pumped storage (generation and pumping consumption) × NASA POWER daily precipitation.</li>
+                <li><b>Method</b>: per-station OLS on daily first differences (ΔGW). Baseline model: precipitation (today, lags 1–3 days, 7-day sum) <b>plus the nearest live river gauge's Δstage</b> (today + yesterday; median distance 5.9 km) — this control absorbs the shared rain/snowmelt → river → bank-connected-aquifer pathway. Full model adds 6 power terms (each hydro class, today + yesterday). Reported value is the <b>excess partial R²</b>: variance uniquely added by the power terms, minus the k/(n−p−1) inflation expected from adding 6 regressors by chance.</li>
+                <li><b>Placebo check</b>: rerunning with the power series shifted back 100 days (keeps weekday/autocorrelation structure, breaks real-time coupling) yields a median excess of ~0.4% — versus ~6% for the real series — so the measured association is not a statistical artifact.</li>
+                <li><b>Result</b> (2026): precipitation alone explains a median 13% of daily ΔGW; adding the local river gauge raises the baseline to 27%; power terms add a median <b>~6% excess</b> on top. Stations within 5 km of a hydro plant show ~9% median excess vs ~5% beyond 5 km — a plausible proximity gradient.</li>
+                <li><b>Interpretation — read carefully</b>:
+                    <ul>
+                        <li>ENTSO-E data is a <i>national</i> aggregate; no plant-level attribution is possible.</li>
+                        <li>The nearest-gauge control cannot capture the full river network (assignment is straight-line, not along-river); residual shared hydrology may remain in the power signal. A denser network (e.g. OSM/Geofabrik waterways) would allow along-river matching — noted as future work.</li>
+                        <li>Austrian pumped storage is mostly high-alpine, (semi-)closed-loop — direct aquifer coupling is physically expected to be near zero; any statistical association is likely weekday/price seasonality shared with other variables.</li>
+                        <li>Bottom line for the risk model: we find <b>no evidence that power-plant pumping is a first-order driver of groundwater decline</b> at national scale; the dominant unexplained signal remains the negative precip-vs-GW divergence (abstraction/structural). Hydropower affects groundwater mainly indirectly — via impoundment, sediment trapping and altered river–aquifer exchange — which is what the hydro_factor (25%) already represents.</li>
+                    </ul>
+                </li>
             </ul>
             
             <h3>River Network Analysis</h3>
