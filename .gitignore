@@ -9,3 +9,14 @@ data/water_quality/DataExtract.json
 # Python cache
 __pycache__/
 *.pyc
+
+# Raw eHYD/EDO/NLV/OWF bulk downloads (too large for git)
+data/edo/
+data/gw/
+data/nlv/
+data/owf/
+data/qu/
+data/*.zip
+data/soil_permeability.gpkg
+logs/
+web/data/edo_municipality_timeseries.json

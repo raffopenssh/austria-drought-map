@@ -1,0 +1,169 @@
+{
+  "title": "Integrated Air-Water Nitrogen Analysis for Austria",
+  "data_sources": {
+    "air_nh3": "Austrian Informative Inventory Report (IIR) 2023",
+    "water_quality": "EEA WISE Database (2022)",
+    "groundwater_levels": "Austrian Hydrological Service"
+  },
+  "correlation": {
+    "nh3_vs_declining_wells": 0.4847,
+    "r_squared": 0.235,
+    "interpretation": "Weak to moderate positive correlation"
+  },
+  "water_quality_national": {
+    "nitrate_mean_mg_l": 16.277258477,
+    "nitrate_max_mg_l": 245.5,
+    "sites_elevated_pct": 31.9,
+    "sites_total": 1972
+  },
+  "regions": [
+    {
+      "name": "Ober\u00f6sterreich",
+      "air_nh3": {
+        "emissions_tonnes_year": 14200,
+        "density_tonnes_km2_year": 1.185
+      },
+      "groundwater": {
+        "monitoring_stations": 711,
+        "declining_wells_pct": 71.6,
+        "avg_trend_m_decade": -0.0929
+      },
+      "combined_risk": {
+        "score": 1.0,
+        "level": "HIGH"
+      }
+    },
+    {
+      "name": "Nieder\u00f6sterreich",
+      "air_nh3": {
+        "emissions_tonnes_year": 15800,
+        "density_tonnes_km2_year": 0.824
+      },
+      "groundwater": {
+        "monitoring_stations": 954,
+        "declining_wells_pct": 66.0,
+        "avg_trend_m_decade": -0.0559
+      },
+      "combined_risk": {
+        "score": 0.658,
+        "level": "HIGH"
+      }
+    },
+    {
+      "name": "Steiermark",
+      "air_nh3": {
+        "emissions_tonnes_year": 8900,
+        "density_tonnes_km2_year": 0.543
+      },
+      "groundwater": {
+        "monitoring_stations": 895,
+        "declining_wells_pct": 65.9,
+        "avg_trend_m_decade": -0.0556
+      },
+      "combined_risk": {
+        "score": 0.497,
+        "level": "MEDIUM"
+      }
+    },
+    {
+      "name": "Vorarlberg",
+      "air_nh3": {
+        "emissions_tonnes_year": 1900,
+        "density_tonnes_km2_year": 0.731
+      },
+      "groundwater": {
+        "monitoring_stations": 342,
+        "declining_wells_pct": 60.4,
+        "avg_trend_m_decade": -0.0613
+      },
+      "combined_risk": {
+        "score": 0.464,
+        "level": "MEDIUM"
+      }
+    },
+    {
+      "name": "Salzburg",
+      "air_nh3": {
+        "emissions_tonnes_year": 2400,
+        "density_tonnes_km2_year": 0.335
+      },
+      "groundwater": {
+        "monitoring_stations": 127,
+        "declining_wells_pct": 63.0,
+        "avg_trend_m_decade": -0.053
+      },
+      "combined_risk": {
+        "score": 0.306,
+        "level": "MEDIUM"
+      }
+    },
+    {
+      "name": "Burgenland",
+      "air_nh3": {
+        "emissions_tonnes_year": 3200,
+        "density_tonnes_km2_year": 0.807
+      },
+      "groundwater": {
+        "monitoring_stations": 66,
+        "declining_wells_pct": 51.5,
+        "avg_trend_m_decade": -0.0192
+      },
+      "combined_risk": {
+        "score": 0.286,
+        "level": "LOW"
+      }
+    },
+    {
+      "name": "Tirol",
+      "air_nh3": {
+        "emissions_tonnes_year": 3800,
+        "density_tonnes_km2_year": 0.301
+      },
+      "groundwater": {
+        "monitoring_stations": 343,
+        "declining_wells_pct": 59.0,
+        "avg_trend_m_decade": -0.015
+      },
+      "combined_risk": {
+        "score": 0.188,
+        "level": "LOW"
+      }
+    },
+    {
+      "name": "K\u00e4rnten",
+      "air_nh3": {
+        "emissions_tonnes_year": 3100,
+        "density_tonnes_km2_year": 0.325
+      },
+      "groundwater": {
+        "monitoring_stations": 134,
+        "declining_wells_pct": 56.5,
+        "avg_trend_m_decade": -0.0281
+      },
+      "combined_risk": {
+        "score": 0.138,
+        "level": "LOW"
+      }
+    },
+    {
+      "name": "Wien",
+      "air_nh3": {
+        "emissions_tonnes_year": 180,
+        "density_tonnes_km2_year": 0.434
+      },
+      "groundwater": {
+        "monitoring_stations": 216,
+        "declining_wells_pct": 52.3,
+        "avg_trend_m_decade": -0.0231
+      },
+      "combined_risk": {
+        "score": 0.095,
+        "level": "LOW"
+      }
+    }
+  ],
+  "high_risk_regions": [
+    "Ober\u00f6sterreich",
+    "Nieder\u00f6sterreich"
+  ]
+}
