@@ -682,6 +682,14 @@
                     <label for="layer-gw">Groundwater Trends</label>
                 </div>
                 <div class="layer-toggle">
+                    <input type="checkbox" id="layer-flow">
+                    <label for="layer-flow">River Flow Trends</label>
+                </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-precip">
+                    <label for="layer-precip">Precipitation Trends</label>
+                </div>
+                <div class="layer-toggle">
                     <input type="checkbox" id="layer-wq-choropleth">
                     <label for="layer-wq-choropleth">Water Quality</label>
                 </div>
@@ -746,6 +754,8 @@
             drought: true,
             hydro: true,
             gw: false,
+            flow: false,
+            precip: false,
             wiseGw: false,
             wiseRiver: false,
             wqChoropleth: false
@@ -766,6 +776,34 @@
                             <span>-50 (decline)</span>
                             <span>0</span>
                             <span>+30 (rise)</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.flow) {
+                html += `
+                    <div class="map-legend">
+                        <h4>River Flow Trend</h4>
+                        <div class="gradient-bar" style="background: linear-gradient(to right, #d32f2f, #3282e6, #1ee6a0);"></div>
+                        <div class="gradient-labels">
+                            <span>-30%/dec</span>
+                            <span>0</span>
+                            <span>+30%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.precip) {
+                html += `
+                    <div class="map-legend">
+                        <h4>Precip Trend</h4>
+                        <div class="gradient-bar" style="background: linear-gradient(to right, #d32f2f, #3282e6, #1ee6a0);"></div>
+                        <div class="gradient-labels">
+                            <span>-150mm/dec</span>
+                            <span>0</span>
+                            <span>+150</span>
                         </div>
                     </div>
                 `;
@@ -856,6 +894,8 @@
         const boundaryLayer = L.layerGroup().addTo(map);  // Drought risk choropleth
         const hydroLayer = L.layerGroup().addTo(map);  // Hydropower plants (points)
         const gwLayer = L.layerGroup();  // Groundwater trends (points)
+        const flowLayer = L.layerGroup();  // River flow gauge trends (points)
+        const precipLayer = L.layerGroup();  // Precipitation station trends (points)
         
         // Risk color function (categorical)
         function getRiskColor(risk) {
@@ -960,6 +1000,8 @@
         let geojsonData = null;
         let sedimentData = [];
         let riverImpactData = [];
+        let flowStationsData = [];
+        let precipStationsData = [];
         let gwTrendsCache = null;  // Cache for GW trends data (pre-loaded in background)
 
         
@@ -1182,6 +1224,76 @@
                 marker.bindTooltip(`${gw.name || 'GW Station'}: ${trendCm} cm/dec`, { direction: 'top' });
                 
                 marker.addTo(gwLayer);
+            });
+        }
+        
+        // River flow trend layer (loaded on demand)
+        function getDivergingTrendColor(t) {
+            // t in [-1, 1]: red (decline) -> blue (stable) -> green (rising)
+            t = Math.max(-1, Math.min(1, t));
+            let r, g, b;
+            if (t < 0) {
+                const f = -t;  // 0..1
+                r = Math.round(50 + f * 161);   // 50 -> 211
+                g = Math.round(130 - f * 83);   // 130 -> 47
+                b = Math.round(230 - f * 183);  // 230 -> 47
+            } else {
+                r = Math.round(50 - t * 20);
+                g = Math.round(130 + t * 100);
+                b = Math.round(230 - t * 70);
+            }
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+        
+        async function renderFlowLayer() {
+            if (!flowStationsData.length) {
+                try {
+                    flowStationsData = await (await fetch('data/flow_analysis.json')).json();
+                } catch (e) { console.error('flow load failed', e); return; }
+            }
+            flowLayer.clearLayers();
+            flowStationsData.forEach(s => {
+                if (!s.lat || !s.lon || s.trend_pct_decade == null) return;
+                const t = s.trend_pct_decade / 30;  // normalize +-30%/dec
+                const marker = L.circleMarker([s.lat, s.lon], {
+                    radius: 5,
+                    fillColor: getDivergingTrendColor(t),
+                    fillOpacity: 0.85,
+                    color: '#222',
+                    weight: 0.5
+                });
+                marker.bindTooltip(
+                    `<b>${s.station}</b> (${s.river})<br>` +
+                    `Flow trend: ${s.trend_pct_decade > 0 ? '+' : ''}${s.trend_pct_decade}%/decade<br>` +
+                    `Mean flow: ${s.mean_flow_m3s} m³/s · ${s.years_data} yrs data`,
+                    { direction: 'top' });
+                marker.addTo(flowLayer);
+            });
+        }
+        
+        async function renderPrecipLayer() {
+            if (!precipStationsData.length) {
+                try {
+                    precipStationsData = await (await fetch('data/precipitation_analysis.json')).json();
+                } catch (e) { console.error('precip load failed', e); return; }
+            }
+            precipLayer.clearLayers();
+            precipStationsData.forEach(s => {
+                if (!s.lat || !s.lon || s.trend_mm_decade == null) return;
+                const t = s.trend_mm_decade / 150;  // normalize +-150mm/dec
+                const marker = L.circleMarker([s.lat, s.lon], {
+                    radius: 4,
+                    fillColor: getDivergingTrendColor(t),
+                    fillOpacity: 0.85,
+                    color: '#222',
+                    weight: 0.5
+                });
+                marker.bindTooltip(
+                    `<b>${s.station}</b><br>` +
+                    `Precip trend: ${s.trend_mm_decade > 0 ? '+' : ''}${s.trend_mm_decade} mm/decade (${s.trend_pct_decade > 0 ? '+' : ''}${s.trend_pct_decade}%)<br>` +
+                    `Mean: ${s.mean_annual_mm} mm/yr · ${s.years_data} yrs data`,
+                    { direction: 'top' });
+                marker.addTo(precipLayer);
             });
         }
         
@@ -1428,6 +1540,24 @@
             if (this.checked) map.addLayer(gwLayer);
             else map.removeLayer(gwLayer);
             legendState.gw = this.checked;
+            updateLegends();
+        });
+        
+        document.getElementById('layer-flow').addEventListener('change', async function() {
+            if (this.checked) {
+                await renderFlowLayer();
+                map.addLayer(flowLayer);
+            } else map.removeLayer(flowLayer);
+            legendState.flow = this.checked;
+            updateLegends();
+        });
+        
+        document.getElementById('layer-precip').addEventListener('change', async function() {
+            if (this.checked) {
+                await renderPrecipLayer();
+                map.addLayer(precipLayer);
+            } else map.removeLayer(precipLayer);
+            legendState.precip = this.checked;
             updateLegends();
         });
         
