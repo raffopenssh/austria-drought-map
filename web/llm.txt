@@ -8,33 +8,45 @@ CORS:        all origins allowed (read-only GETs)
 
 ## What this dataset is
 
-A composite drought / water-stress risk model for all ~2,100 Austrian
-municipalities (Gemeinden). It fuses Copernicus EDO Combined Drought Indicator,
-eHYD groundwater & surface-flow station trends, GeoSphere precipitation,
-WISE water-quality status, INSPIRE soil permeability, and e-control hydropower
-exposure into a 0–1 risk_score (low/medium/high). Interactive map at the base URL.
+GW Power: the groundwater status of Austria. The headline model is the
+**Groundwater Status Index (GWI)** — one 0–1 value (good/watch/stressed) for
+each of the 7,850 Katastralgemeinden (KGs), fusing:
 
-Granularity: per Gemeinde (municipality). Keyed on the official 5-digit
-Statistik Austria gemeinde_code.
+  gwi_q_trend   35%  IDW 10-yr eHYD groundwater level trend (clamp(-t/0.5 m/dec))
+  gwi_q_div     15%  5-yr precip-vs-level divergence (clamp(-d/1.5 sigma))
+  gwi_q_nitrate 25%  IDW latest WISE-6 nitrate (clamp(no3/50 mg/L))
+  gwi_q_wfd     10%  WISE WFD 2022 water-body status risk
+  gwi_q_edo     15%  Copernicus EDO CDI mean 2012-2023 (clamp(cdi/2))
+
+Weights renormalized over available components; categories good <0.30 <=
+watch <0.50 <= stressed. gwi_estimated=1 flags KGs where the nearest-3
+(<=30 km) fallback replaced the primary 12.5 km IDW radius. Full method:
+the Methods modal on the map, and scripts/build_gw_index.py in the repo.
+
+A legacy composite drought risk_score (per Gemeinde) plus per-point station
+observations (groundwater levels, nitrate, hydropower, WFD sites) with full
+annual histories are carried alongside.
+
+Granularity: MIXED — gwi_* per KG, legacy metrics per Gemeinde, stations per
+point. Keys: official 5-char kg_code / gemeinde_code strings.
 
 ## Sibling-service integration endpoints (/llm/)
 
 Implements the Austrian Cadastre "Integration Spec for Sibling Data Services"
 (https://cadastre-process-api.exe.xyz/api/v1/docs/llm.txt?section=integration).
 
-Our headline metrics are per-municipality, so every per-KG answer maps UP from
-kg_code to its gemeinde_code (resolved once through the canonical /api/v1/lookup
-EDM register, cached in data/kg_to_gemeinde.json) and returns the Gemeinde-level
-block; every KG inside a Gemeinde returns the same metrics. No local fuzzy
-matching of place names.
+The gwi_* metrics are computed AT the requested KG's centroid (granularity
+"kg"). Legacy drought metrics map UP from kg_code to gemeinde_code (resolved
+through the canonical EDM register: data/kg_registry.json built from
+/api/v1/lookup). No local fuzzy matching of place names.
 
-In addition we carry three POINT datasets — groundwater stations, hydropower
-plants and WISE water-quality sites — each snapped ONCE to its Katastralgemeinde
-(and parcel) via the cadastre's POST /api/v1/spatial/points (exact
-point-in-polygon). Those observations are returned under 'points', grouped by
-KG, with each station's full annual history and (when confident) its parcel_id.
-KG-level roll-ups (station/plant/site counts, mean GW trend, total MW, #at-risk)
-are folded into 'metrics'.
+We carry four POINT datasets — groundwater level stations, WISE-6 nitrate
+stations, hydropower plants and WISE WFD water-quality sites — each snapped
+ONCE to its Katastralgemeinde (and parcel) via the cadastre's POST
+/api/v1/spatial/points (exact point-in-polygon). Those observations are
+returned under 'points', grouped by KG, with each station's full annual
+history and (when confident) its parcel_id. KG-level roll-ups (station
+counts, mean GW trend, total MW, #at-risk) are folded into 'metrics'.
 
   GET /llm/kg/{kg_code}            drought/water-stress metrics for one KG
   GET /llm/kg/{kg_code}.json       (alias; JSON is the only format)
@@ -46,8 +58,10 @@ are folded into 'metrics'.
                                    through the canonical cadastre /api/v1/lookup)
   GET /llm/muni/{code_or_name}     (alias of /llm/gemeinde/)
   GET /llm/gemeinden?codes=a,b,c   batch (<=500 codes) -> {"results":[...]}
+  GET /llm/point/{id}              one station/plant/site by id, e.g.
+                                   gw:336446, no3:ATPG90100012, pp:12, wq:AT...
   GET /llm/manifest.json           coverage + metrics schema (crawl entry point)
-  GET /llm/covered_kgs.json        array of every kg_code we can answer (7,545)
+  GET /llm/covered_kgs.json        array of every kg_code we can answer (7,850)
   GET /llm/covered_gemeinden.json  array of every gemeinde_code (2,117)
 
 The per-Gemeinde payload mirrors the per-KG shape, plus 'kg_codes' (all KGs in
@@ -65,12 +79,18 @@ All kg_code / gemeinde_code values are 5-character zero-padded strings.
     "kg_code": "63349",
     "gemeinde_code": "61631",
     "gemeinde_name": "Köflach",
-    "granularity": "gemeinde",
+    "granularity": "kg",
+    "granularity_note": "gwi_* metrics: kg; legacy risk metrics: gemeinde; points: point",
     "as_of": "2023-12-31",
     "updated_at": "<ISO8601>",
     "source": "...", "license": "CC-BY-4.0",
     "unit_glossary": { "<metric>": "<unit/meaning>", ... },
     "metrics": {
+      "gwi": 0.45, "gwi_category": "watch",
+      "gwi_q_trend": 0.53, "gwi_q_div": 0.17, "gwi_q_nitrate": 0.63,
+      "gwi_q_wfd": 0.0, "gwi_q_edo": 0.53,
+      "gwi_gw_trend": -0.27, "gwi_gw_div": -0.26, "gwi_no3": 31.6,
+      "gwi_n_gw_stations": 125, "gwi_n_no3_stations": 42,
       "risk_score": 0.14, "risk_category": "low",
       "edo_cdi_mean": 0.70, "edo_cdi_max": 4.8, "edo_risk": 0.35,
       "gw_risk": 0.02, "gw_trend": -0.005,
@@ -86,6 +106,9 @@ All kg_code / gemeinde_code values are 5-character zero-padded strings.
         "parcel_id": "45025-1155",
         "metrics": { "gw_level_m": 260.48, "gw_trend_m_per_decade": 0.29, "gw_p_value": 0.005 },
         "history": [ { "as_of": "1990", "gw_level_m": 260.41 }, ... ] },
+      { "id": "no3:ATPG20441012", "category": "nitrate_station",
+        "metrics": { "no3_mg_l": 18.4, "no3_latest_year": 2024, "no3_trend_mg_l_per_yr": -0.05 },
+        "history": [ { "as_of": "1992", "no3_mg_l": 21.0 }, ... ] },
       { "id": "pp:12", "category": "power_plant", "metrics": { "capacity_mw": 172.0 }, ... },
       { "id": "wq:AT300012", "category": "water_quality_site",
         "metrics": { "chem_status": "Good", "eco_status": null, "at_risk": "No" }, ... }
@@ -93,8 +116,10 @@ All kg_code / gemeinde_code values are 5-character zero-padded strings.
   }
 
 'history' (KG level) is the annual Copernicus EDO drought series (2012–2023).
-Each groundwater station carries its own 'history' of annual levels (from 1990).
-Point categories: groundwater_station, power_plant, water_quality_site.
+Groundwater stations carry their own 'history' of annual levels (from 1990);
+nitrate stations their annual NO3 means (from 1992).
+Point categories: groundwater_station, nitrate_station, power_plant,
+water_quality_site.
 
 ## Notes for consumers
 

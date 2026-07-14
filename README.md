@@ -1,26 +1,41 @@
-# GW-Power (Austria groundwater × hydropower)
+# GW Power — the groundwater status of Austria
 
-Interactive municipality-level drought risk visualization for Austria, combining 100-year groundwater monitoring data with hydropower infrastructure analysis.
+One map, one model: the **Groundwater Status Index (GWI)** for every one of
+Austria's 7,850 Katastralgemeinden — groundwater quantity, quality (nitrate)
+and drought pressure in a single transparent 0–1 index. Tap anywhere for the
+KG's component breakdown, nearby station timelines (levels since 1966,
+nitrate since 1992) and its EDO drought history.
 
-## Live Demo
+## Live
 
-**https://groundwater-at.exe.xyz:8000/**
+**https://groundwater-at.exe.xyz:8000/** — the GW Power app
+(the previous multi-layer explorer survives at `/explore.html`).
 
-## Overview
+## The model (GWI)
 
-This project visualizes drought risk across Austrian municipalities based on:
+Computed at every KG centroid by `scripts/build_gw_index.py`
+(→ `web/data/gw_index_kg.json`), Gemeinde mean for the choropleth.
+Weighted mean of five sub-risks, weights renormalized over available data:
 
-- **Groundwater trends** from 100-year eHYD monitoring data (2,074 stations)
-- **Hydropower impact** from pump storage, run-of-river, and storage plants (156 plants)
-- **Surface water discharge** patterns
-- **Precipitation data** (495 stations)
+| Component | Weight | Definition |
+|---|---|---|
+| Level trend | 35% | IDW of 10-yr eHYD level trends (≤12.5 km); risk = clamp(−trend / 0.5 m/dec) |
+| Precip divergence | 15% | 5-yr level residual vs precipitation regression; risk = clamp(−div / 1.5σ) |
+| Nitrate | 25% | IDW of latest WISE-6 annual means (stations ≥2015); risk = clamp(NO₃ / 50 mg/L) |
+| WFD status | 10% | WISE WFD 2022 water-body status risk |
+| Drought pressure | 15% | Copernicus EDO CDI mean 2012–23; risk = clamp(CDI / 2) |
 
-## Key Findings
+Categories: good < 0.30 ≤ watch < 0.50 ≤ stressed (calibrated ≈ 28/40/31%
+nationally). `est` flags KGs where the nearest-3 (≤30 km) fallback was used.
+Full honesty section: the Methods modal in the app.
 
-- **54 declining vs 40 rising** groundwater stations (based on statistically valid long-term data)
-- **Mean groundwater decline: -4.7cm/decade**
-- **186 at-risk municipalities** identified
-- Highest risk areas: Marchfeld/Vienna Basin, SE Styria
+## Key findings
+
+- Nation-wide: ~2,460 KGs (31%) score *stressed*, concentrated in the
+  Weinviertel/Marchfeld, the Vienna basin and SE Styria
+- Nitrate is the dominant quality signal: dozens of stations still exceed
+  the 50 mg/L EU limit in 2024
+- Mean groundwater decline ≈4.7 cm/decade, with strong east–west gradient
 
 ## Context
 
@@ -32,24 +47,30 @@ In recent years, Austrian municipalities have had to implement water rationing m
 
 ## Data Sources
 
-- [eHYD Portal](https://ehyd.gv.at/) - Austrian hydrographic data
-  - Groundwater levels (cat=gw)
-  - Surface water discharge (cat=owf)
-  - Precipitation (cat=nlv)
-  - Springs (cat=qu)
-- [Oesterreichs Energie](https://oesterreichsenergie.at/) - Power plant registry
+- [eHYD Portal](https://ehyd.gv.at/) — 3,732 groundwater level stations (annual means, most 1966–2022)
+- EEA Waterbase ICM 2026 (WISE-6 SoE) — 2,250 nitrate stations, 1992–2024 (`scripts/fetch_wise_nitrate.py`)
+- WISE WFD 2022 — water-body chemical/ecological status
+- [Copernicus EDO](https://edo.jrc.ec.europa.eu/) — Combined Drought Indicator 2012–2023
+- NASA POWER — daily precipitation behind the divergence component
+- [BEV cadastre API](https://cadastre-process-api.exe.xyz/) — canonical KG/Gemeinde registry, point-in-polygon snapping, address search
+- [Oesterreichs Energie](https://oesterreichsenergie.at/) — power plant registry
 - Austrian municipality boundaries from GeoJSON-Austria
 
 ## API
 
 Sibling-service endpoints per the [cadastre integration spec](https://cadastre-process-api.exe.xyz/api/v1/docs/llm.txt?section=integration), keyed on official BEV/Statistik Austria codes (5-char zero-padded strings):
 
-- `GET /llm/kg/{kg_code}` — per Katastralgemeinde (maps up to its Gemeinde)
-- `GET /llm/gemeinde/{code_or_name}` — per municipality (alias `/llm/muni/`)
+- `GET /llm/kg/{kg_code}` — per Katastralgemeinde: **KG-granular GWI + components**, legacy Gemeinde metrics, snapped point observations
+- `GET /llm/gemeinde/{code_or_name}` — per municipality (alias `/llm/muni/`), name lookup included
 - `GET /llm/kgs?codes=...` / `GET /llm/gemeinden?codes=...` — batch (≤500)
+- `GET /llm/point/{id}` — single station (`gw:336446`, `no3:ATPG90100012`, `pp:12`, `wq:AT…`) with full annual history
 - `GET /llm/manifest.json`, `/llm/covered_kgs.json`, `/llm/covered_gemeinden.json`
 
-Payloads include composite risk metrics, EDO drought history (2012–2023), and snapped point observations (GW stations with annual level history, hydropower plants, WISE water-quality sites). See [`web/llm.txt`](web/llm.txt).
+Point categories: groundwater_station, nitrate_station, power_plant, water_quality_site — all snapped once to their KG/parcel via the cadastre. See [`web/llm.txt`](web/llm.txt).
+
+## Share links
+
+`?v=lat,lng,zoom` (view) plus deep links `&kg=66123` (KG modal), `&st=336446` (GW station), `&no3=ATPG90100012` (nitrate station), `&gem=61045` (Gemeinde).
 
 ## Technical Stack
 
@@ -74,18 +95,12 @@ austria-drought-map/
     └── data/             # Processed JSON data
 ```
 
-## Risk Calculation
-
-The risk score combines:
-- **Groundwater trend risk** (50%): Negative trend = higher risk
-- **Hydropower impact risk** (50%): Higher capacity nearby = higher risk
-
 ## Limitations
 
-- Coordinate transformation from BMN to WGS84 is approximate
-- Time series analysis limited to stations with 10+ years of data
-- Trend analysis excludes stations with unrealistic variance
-- Heat pump risk is currently proxied by groundwater trend (actual depth data would improve accuracy)
+- IDW interpolation between stations is an estimate, not a measurement (`est` flag marks sparse areas)
+- Aquifers ignore administrative borders; sharp steps between neighbouring KGs deserve skepticism
+- WFD status is per water body (Gemeinde attribution approximate); nitrate <LOQ counted as LOQ/2
+- NASA POWER precipitation grid is coarse (~50 km); trend windows differ per source (eHYD →2022, nitrate →2024)
 
 ## Future Enhancements
 

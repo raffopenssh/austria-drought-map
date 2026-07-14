@@ -4,17 +4,22 @@
 Implements the "Integration Spec for Sibling Data Services" published at
 https://cadastre-process-api.exe.xyz/api/v1/docs/llm.txt?section=integration
 
-This dataset (Austrian drought / water-stress risk) is per-municipality
-(Gemeinde), so every endpoint reports granularity="gemeinde": for a requested
-kg_code we map UP to its gemeinde_code (via the canonical /api/v1/lookup,
-pre-resolved into data/kg_to_gemeinde.json) and return the Gemeinde-level block.
-Every KG inside a Gemeinde returns the same metrics.
+Granularity is MIXED:
+  - The Groundwater Status Index (GWI) and its components are computed at
+    every KG centroid (web/data/gw_index_kg.json) -> granularity "kg".
+  - The legacy drought-risk metrics are per-municipality (Gemeinde); for a
+    requested kg_code we map UP to its gemeinde_code and return the
+    Gemeinde-level block alongside.
+  - Station observations (groundwater levels, nitrate, hydropower, WFD
+    sites) are per-point, snapped once to their KG via the cadastre
+    POST /api/v1/spatial/points (scripts/snap_points.py).
 
 Endpoints:
   GET /llm/kg/{kg_code}            per-KG payload (alias: .json)
   GET /llm/kgs?codes=a,b,c         batch (<=500) of per-KG payloads
   GET /llm/gemeinde/{code_or_name} per-Gemeinde payload (alias: /llm/muni/)
   GET /llm/gemeinden?codes=a,b,c   batch (<=500) of per-Gemeinde payloads
+  GET /llm/point/{id}              single point, e.g. gw:336446, no3:AT...
   GET /llm/manifest.json           coverage + schema descriptor
   GET /llm/covered_kgs.json        array of every kg_code we can answer
   GET /llm/covered_gemeinden.json  array of every gemeinde_code we can answer
@@ -35,6 +40,34 @@ SOURCE = ("Copernicus EDO CDI, eHYD groundwater & surface-flow stations, "
 LICENSE = "CC-BY-4.0"
 # Validity date of the headline figures: latest EDO drought year we ingest.
 AS_OF = "2023-12-31"
+
+GWI_GLOSSARY = {
+    "gwi": "Groundwater Status Index 0-1 (higher = more stressed); KG-granular",
+    "gwi_category": "good|watch|stressed bucket of gwi (<0.30 / <0.50 / >=0.50)",
+    "gwi_q_trend": "GWI quantity component: 10-yr level-trend sub-risk 0-1 (w 35%)",
+    "gwi_q_div": "GWI quantity component: precip-divergence sub-risk 0-1 (w 15%)",
+    "gwi_q_nitrate": "GWI quality component: nitrate sub-risk 0-1 vs 50 mg/L EU limit (w 25%)",
+    "gwi_q_wfd": "GWI quality component: WFD 2022 status sub-risk 0-1 (w 10%)",
+    "gwi_q_edo": "GWI drought component: EDO CDI sub-risk 0-1 (w 15%)",
+    "gwi_gw_trend": "IDW groundwater level trend at the KG centroid, m/decade (neg = declining)",
+    "gwi_gw_div": "IDW 5-yr precip-vs-level divergence, sigma (neg = below precip-explained)",
+    "gwi_no3": "IDW latest annual-mean nitrate at the KG centroid, mg/L",
+    "gwi_n_gw_stations": "# groundwater level stations used for the interpolation",
+    "gwi_n_no3_stations": "# nitrate stations used for the interpolation",
+    "gwi_estimated": "1 = >=1 component used the nearest-3 <=30 km fallback (sparse area)",
+}
+
+# gw_index_kg.json compact key -> API metric name
+_GWI_KEYMAP = [
+    ("i", "gwi"), ("c", "gwi_category"),
+    ("q_trend", "gwi_q_trend"), ("q_div", "gwi_q_div"),
+    ("q_nitrate", "gwi_q_nitrate"), ("q_wfd", "gwi_q_wfd"),
+    ("q_edo", "gwi_q_edo"),
+    ("gw_trend", "gwi_gw_trend"), ("gw_div", "gwi_gw_div"),
+    ("no3", "gwi_no3"),
+    ("n_gw", "gwi_n_gw_stations"), ("n_no3", "gwi_n_no3_stations"),
+    ("est", "gwi_estimated"),
+]
 
 UNIT_GLOSSARY = {
     "risk_score": "composite drought-risk index 0-1 (higher = drier/more stressed)",
@@ -77,6 +110,10 @@ METRICS_SCHEMA = {
 # ---- point datasets (granularity=point), snapped to KGs once via the cadastre
 # POST /api/v1/spatial/points (see scripts/snap_points.py) -------------------
 POINT_GLOSSARY = {
+    "no3_mg_l": "nitrate concentration, mg/L (annual mean; <LOQ counted as LOQ/2)",
+    "no3_latest_year": "year of the latest nitrate annual mean",
+    "no3_trend_mg_l_per_yr": "Theil-Sen nitrate trend, mg/L per year",
+    "nitrate_station_count": "# WISE-6 nitrate stations in this KG",
     "gw_level_m": "groundwater level, m above adriatic (latest annual mean)",
     "gw_trend_m_per_decade": "groundwater level trend, m/decade (neg = declining)",
     "gw_p_value": "p-value of the groundwater trend",
@@ -151,14 +188,58 @@ def _wq_point(f, snap):
     return obj
 
 
+def _no3_point(s, snap):
+    """WISE-6 nitrate station -> point object with full annual history."""
+    metrics = {
+        "no3_mg_l": s.get("latest"),
+        "no3_latest_year": s.get("latest_year"),
+        "no3_trend_mg_l_per_yr": s.get("trend_per_yr"),
+    }
+    p = {
+        "id": "no3:" + str(s["id"]),
+        "category": "nitrate_station",
+        "name": s.get("id"),
+        "lon": s.get("lon"), "lat": s.get("lat"),
+        "metrics": {k: v for k, v in metrics.items() if v is not None},
+    }
+    if snap.get("parcel_id"):
+        p["parcel_id"] = snap["parcel_id"]
+    history = [{"as_of": str(yr), "no3_mg_l": v}
+               for yr, v in sorted((s.get("annual") or {}).items())]
+    if history:
+        p["history"] = history
+    return p
+
+
 def _load():
     if _state["loaded"]:
         return
     munis = json.load(open(os.path.join(DATA, "municipalities.json")))
     _state["gem_by_code"] = {str(m["iso"]).zfill(5): m for m in munis}
     # kg_code / gemeinde_code are canonically 5-char zero-padded strings.
+    # kg_registry.json (all 7,850 KGs, from the cadastre EDM register) is the
+    # primary source; kg_to_gemeinde.json fills any historical stragglers.
+    kg2gem = {}
+    reg_path = os.path.join(DATA, "kg_registry.json")
+    if os.path.exists(reg_path):
+        _state["kg_registry"] = json.load(open(reg_path))
+        for k, r in _state["kg_registry"].items():
+            kg2gem[str(k).zfill(5)] = str(r["g"]).zfill(5)
+    else:
+        _state["kg_registry"] = {}
     raw = json.load(open(os.path.join(DATA, "kg_to_gemeinde.json")))
-    _state["kg2gem"] = {str(k).zfill(5): str(v).zfill(5) for k, v in raw.items()}
+    for k, v in raw.items():
+        kg2gem.setdefault(str(k).zfill(5), str(v).zfill(5))
+    _state["kg2gem"] = kg2gem
+    # Per-KG Groundwater Status Index (the model behind the GW Power app).
+    gwi_path = os.path.join(DATA, "gw_index_kg.json")
+    if os.path.exists(gwi_path):
+        gwi = json.load(open(gwi_path))
+        _state["gwi_kgs"] = gwi.get("kgs", {})
+        _state["gwi_meta"] = {"generated": gwi.get("generated"),
+                              "weights": gwi.get("weights")}
+    else:
+        _state["gwi_kgs"], _state["gwi_meta"] = {}, {}
     # Reverse map gemeinde_code -> [kg_code, ...] for the per-Gemeinde endpoint.
     gem2kgs = {}
     for kg, gem in _state["kg2gem"].items():
@@ -179,11 +260,15 @@ def _load():
     snap_path = os.path.join(DATA, "point_snap.json")
     snap = json.load(open(snap_path)) if os.path.exists(snap_path) else {}
 
+    point_by_id = {}
+
     def add(pid, obj):
+        point_by_id[pid] = (None, obj)
         s = snap.get(pid)
         if not s or not s.get("kg_code"):
             return
         kg = str(s["kg_code"])
+        point_by_id[pid] = (kg, obj)
         kg_points.setdefault(kg, []).append(obj)
         covered.add(kg)
 
@@ -191,21 +276,28 @@ def _load():
     if os.path.exists(gw_path):
         for s in json.load(open(gw_path)):
             pid = "gw:" + str(s["id"])
-            if snap.get(pid):
-                add(pid, _gw_point(s, snap[pid]))
+            add(pid, _gw_point(s, snap.get(pid) or {}))
     pp_path = os.path.join(DATA, "powerplants.json")
     if os.path.exists(pp_path):
         for i, p in enumerate(json.load(open(pp_path))):
             pid = "pp:" + str(i)
-            if snap.get(pid):
-                add(pid, _pp_point(i, p, snap[pid]))
+            add(pid, _pp_point(i, p, snap.get(pid) or {}))
     wq_path = os.path.join(DATA, "wise_monitoring_sites.json")
     if os.path.exists(wq_path):
         for f in json.load(open(wq_path))["features"]:
             pr = f.get("properties") or {}
             pid = "wq:" + str(pr.get("id"))
-            if snap.get(pid):
-                add(pid, _wq_point(f, snap[pid]))
+            add(pid, _wq_point(f, snap.get(pid) or {}))
+    no3_path = os.path.join(DATA, "nitrate_stations.json")
+    if os.path.exists(no3_path):
+        for s in json.load(open(no3_path)).get("stations", []):
+            pid = "no3:" + str(s["id"])
+            add(pid, _no3_point(s, snap.get(pid) or {}))
+
+    # Flat point index for /llm/point/{id} (includes unsnapped points).
+    _state["point_by_id"] = point_by_id
+    # Every KG with a GWI value is covered.
+    covered.update(str(k).zfill(5) for k in _state["gwi_kgs"])
 
     _state["kg_points"] = kg_points
     _state["covered"] = sorted(covered)
@@ -238,7 +330,18 @@ def _point_rollup(points):
         out["water_quality_site_count"] = len(wq)
         at_risk = sum(1 for p in wq if p["metrics"].get("at_risk") == "Yes")
         out["water_quality_sites_at_risk"] = at_risk
+    no3 = [p for p in points if p["category"] == "nitrate_station"]
+    if no3:
+        out["nitrate_station_count"] = len(no3)
     return out
+
+
+def _gwi_metrics(kg_code):
+    """Per-KG GWI metrics (granularity: kg) from gw_index_kg.json."""
+    rec = _state["gwi_kgs"].get(kg_code) or _state["gwi_kgs"].get(kg_code.lstrip("0"))
+    if not rec:
+        return {}
+    return {name: rec[k] for k, name in _GWI_KEYMAP if rec.get(k) is not None}
 
 
 def _history(m):
@@ -261,12 +364,11 @@ def _payload_for_kg(kg_code):
     _load()
     kg_code = str(kg_code).strip().zfill(5)
     gem_code = _state["kg2gem"].get(kg_code)
-    if not gem_code:
-        return {"kg_code": kg_code, "error": "no_data"}, 404
     m = _state["gem_by_code"].get(gem_code) if gem_code else None
     points = _state["kg_points"].get(kg_code, [])
-    # Nothing at all for this KG (no Gemeinde match AND no snapped points).
-    if not m and not points:
+    has_gwi = bool(_state["gwi_kgs"].get(kg_code))
+    # Nothing at all for this KG.
+    if not m and not points and not has_gwi:
         return {"kg_code": kg_code, "error": "no_data"}, 404
 
     metrics = {}
@@ -274,10 +376,15 @@ def _payload_for_kg(kg_code):
         for k in METRIC_KEYS:
             if k in m and m[k] is not None:
                 metrics[k] = m[k]
+    # The GWI and its components are evaluated at THIS KG's centroid.
+    gwi = _gwi_metrics(kg_code)
+    metrics.update(gwi)
     # Fold the point roll-up (station counts etc.) into the KG-level metrics.
     metrics.update(_point_rollup(points))
 
     glossary = dict(UNIT_GLOSSARY)
+    if gwi:
+        glossary.update(GWI_GLOSSARY)
     if points:
         glossary.update(POINT_GLOSSARY)
 
@@ -287,9 +394,12 @@ def _payload_for_kg(kg_code):
         "kg_code": kg_code,
         "gemeinde_code": gem_code,
         "gemeinde_name": m.get("name") if m else None,
-        # Headline metrics are municipal; we also attach snapped point
-        # observations (stations/plants/sites) for this KG under 'points'.
-        "granularity": "gemeinde",
+        # gwi_* metrics are KG-granular (computed at this KG's centroid);
+        # the legacy drought metrics are municipal; snapped point
+        # observations (stations/plants/sites) for this KG are in 'points'.
+        "granularity": "kg" if gwi else "gemeinde",
+        "granularity_note": ("gwi_* metrics: kg; legacy risk metrics: "
+                             "gemeinde; points: point"),
         "as_of": AS_OF,
         "updated_at": _state["updated_at"],
         "source": SOURCE,
@@ -360,9 +470,16 @@ def _payload_for_gemeinde(ident):
             points.append(q)
 
     metrics = {k: m[k] for k in METRIC_KEYS if m.get(k) is not None}
+    # Gemeinde-mean GWI (aggregated over its KGs by build_gw_index.py).
+    gwi_keys = [n for _, n in _GWI_KEYMAP]
+    gwi = {k: m[k] for k in gwi_keys if m.get(k) is not None}
+    metrics.update(gwi)
     metrics.update(_point_rollup(points))
 
     glossary = dict(UNIT_GLOSSARY)
+    if gwi:
+        glossary.update(GWI_GLOSSARY)
+        glossary["gwi"] += " (Gemeinde value = mean over its KGs)"
     if points:
         glossary.update(POINT_GLOSSARY)
 
@@ -387,19 +504,31 @@ def _payload_for_gemeinde(ident):
 
 def manifest():
     _load()
+    schema = dict(METRICS_SCHEMA)
+    for _, name in _GWI_KEYMAP:
+        schema[name] = "string" if name == "gwi_category" else "number"
     return {
         "service": SERVICE,
         "dataset": DATASET,
-        "finest_granularity": "gemeinde",
+        "finest_granularity": "kg",
+        "granularity_note": ("gwi_* metrics are KG-granular (7,850 KGs); "
+                             "legacy drought metrics are Gemeinde-level; "
+                             "station observations are point-level with "
+                             "annual history"),
+        "model": {"name": "Groundwater Status Index (GWI)",
+                  **_state.get("gwi_meta", {}),
+                  "docs": "scripts/build_gw_index.py; Methods modal at /"},
         "join_keys": ["kg_code", "gemeinde_code"],
         "kg_endpoint": "/llm/kg/{kg_code}",
         "batch_endpoint": "/llm/kgs?codes={kg_code,...}",
         "gemeinde_endpoint": "/llm/gemeinde/{gemeinde_code_or_name}",
         "gemeinde_batch_endpoint": "/llm/gemeinden?codes={gemeinde_code,...}",
+        "point_endpoint": "/llm/point/{point_id}",
         "covered_gemeinden_url": "/llm/covered_gemeinden.json",
-        "metrics_schema": METRICS_SCHEMA,
+        "metrics_schema": schema,
         "point_categories": [
-            "groundwater_station", "power_plant", "water_quality_site"],
+            "groundwater_station", "nitrate_station", "power_plant",
+            "water_quality_site"],
         "point_kg_count": len(_state["kg_points"]),
         "kg_count": len(_state["covered"]),
         "gemeinde_count": len(set(_state["kg2gem"].values())),
@@ -459,6 +588,29 @@ def handle(path, query):
             results.append(obj)
         return 200, {"results": results,
                      "meta": {"requested": len(code_list)}}
+    if path.startswith("/llm/point/"):
+        pid = urllib.parse.unquote(path[len("/llm/point/"):]).strip("/")
+        if pid.endswith(".json"):
+            pid = pid[:-5]
+        if not pid:
+            return 400, {"error": "missing point id"}
+        _load()
+        hit = _state["point_by_id"].get(pid)
+        if not hit:
+            return 404, {"point_id": pid, "error": "no_data"}
+        kg, p = hit
+        obj = dict(p)
+        obj.update({
+            "service": SERVICE, "dataset": DATASET,
+            "kg_code": kg,
+            "gemeinde_code": _state["kg2gem"].get(kg),
+            "granularity": "point",
+            "as_of": AS_OF, "updated_at": _state["updated_at"],
+            "source": SOURCE, "license": LICENSE,
+            "unit_glossary": {k: v for k, v in POINT_GLOSSARY.items()
+                              if k in p.get("metrics", {})},
+        })
+        return 200, obj
     if path.startswith("/llm/kg/"):
         kg = path[len("/llm/kg/"):]
         if kg.endswith(".json"):
