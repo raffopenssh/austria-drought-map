@@ -693,6 +693,10 @@
                     <input type="checkbox" id="layer-wq-choropleth">
                     <label for="layer-wq-choropleth">Water Quality</label>
                 </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="layer-protection">
+                    <label for="layer-protection">Water Protection Zones</label>
+                </div>
             </div>
             
             
@@ -756,6 +760,7 @@
             gw: false,
             flow: false,
             precip: false,
+            protection: false,
             wiseGw: false,
             wiseRiver: false,
             wqChoropleth: false
@@ -805,6 +810,17 @@
                             <span>0</span>
                             <span>+150</span>
                         </div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.protection) {
+                html += `
+                    <div class="map-legend">
+                        <h4>Protection Zones</h4>
+                        <div class="legend-item-row"><div class="legend-dot" style="background: #29b6f6;"></div><span class="legend-label">Schutzgebiet (strict)</span></div>
+                        <div class="legend-item-row"><div class="legend-dot" style="background: #81d4fa;"></div><span class="legend-label">Schongebiet (buffer)</span></div>
+                        <div style="font-size:0.65em; color:#6a6a8a; margin-top:4px;">7 of 9 provinces (no Kärnten/Salzburg data)</div>
                     </div>
                 `;
             }
@@ -896,6 +912,7 @@
         const gwLayer = L.layerGroup();  // Groundwater trends (points)
         const flowLayer = L.layerGroup();  // River flow gauge trends (points)
         const precipLayer = L.layerGroup();  // Precipitation station trends (points)
+        const protectionLayer = L.layerGroup();  // Drinking water protection zones (polygons)
         
         // Risk color function (categorical)
         function getRiskColor(risk) {
@@ -1297,6 +1314,33 @@
             });
         }
         
+        // Water protection zones layer (loaded on demand)
+        let protectionDataLoaded = false;
+        async function renderProtectionLayer() {
+            if (protectionDataLoaded) return;
+            let data;
+            try {
+                data = await (await fetch('data/water_protection_at.geojson')).json();
+            } catch (e) { console.error('protection zones load failed', e); return; }
+            L.geoJSON(data, {
+                style: function(f) {
+                    const isSchon = /schongebiet/i.test(f.properties.zone_type || '');
+                    return {
+                        fillColor: isSchon ? '#81d4fa' : '#29b6f6',
+                        fillOpacity: isSchon ? 0.25 : 0.45,
+                        color: '#29b6f6',
+                        weight: 0.7,
+                        opacity: 0.8
+                    };
+                },
+                onEachFeature: function(f, layer) {
+                    const p = f.properties;
+                    layer.bindTooltip(`<b>${p.name || 'Protection zone'}</b><br>${p.zone_type || ''}<br>${p.province}`, { sticky: true });
+                }
+            }).addTo(protectionLayer);
+            protectionDataLoaded = true;
+        }
+        
         // WISE Water Quality Data (loaded on demand)
         let wiseDataLoaded = false;
         let wiseData = null;
@@ -1558,6 +1602,15 @@
                 map.addLayer(precipLayer);
             } else map.removeLayer(precipLayer);
             legendState.precip = this.checked;
+            updateLegends();
+        });
+        
+        document.getElementById('layer-protection').addEventListener('change', async function() {
+            if (this.checked) {
+                await renderProtectionLayer();
+                map.addLayer(protectionLayer);
+            } else map.removeLayer(protectionLayer);
+            legendState.protection = this.checked;
             updateLegends();
         });
         
@@ -2707,6 +2760,7 @@
                 </li>
                 <li><a href="https://oesterreichsenergie.at" target="_blank">Oesterreichs Energie</a> - Power plant registry (156 hydropower plants)</li>
                 <li>Municipality boundaries from <a href="https://github.com/ginseng666/GeoJSON-TopoJSON-Austria" target="_blank">GeoJSON Austria</a></li>
+                <li>Drinking-water protection zones (Wasserschutz-/Wasserschongebiete) from provincial INSPIRE WFS services (via <a href="https://inspire-austria.exe.xyz" target="_blank">INSPIRE Österreich</a>): OÖ DORIS, Steiermark, Tirol, NÖ, Burgenland, Wien, Vorarlberg — 25,365 zones, 7 of 9 provinces</li>
             </ul>
             
             <h3>Risk Calculation</h3>

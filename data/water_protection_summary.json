@@ -1,0 +1,47 @@
+{
+  "total_features": 25365,
+  "provinces": {
+    "Oberösterreich": {
+      "features": 8675,
+      "area_km2": 187.4
+    },
+    "Steiermark": {
+      "features": 11907,
+      "area_km2": 2223.1
+    },
+    "Tirol": {
+      "features": 360,
+      "area_km2": 584.8
+    },
+    "Burgenland": {
+      "features": 14,
+      "area_km2": 163.3
+    },
+    "Wien": {
+      "features": 21,
+      "area_km2": 65.5
+    },
+    "Niederösterreich": {
+      "features": 3961,
+      "area_km2": 1453.8
+    },
+    "Vorarlberg": {
+      "features": 427,
+      "area_km2": 70.5
+    }
+  },
+  "sources_ok": [
+    "Oberösterreich (DORIS WFS)",
+    "Steiermark Schutzgebiete",
+    "Steiermark Schongebiete",
+    "Tirol Wasserschutzgebiete",
+    "Burgenland Schongebiete",
+    "Wien Area Management",
+    "Niederösterreich INSPIRE GML",
+    "Vorarlberg VOGIS"
+  ],
+  "sources_failed": [
+    "Kärnten OGC API"
+  ],
+  "simplify_tolerance_deg": 0.0005
+}
