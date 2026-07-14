@@ -2190,6 +2190,23 @@
                     ${(muni.precip_estimated || muni.flow_estimated) ? '<p style="font-size: 0.65em; color: #6a6a8a; margin-top: 6px;">* Estimated from nearest stations</p>' : ''}
                 </div>
                 
+                ${muni.edo_yearly ? `
+                <div class="detail-section">
+                    <h4>Drought History (EDO CDI by Year)</h4>
+                    <div style="display: flex; align-items: stretch; gap: 4px; height: 100px; padding: 4px 0;">
+                        ${Object.entries(muni.edo_yearly).map(([yr, v]) => {
+                            const h = Math.max(3, Math.min(100, (v.mean / 2) * 100));
+                            const col = v.mean > 1.2 ? '#e94560' : v.mean > 0.8 ? '#f97316' : v.mean > 0.4 ? '#f39c12' : '#3b82f6';
+                            return `<div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:2px;" title="${yr}: mean CDI ${v.mean.toFixed(2)}, max ${v.max.toFixed(1)}">
+                                <div style="width:100%; height:${h}%; background:${col}; border-radius:2px 2px 0 0; min-height:2px;" title="${yr}: mean CDI ${v.mean.toFixed(2)}"></div>
+                                <span style="font-size:0.55em; color:#6a6a8a;">${yr.slice(2)}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    <p style="font-size: 0.65em; color: #6a6a8a;">Bar height = mean Combined Drought Indicator (0 = none, 3 = alert). Source: Copernicus EDO.</p>
+                </div>
+                ` : ''}
+                
                 ${riverInfo.length > 0 ? `
                 <div class="detail-section">
                     <h4>Nearby Rivers & Hydropower</h4>
@@ -2695,10 +2712,12 @@
             <h3>Risk Calculation</h3>
             <p>The drought risk score combines four factors:</p>
             <ul>
-                <li><b>Groundwater trend (40%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
-                <li><b>Hydropower impact (30%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
-                <li><b>EDO Combined Drought Index (30%)</b>: Satellite-derived drought indicator from Copernicus, integrating precipitation, soil moisture, and vegetation stress (2012-2023 average).</li>
+                <li><b>Groundwater trend (35%)</b>: Linear regression on annual mean water table levels. Negative trends (declining water table) increase risk.</li>
+                <li><b>Hydropower impact (25%)</b>: Weighted impact of nearby plants within 30km radius (see below).</li>
+                <li><b>EDO Combined Drought Index (25%)</b>: Satellite-derived drought indicator from Copernicus, integrating precipitation, soil moisture, and vegetation stress (2012-2023 average).</li>
+                <li><b>Soil permeability (15%)</b>: Low-permeability soils reduce groundwater recharge (INSPIRE Austria soil data).</li>
             </ul>
+            <p>River flow trends and precipitation trends are shown as separate informational layers and in the municipality detail view, but do not enter the composite score directly (they overlap with EDO CDI and groundwater signals).</p>
             
             <h3>Hydropower Impact Factor</h3>
             <p>The hydro_factor calculation considers:</p>
