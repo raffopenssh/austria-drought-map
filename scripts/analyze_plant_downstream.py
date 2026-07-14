@@ -189,6 +189,30 @@ for pid, ds in DS.items():
                              river=g.get('gewasser'), km=info['km'],
                              off_m=info['off_m'], sig=sig, **r))
 
+# ---- sparkline series for significant GW links (last ~150 common days) ----
+def spark_for(levels, rel, ndays=150):
+    days = sorted(set(levels) & set(rel))[-ndays:]
+    if len(days) < 60:
+        return None
+    lv = np.array([levels[d] for d in days], float)
+    rl = np.array([rel[d] for d in days], float)
+    def norm(a):
+        lo, hi = float(a.min()), float(a.max())
+        if hi - lo < 1e-9:
+            return [50] * len(a)
+        return [int(round((v - lo) / (hi - lo) * 100)) for v in a]
+    return dict(d0=days[0], d1=days[-1], n=len(days),
+                lvl=norm(lv), rel=norm(rl),
+                lvl_min=round(float(lv.min()), 2), lvl_max=round(float(lv.max()), 2))
+
+for l in links_gw:
+    if not l['sig']:
+        continue
+    s = gw_daily.get(l['station'])
+    sp = spark_for(s['levels'], release[l['plant']]) if s else None
+    if sp:
+        l['spark'] = sp
+
 plants_out = {}
 for pid, ds in DS.items():
     p = PLANTS[pid]

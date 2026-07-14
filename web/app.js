@@ -301,22 +301,41 @@ function hydroLinksForStation(id) {
     if (!plantInfl || !plantInfl.gw_links_sig) return [];
     return plantInfl.gw_links_sig.filter(l => String(l.station) === String(id));
 }
+function hydroSparkSVG(l) {
+    const sp = l.spark;
+    if (!sp || !sp.lvl || sp.lvl.length < 10) return '';
+    const W = 260, H = 44, n = sp.lvl.length;
+    const pts = a => a.map((v, i) =>
+        `${(i / (n - 1) * W).toFixed(1)},${(H - 3 - v / 100 * (H - 8)).toFixed(1)}`).join(' ');
+    const d0 = sp.d0.slice(5).replace('-', '/'), d1 = sp.d1.slice(5).replace('-', '/');
+    return `<div class="hydro-spark" style="margin:2px 0 6px 20px;">
+        <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;background:#141a2e;border-radius:6px;">
+            <polyline points="${pts(sp.rel)}" fill="none" stroke="#8fb8f2" stroke-width="1" opacity="0.75"/>
+            <polyline points="${pts(sp.lvl)}" fill="none" stroke="#facc6b" stroke-width="1.4"/>
+        </svg>
+        <small style="color:#6a7194;"><span style="color:#facc6b">━</span> well level (${sp.lvl_min}–${sp.lvl_max} m)
+        &nbsp;<span style="color:#8fb8f2">━</span> plant release &nbsp;·&nbsp; ${d0}–${d1}</small>
+    </div>`;
+}
 function hydroLinkRowHTML(l, showStation) {
     const p = plantInfl.plants[l.plant] || {};
     const dir = l.beta_sum > 0 ? '↑ level rises with releases' : '↓ level falls with releases';
     const share = Math.round(l.partial * 100);
-    return `<div class="station-item" style="cursor:default;">
+    return `<div class="station-item" style="cursor:default;display:block;">
+        <div style="display:flex;align-items:center;gap:8px;">
         <span class="dot" style="background:#8fb8f2"></span>
         <span class="nm">${esc(p.name || l.plant)} <small style="color:#6a7194">${esc(p.type || '')} · ${p.mw || '?'} MW · ${esc(p.river || '')}</small>${showStation ? `<br><small style="color:#6a7194">at ${esc(l.name)} (<a href="#" onclick="openGWStationById('${esc(l.station)}');return false;">${esc(l.station)}</a>)</small>` : ''}</span>
         <span class="meta">${l.km.toFixed(0)} km downstr.</span>
         <span class="val" title="partial R² = ${l.partial}, p = ${l.p}, placebo = ${l.placebo}">${share}% <small style="color:#6a7194">${dir.slice(0, 1)}</small></span>
+        </div>
+        ${hydroSparkSVG(l)}
     </div>`;
 }
 function hydroImpactHTML(links, showStation) {
     if (!links.length) return '';
     const anyDownscaled = links.some(l => (plantInfl.plants[l.plant] || {}).release_source !== 'a73');
     return `<h3>Hydropower influence <small style="color:#6a7194;font-weight:400">detected downstream signal</small></h3>
-        <div class="station-list">${links.map(l => hydroLinkRowHTML(l, showStation)).join('')}</div>
+        <div class="station-list" style="max-height:340px;">${links.map(l => hydroLinkRowHTML(l, showStation)).join('')}</div>
         <div class="note">% = share of day-to-day groundwater level variation at the monitoring well explained by the plant's
         turbined releases (ENTSO-E${anyDownscaled ? ', partly downscaled from the national feed by plant type & capacity' : ' per-unit data'}),
         after controlling for local precipitation. Only links passing significance tests (p&lt;0.01, above placebo) are shown.
