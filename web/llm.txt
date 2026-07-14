@@ -39,10 +39,23 @@ are folded into 'metrics'.
   GET /llm/kg/{kg_code}            drought/water-stress metrics for one KG
   GET /llm/kg/{kg_code}.json       (alias; JSON is the only format)
   GET /llm/kgs?codes=a,b,c         batch (<=500 codes) -> {"results":[...]}
+  GET /llm/gemeinde/{code_or_name} per-Gemeinde payload; accepts the 5-digit
+                                   gemeinde_code or an exact municipality name
+                                   (case-insensitive; ambiguous names -> HTTP 300
+                                   with candidates; unknown names are resolved
+                                   through the canonical cadastre /api/v1/lookup)
+  GET /llm/muni/{code_or_name}     (alias of /llm/gemeinde/)
+  GET /llm/gemeinden?codes=a,b,c   batch (<=500 codes) -> {"results":[...]}
   GET /llm/manifest.json           coverage + metrics schema (crawl entry point)
   GET /llm/covered_kgs.json        array of every kg_code we can answer (7,545)
+  GET /llm/covered_gemeinden.json  array of every gemeinde_code (2,117)
 
-404 with {"kg_code":"...","error":"no_data"} when a KG is outside our coverage.
+The per-Gemeinde payload mirrors the per-KG shape, plus 'kg_codes' (all KGs in
+the Gemeinde) and the union of snapped points across those KGs (each point
+carries its 'kg_code').
+
+All kg_code / gemeinde_code values are 5-character zero-padded strings.
+404 with {"error":"no_data"} when a KG/Gemeinde is outside our coverage.
 
 ### Per-KG response shape
 

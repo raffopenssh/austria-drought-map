@@ -13,12 +13,17 @@ Every KG inside a Gemeinde returns the same metrics.
 Endpoints:
   GET /llm/kg/{kg_code}            per-KG payload (alias: .json)
   GET /llm/kgs?codes=a,b,c         batch (<=500) of per-KG payloads
+  GET /llm/gemeinde/{code_or_name} per-Gemeinde payload (alias: /llm/muni/)
+  GET /llm/gemeinden?codes=a,b,c   batch (<=500) of per-Gemeinde payloads
   GET /llm/manifest.json           coverage + schema descriptor
   GET /llm/covered_kgs.json        array of every kg_code we can answer
+  GET /llm/covered_gemeinden.json  array of every gemeinde_code we can answer
 """
 import json
 import os
 import datetime
+import urllib.request
+import urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "web", "data")
@@ -150,9 +155,24 @@ def _load():
     if _state["loaded"]:
         return
     munis = json.load(open(os.path.join(DATA, "municipalities.json")))
-    _state["gem_by_code"] = {str(m["iso"]): m for m in munis}
-    _state["kg2gem"] = json.load(open(os.path.join(DATA, "kg_to_gemeinde.json")))
-    covered = set(json.load(open(os.path.join(DATA, "covered_kgs.json"))))
+    _state["gem_by_code"] = {str(m["iso"]).zfill(5): m for m in munis}
+    # kg_code / gemeinde_code are canonically 5-char zero-padded strings.
+    raw = json.load(open(os.path.join(DATA, "kg_to_gemeinde.json")))
+    _state["kg2gem"] = {str(k).zfill(5): str(v).zfill(5) for k, v in raw.items()}
+    # Reverse map gemeinde_code -> [kg_code, ...] for the per-Gemeinde endpoint.
+    gem2kgs = {}
+    for kg, gem in _state["kg2gem"].items():
+        gem2kgs.setdefault(str(gem), []).append(str(kg))
+    _state["gem2kgs"] = {g: sorted(k) for g, k in gem2kgs.items()}
+    # Exact (casefolded) name -> gemeinde_code index. Names come from the
+    # canonical municipality registry; only unambiguous names are indexed.
+    by_name = {}
+    for code, m in _state["gem_by_code"].items():
+        key = str(m.get("name", "")).casefold()
+        by_name.setdefault(key, set()).add(code)
+    _state["gem_by_name"] = {k: next(iter(v)) for k, v in by_name.items() if len(v) == 1}
+    _state["gem_ambiguous"] = {k: sorted(v) for k, v in by_name.items() if len(v) > 1}
+    covered = {str(k).zfill(5) for k in json.load(open(os.path.join(DATA, "covered_kgs.json")))}
 
     # Build kg_code -> [point objects] from the snapped point datasets.
     kg_points = {}
@@ -239,7 +259,7 @@ def _history(m):
 def _payload_for_kg(kg_code):
     """Return (dict, http_status). 404 dict when we hold nothing."""
     _load()
-    kg_code = str(kg_code)
+    kg_code = str(kg_code).strip().zfill(5)
     gem_code = _state["kg2gem"].get(kg_code)
     if not gem_code:
         return {"kg_code": kg_code, "error": "no_data"}, 404
@@ -282,6 +302,89 @@ def _payload_for_kg(kg_code):
     return payload, 200
 
 
+_lookup_cache = {}
+
+
+def _canonical_lookup(name):
+    """Resolve a Gemeinde name via the canonical cadastre EDM lookup.
+
+    Used only when the local exact-name index misses; result is cached.
+    Returns gemeinde_code or None.
+    """
+    key = name.casefold()
+    if key in _lookup_cache:
+        return _lookup_cache[key]
+    code = None
+    try:
+        url = ("https://cadastre-process-api.exe.xyz/api/v1/lookup?type=gemeinde&limit=2&q="
+               + urllib.parse.quote(name))
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            data = json.load(resp).get("data") or []
+        if len(data) == 1 and data[0].get("gemeinde_code"):
+            code = str(data[0]["gemeinde_code"])
+    except Exception:
+        code = None
+    _lookup_cache[key] = code
+    return code
+
+
+def _payload_for_gemeinde(ident):
+    """Per-Gemeinde payload. ident = 5-digit gemeinde_code or exact name.
+
+    Returns (dict, http_status).
+    """
+    _load()
+    ident = str(ident).strip()
+    gem_code = None
+    if ident.isdigit() and len(ident) == 5:
+        gem_code = ident
+    else:
+        key = ident.casefold()
+        gem_code = _state["gem_by_name"].get(key)
+        if not gem_code and key in _state["gem_ambiguous"]:
+            return {"gemeinde": ident, "error": "ambiguous_name",
+                    "candidates": _state["gem_ambiguous"][key]}, 300
+        if not gem_code:
+            gem_code = _canonical_lookup(ident)
+    m = _state["gem_by_code"].get(gem_code) if gem_code else None
+    if not m:
+        return {"gemeinde": ident, "error": "no_data"}, 404
+
+    kgs = _state["gem2kgs"].get(gem_code, [])
+    # Union of the snapped points across all KGs of this Gemeinde.
+    points = []
+    for kg in kgs:
+        for p in _state["kg_points"].get(kg, []):
+            q = dict(p)
+            q["kg_code"] = kg
+            points.append(q)
+
+    metrics = {k: m[k] for k in METRIC_KEYS if m.get(k) is not None}
+    metrics.update(_point_rollup(points))
+
+    glossary = dict(UNIT_GLOSSARY)
+    if points:
+        glossary.update(POINT_GLOSSARY)
+
+    payload = {
+        "service": SERVICE,
+        "dataset": DATASET,
+        "gemeinde_code": gem_code,
+        "gemeinde_name": m.get("name"),
+        "kg_codes": kgs,
+        "granularity": "gemeinde",
+        "as_of": AS_OF,
+        "updated_at": _state["updated_at"],
+        "source": SOURCE,
+        "license": LICENSE,
+        "unit_glossary": glossary,
+        "metrics": metrics,
+        "history": _history(m),
+        "points": points,
+    }
+    return payload, 200
+
+
 def manifest():
     _load()
     return {
@@ -291,6 +394,9 @@ def manifest():
         "join_keys": ["kg_code", "gemeinde_code"],
         "kg_endpoint": "/llm/kg/{kg_code}",
         "batch_endpoint": "/llm/kgs?codes={kg_code,...}",
+        "gemeinde_endpoint": "/llm/gemeinde/{gemeinde_code_or_name}",
+        "gemeinde_batch_endpoint": "/llm/gemeinden?codes={gemeinde_code,...}",
+        "covered_gemeinden_url": "/llm/covered_gemeinden.json",
         "metrics_schema": METRICS_SCHEMA,
         "point_categories": [
             "groundwater_station", "power_plant", "water_quality_site"],
@@ -319,6 +425,29 @@ def handle(path, query):
         return 200, manifest()
     if path == "/llm/covered_kgs.json":
         return 200, covered_kgs()
+    if path == "/llm/covered_gemeinden.json":
+        _load()
+        return 200, sorted(_state["gem_by_code"].keys())
+    if path == "/llm/gemeinden":
+        codes = (query.get("codes", [""])[0]).strip()
+        if not codes:
+            return 400, {"error": "missing 'codes' query parameter"}
+        code_list = [c.strip() for c in codes.split(",") if c.strip()][:500]
+        results = []
+        for c in code_list:
+            obj, _ = _payload_for_gemeinde(c)
+            results.append(obj)
+        return 200, {"results": results, "meta": {"requested": len(code_list)}}
+    for prefix in ("/llm/gemeinde/", "/llm/muni/"):
+        if path.startswith(prefix):
+            ident = urllib.parse.unquote(path[len(prefix):])
+            if ident.endswith(".json"):
+                ident = ident[:-5]
+            ident = ident.strip("/")
+            if not ident:
+                return 400, {"error": "missing gemeinde code or name"}
+            obj, status = _payload_for_gemeinde(ident)
+            return status, obj
     if path == "/llm/kgs":
         codes = (query.get("codes", [""])[0]).strip()
         if not codes:
