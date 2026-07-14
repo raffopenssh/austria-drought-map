@@ -1,171 +1,223 @@
 #!/usr/bin/env python3
-"""Fetch actual groundwater nitrate (and ammonium) measurements for Austria
-from the EEA discodata SQL API (WISE SoE / Waterbase WISE6 disaggregated data),
-plus monitoring-site coordinates, and build per-station time series.
+"""Build the WISE groundwater nitrate layer for Austria.
 
-The discodata endpoint is flaky: identical queries randomly time out after
-~30 s. We page with TOP/OFFSET-free `p`/`nrOfHits` pagination and retry each
-page until it succeeds.
+Data source: EEA Waterbase - Water Quality ICM (WISE-6 disaggregated data),
+2026 release (1900-2025). The discodata SQL API deterministically times out on
+any filtered/paginated query, so instead we stream-filter the full EU CSV dump
+(https://sdi.eea.europa.eu/datashare/s/sptXqwkQr5g7Bp5, folder
+eea_t_waterbase-water-quality-icm-2026_p_1900-2025_v01_r00) down to Austrian
+groundwater nitrate/ammonium rows. That filtered CSV is checked in-repo-adjacent
+at data/water_quality/at_gw_nitrate_ammonium.csv (see --refetch for how to
+regenerate it); site coordinates come from the SpatialObjects dump
+(data/water_quality/at_wise_spatial.csv) with a fallback to
+web/data/wise_monitoring_sites.json.
 
-Outputs:
-  data/water_quality/wise_nitrate_raw.json      raw measurements (site,date,value)
-  web/data/nitrate_stations.json(.gz)           stations w/ coords, latest value,
-                                                annual means, trend
+Output: web/data/nitrate_stations.json(.gz)
 """
+import csv
 import gzip
 import json
-import time
-import urllib.parse
-import urllib.request
+import statistics
+import sys
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-RAW_OUT = ROOT / "data/water_quality/wise_nitrate_raw.json"
+MEAS_CSV = ROOT / "data/water_quality/at_gw_nitrate_ammonium.csv.gz"
+SPATIAL_CSV = ROOT / "data/water_quality/at_wise_spatial.csv"
+SITES_JSON = ROOT / "web/data/wise_monitoring_sites.json"
 WEB_OUT = ROOT / "web/data/nitrate_stations.json"
 
-SQL_URL = "https://discodata.eea.europa.eu/sql"
-PAGE = 5000
+NITRATE = "CAS_14797-55-8"  # mg{NO3}/L
 
-DETERMINANDS = {
-    "nitrate": "CAS_14797-55-8",   # mg{NO3}/L
-    "ammonium": "CAS_14798-03-9",  # mg{NH4}/L
+# Max sibling spread (km) accepted when approximating coordinates of sites
+# missing from the spatial dumps via co-located sister wells (same GZÜV
+# location prefix, i.e. identifier minus the last two digits).
+MAX_SIBLING_SPREAD_KM = 10.0
+
+# Manual fixes for sites whose *name* identifies the locality (verified by hand).
+MANUAL_COORDS = {
+    # "GEMEINDEBRUNNEN WVA LORETTO" -> Loretto, Bez. Eisenstadt-Umgebung, Bgld.
+    "ATTG10003872": (47.909, 16.518, "GEMEINDEBRUNNEN WVA LORETTO"),
 }
 
-
-def sql(query, p=1, n=PAGE, tries=12):
-    params = urllib.parse.urlencode({"query": query, "p": p, "nrOfHits": n})
-    url = f"{SQL_URL}?{params}"
-    for attempt in range(tries):
-        try:
-            with urllib.request.urlopen(url, timeout=90) as r:
-                d = json.loads(r.read())
-            if "results" in d and not d.get("errors"):
-                return d["results"]
-            err = d.get("errors")
-            print(f"    retry {attempt+1}: {str(err)[:60]}", flush=True)
-        except Exception as e:
-            print(f"    retry {attempt+1}: {e}", flush=True)
-        time.sleep(3 + attempt * 2)
-    raise RuntimeError(f"query failed after {tries} tries: {query[:80]}")
+REFETCH_HELP = """To regenerate the filtered CSVs (needs ~2 GB free disk):
+  URL='https://sdi.eea.europa.eu/datashare/public.php/webdav/eea_t_waterbase-water-quality-icm-2026_p_1900-2025_v01_r00'
+  curl -u 'sptXqwkQr5g7Bp5:' -o /tmp/dis.zip "$URL/WISE6_DisaggregatedData-csv.zip"
+  unzip -p /tmp/dis.zip | { head -1; grep -E '^AT,[^,]*,[^,]*,GW,CAS_(14797-55-8|14798-03-9),'; } \\
+      | gzip -9 > data/water_quality/at_gw_nitrate_ammonium.csv.gz
+  curl -u 'sptXqwkQr5g7Bp5:' -o /tmp/sp.zip "$URL/WISE6_SpatialObjects_DerivedData-csv.zip"
+  unzip -p /tmp/sp.zip | { head -1; grep '^AT,'; } > data/water_quality/at_wise_spatial.csv
+  rm /tmp/dis.zip /tmp/sp.zip
+"""
 
 
-def fetch_measurements(code, y0=1990, y1=2025):
-    """Query per-year: the discodata server times out on large offset
-    pagination, but small per-year result sets (with TOP) usually return."""
-    rows = []
-    for year in range(y0, y1 + 1):
-        q = (
-            "SELECT TOP 30000 monitoringSiteIdentifier s, "
-            "phenomenonTimeSamplingDate d, "
-            "resultObservedValue v, resultQualityObservedValueBelowLOQ loq "
-            "FROM [WISE_SOE].[latest].[Waterbase_T_WISE6_DisaggregatedData] "
-            f"WHERE countryCode='AT' AND observedPropertyDeterminandCode='{code}' "
-            "AND parameterWaterBodyCategory='GW' "
-            f"AND phenomenonTimeReferenceYear={year}"
-        )
-        page = sql(q, p=1, n=30000)
-        rows.extend(page)
-        print(f"  {year}: +{len(page)} (total {len(rows)})", flush=True)
-    return rows
+def load_coords():
+    coords = {}
+    # Fallback first: WFD monitoring sites GeoJSON (lower priority)
+    if SITES_JSON.exists():
+        gj = json.loads(SITES_JSON.read_text())
+        for ft in gj.get("features", []):
+            sid = ft["properties"].get("id")
+            lon, lat = ft["geometry"]["coordinates"][:2]
+            if sid:
+                coords[sid] = (lat, lon, ft["properties"].get("name"))
+    # Primary: WISE-6 spatial objects dump
+    if SPATIAL_CSV.exists():
+        with open(SPATIAL_CSV, encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                sid = row.get("monitoringSiteIdentifier") or row.get("thematicIdIdentifier")
+                try:
+                    lat, lon = float(row["lat"]), float(row["lon"])
+                except (ValueError, KeyError):
+                    continue
+                if sid:
+                    coords[sid] = (lat, lon, row.get("monitoringSiteName") or None)
+    return coords
 
 
-def fetch_sites():
-    q = (
-        "SELECT monitoringSiteIdentifier s, monitoringSiteName nm, lon, lat "
-        "FROM [WISE_SOE].[latest].[Waterbase_S_WISE_SpatialObject_DerivedData] "
-        "WHERE countryCode='AT' AND monitoringSiteIdentifier IS NOT NULL"
+def approx_from_siblings(sid, coords):
+    """Estimate coordinates for a site absent from the spatial dumps using
+    sister wells: GZÜV identifiers minus their final two digits denote the
+    same measurement location (e.g. ATPG40405012 ~ ATPG40405022/-32/-42).
+    Returns (lat, lon, err_km) or None if no siblings / spread too large."""
+    import math
+
+    key = sid[:10]
+    sibs = [v for k, v in coords.items() if k.startswith(key) and k != sid]
+    if not sibs:
+        return None
+    lat = statistics.median(p[0] for p in sibs)
+    lon = statistics.median(p[1] for p in sibs)
+    err = max(
+        (
+            111.3
+            * math.hypot(p[0] - lat, (p[1] - lon) * math.cos(math.radians(lat)))
+            for p in sibs
+        ),
+        default=0.0,
     )
-    rows, p = [], 1
-    while True:
-        page = sql(q, p=p)
-        rows.extend(page)
-        print(f"  sites page {p}: +{len(page)}", flush=True)
-        if len(page) < PAGE:
-            break
-        p += 1
-    return {r["s"]: r for r in rows}
+    if err > MAX_SIBLING_SPREAD_KM:
+        return None
+    return lat, lon, max(err, 0.5)
 
 
-def theil_sen_ish(years, vals):
-    """Simple OLS slope (mg/L per year); enough data points per station is small."""
-    n = len(years)
-    if n < 3:
-        return None
-    mx = sum(years) / n
-    my = sum(vals) / n
-    denom = sum((x - mx) ** 2 for x in years)
-    if denom == 0:
-        return None
-    return sum((x - mx) * (y - my) for x, y in zip(years, vals)) / denom
+def theil_sen(xs, ys):
+    slopes = [
+        (ys[j] - ys[i]) / (xs[j] - xs[i])
+        for i in range(len(xs))
+        for j in range(i + 1, len(xs))
+        if xs[j] != xs[i]
+    ]
+    return statistics.median(slopes) if slopes else None
 
 
 def main():
-    print("Fetching site coordinates...", flush=True)
-    sites = fetch_sites()
-    print(f"{len(sites)} AT monitoring sites with metadata")
+    if "--refetch" in sys.argv or not MEAS_CSV.exists():
+        print(REFETCH_HELP)
+        if not MEAS_CSV.exists():
+            sys.exit(f"missing {MEAS_CSV}")
+        return
 
-    raw = {}
-    for name, code in DETERMINANDS.items():
-        print(f"Fetching {name} ({code})...", flush=True)
-        raw[name] = fetch_measurements(code)
-        print(f"{name}: {len(raw[name])} measurements")
+    coords = load_coords()
+    print(f"{len(coords)} sites with coordinates")
 
-    RAW_OUT.parent.mkdir(parents=True, exist_ok=True)
-    RAW_OUT.write_text(json.dumps(raw))
-    print(f"Wrote {RAW_OUT}")
-
-    # Build per-station summary for nitrate (primary) + ammonium latest
-    stations = {}
-    for name in DETERMINANDS:
-        by_site = defaultdict(list)
-        for r in raw[name]:
-            v = r.get("v")
-            if v is None:
+    # site -> year -> [values]
+    per_site = defaultdict(lambda: defaultdict(list))
+    latest = {}  # site -> (yyyymmdd, value)
+    n_rows = 0
+    with gzip.open(MEAS_CSV, "rt", encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            if row["observedPropertyDeterminandCode"] != NITRATE:
                 continue
-            d = (r.get("d") or "")[:10]
-            if not d:
+            v = row["resultObservedValue"]
+            d = row["phenomenonTimeSamplingDate"]
+            if not v or len(d) < 4:
                 continue
-            by_site[r["s"]].append((d, float(v), bool(r.get("loq"))))
-        for sid, meas in by_site.items():
-            meas.sort()
-            st = stations.setdefault(sid, {"id": sid})
-            meta = sites.get(sid)
-            if meta:
-                st["name"] = meta.get("nm") or sid
-                st["lon"] = meta.get("lon")
-                st["lat"] = meta.get("lat")
-            # annual means
-            years = defaultdict(list)
-            for d, v, loq in meas:
-                years[int(d[:4])].append(v)
-            annual = {y: round(sum(vs) / len(vs), 2) for y, vs in sorted(years.items())}
-            last_d, last_v, _ = meas[-1]
-            yrs = sorted(annual)
-            vals = [annual[y] for y in yrs]
-            slope = theil_sen_ish(yrs, vals)
-            st[name] = {
-                "n": len(meas),
-                "latest": {"date": last_d, "value": round(last_v, 2)},
-                "annual": annual,
-                "trend_per_yr": round(slope, 3) if slope is not None else None,
-                "mean_recent5": round(
-                    sum(vals[-5:]) / len(vals[-5:]), 2
-                ) if vals else None,
-            }
+            v = float(v)
+            if v < 0:
+                continue
+            if row["resultQualityObservedValueBelowLOQ"] == "1":
+                # below limit of quantification: use LOQ/2 convention if LOQ known
+                loq = row.get("procedureLOQValue")
+                if loq:
+                    v = min(v, float(loq) / 2)
+            sid = row["monitoringSiteIdentifier"]
+            per_site[sid][int(d[:4])].append(v)
+            if sid not in latest or d > latest[sid][0]:
+                latest[sid] = (d, v)
+            n_rows += 1
+    print(f"{n_rows} nitrate measurements at {len(per_site)} sites")
+
+    stations = []
+    no_coord = 0
+    n_approx = 0
+    for sid, years in per_site.items():
+        approx_err = None
+        c = coords.get(sid)
+        if not c and sid in MANUAL_COORDS:
+            c = MANUAL_COORDS[sid]
+            approx_err = 1.0
+            n_approx += 1
+        if not c:
+            est = approx_from_siblings(sid, coords)
+            if est is None:
+                no_coord += 1
+                continue
+            c = (est[0], est[1], None)
+            approx_err = est[2]
+            n_approx += 1
+        lat, lon, name = c
+        annual = {y: sum(vs) / len(vs) for y, vs in years.items()}
+        ys = sorted(annual)
+        vals = [annual[y] for y in ys]
+        slope = theil_sen(ys, vals) if len(ys) >= 5 else None
+        n_samples = sum(len(vs) for vs in years.values())
+        st = {
+            "id": sid,
+            "lat": round(lat, 5),
+            "lon": round(lon, 5),
+            "n_samples": n_samples,
+            "n_years": len(ys),
+            "first_year": ys[0],
+            "last_year": ys[-1],
+            "latest": round(annual[ys[-1]], 2),   # latest annual mean
+            "latest_year": ys[-1],
+            "mean": round(sum(vals) / len(vals), 2),
+            "trend_per_yr": round(slope, 4) if slope is not None else None,
+        }
+        if name and name.upper() != "NO INTERNATIONAL NAME":
+            st["name"] = name
+        if approx_err is not None:
+            st["coord_approx"] = True
+            st["coord_err_km"] = round(approx_err, 1)
+        stations.append(st)
+    stations.sort(key=lambda s: s["id"])
+    print(
+        f"{len(stations)} stations with coords "
+        f"({n_approx} approximated from sibling wells, {no_coord} dropped)"
+    )
 
     out = {
-        "source": "EEA WISE SoE (Waterbase WISE6 disaggregated), discodata.eea.europa.eu",
-        "units": {"nitrate": "mg NO3/L", "ammonium": "mg NH4/L"},
-        "thresholds": {"nitrate_drinking_limit": 50, "nitrate_threshold_at": 45},
-        "n_stations": len(stations),
-        "stations": [s for s in stations.values() if s.get("lon") is not None],
+        "generated": date.today().isoformat(),
+        "source": "EEA Waterbase Water Quality ICM 2026 (WISE-6 SoE disaggregated data)",
+        "unit": "mg/L NO3",
+        "thresholds": {"eu_drinking_water_limit": 50, "at_quality_target": 45},
+        "stations": stations,
     }
-    WEB_OUT.write_text(json.dumps(out))
+    blob = json.dumps(out, separators=(",", ":"))
+    WEB_OUT.write_text(blob)
     with gzip.open(str(WEB_OUT) + ".gz", "wt") as f:
-        f.write(json.dumps(out))
-    n_geo = len(out["stations"])
-    print(f"Wrote {WEB_OUT}: {len(stations)} stations, {n_geo} with coords")
+        f.write(blob)
+    print(f"wrote {WEB_OUT} ({len(blob)/1e6:.1f} MB) + .gz")
+
+    # report stats
+    latest_vals = [s["latest"] for s in stations]
+    over50 = sum(1 for v in latest_vals if v > 50)
+    print(f"median latest annual mean: {statistics.median(latest_vals):.1f} mg/L")
+    print(f">50 mg/L (latest): {over50} ({100*over50/len(stations):.1f}%)")
+    print(f"year range: {min(s['first_year'] for s in stations)}-{max(s['last_year'] for s in stations)}")
 
 
 if __name__ == "__main__":

@@ -755,6 +755,10 @@
                     <label for="st-precip">Precipitation Trends</label>
                 </div>
                 <div class="layer-toggle">
+                    <input type="radio" name="station-layer" id="st-nitrate" value="nitrate">
+                    <label for="st-nitrate" title="WISE-6 groundwater nitrate (EEA Waterbase ICM): latest annual mean per station, 1997–2024">Nitrate (GW quality)</label>
+                </div>
+                <div class="layer-toggle">
                     <input type="radio" name="station-layer" id="st-none" value="none">
                     <label for="st-none">None</label>
                 </div>
@@ -839,7 +843,8 @@
             wiseRiver: false,
             wqChoropleth: false,
             divergence: false,
-            powerGw: false
+            powerGw: false,
+            nitrate: false
         };
         
         function updateLegends() {
@@ -916,6 +921,21 @@
                             <span>&ge;20%</span>
                         </div>
                         <div style="font-size:0.65em; color:#6a6a8a; margin-top:4px;">Excess partial R&sup2;: daily GW variance added by national hydro ops beyond precipitation (correlation, not causation)</div>
+                    </div>
+                `;
+            }
+            
+            if (legendState.nitrate) {
+                html += `
+                    <div class="map-legend">
+                        <h4>GW Nitrate (latest)</h4>
+                        <div class="gradient-bar" style="background: linear-gradient(to right, #2e7d32, #9ccc65, #ffe082, #ff8f00, #d32f2f);"></div>
+                        <div class="gradient-labels">
+                            <span>0</span>
+                            <span>25</span>
+                            <span>&ge;50 mg/L</span>
+                        </div>
+                        <div style="font-size:0.65em; color:#6a6a8a; margin-top:4px;">EU drinking-water limit 50 mg/L NO&#8323; (EEA WISE-6, 1997&ndash;2024)</div>
                     </div>
                 `;
             }
@@ -1021,6 +1041,7 @@
         const protectionLayer = L.layerGroup();  // Drinking water protection zones (polygons)
         const divergenceLayer = L.layerGroup();  // Precip vs GW divergence (points)
         const powerGwLayer = L.layerGroup();  // Hydropower <-> GW coupling (points, live eHYD stations)
+        const nitrateLayer = L.layerGroup();  // WISE GW nitrate (points)
         
         // Risk color function (categorical)
         function getRiskColor(risk) {
@@ -1485,6 +1506,44 @@
             });
         }
         
+        // WISE groundwater nitrate layer (loaded on demand)
+        let nitrateData = null;
+        function getNitrateColor(v) {
+            if (v == null) return '#888';
+            if (v < 10) return '#2e7d32';
+            if (v < 25) return '#9ccc65';
+            if (v < 37.5) return '#ffe082';
+            if (v < 50) return '#ff8f00';
+            return '#d32f2f';
+        }
+        async function renderNitrateLayer() {
+            if (!nitrateData) {
+                try {
+                    nitrateData = await (await fetch('data/nitrate_stations.json')).json();
+                } catch (e) { console.error('nitrate load failed', e); return; }
+            }
+            nitrateLayer.clearLayers();
+            nitrateData.stations.forEach(s => {
+                if (s.lat == null || s.latest == null) return;
+                const marker = L.circleMarker([s.lat, s.lon], {
+                    radius: s.latest >= 50 ? 6 : 4,
+                    fillColor: getNitrateColor(s.latest),
+                    fillOpacity: 0.85,
+                    color: '#222',
+                    weight: 0.5
+                });
+                const trend = s.trend_per_yr != null
+                    ? `Trend: ${s.trend_per_yr > 0 ? '+' : ''}${s.trend_per_yr} mg/L·yr<br>` : '';
+                marker.bindTooltip(
+                    `<b>${s.id}</b><br>` +
+                    `Nitrate: <b>${s.latest} mg/L</b> (${s.latest_year})${s.latest >= 50 ? ' ⚠ above EU limit' : ''}<br>` +
+                    trend +
+                    `<span style="color:#9aa">${s.n_samples} samples · ${s.first_year}–${s.last_year}</span>`,
+                    { direction: 'top' });
+                marker.addTo(nitrateLayer);
+            });
+        }
+
         // Water protection zones layer (loaded on demand)
         let protectionDataLoaded = false;
         async function renderProtectionLayer() {
@@ -1754,6 +1813,7 @@
             divergence: { layer: divergenceLayer, render: renderDivergenceLayer, legend: 'divergence' },
             flow:    { layer: flowLayer, render: renderFlowLayer, legend: 'flow' },
             precip:  { layer: precipLayer, render: renderPrecipLayer, legend: 'precip' },
+            nitrate: { layer: nitrateLayer, render: renderNitrateLayer, legend: 'nitrate' },
         };
         async function setStationLayer(v) {
             for (const k in stationLayers) {
@@ -2991,6 +3051,7 @@
                 <li><a href="https://transparency.entsoe.eu/" target="_blank">ENTSO-E Transparency Platform</a> - Austrian electricity generation per production type (15-min resolution, 2023–present) via austria-power.exe.xyz mirror; used for the Hydropower ↔ GW coupling analysis</li>
                 <li><a href="https://ehyd.gv.at" target="_blank">eHYD live services</a> - 227 real-time groundwater stations with daily levels, historical percentile bands (services/GrundwasserAktuell, Diagram/grundwasserLongtermBgis)</li>
                 <li><a href="https://power.larc.nasa.gov/" target="_blank">NASA POWER</a> - Gridded precipitation (0.5°): monthly 1990–2024 for the divergence analysis, daily 2025–present as control variable in the power–GW regression</li>
+                <li><a href="https://www.eea.europa.eu/en/datahub" target="_blank">EEA Waterbase Water Quality ICM 2026</a> — WISE-6 SoE disaggregated groundwater nitrate (2,196 AT stations, 1997–2024; fetched via EEA SDI datashare WebDAV)</li>
                 <li>Drinking-water protection zones (Wasserschutz-/Wasserschongebiete) from provincial INSPIRE WFS services (via <a href="https://inspire-austria.exe.xyz" target="_blank">INSPIRE Österreich</a>): OÖ DORIS, Steiermark, Tirol, NÖ, Burgenland, Wien, Vorarlberg — 25,365 zones, 7 of 9 provinces</li>
             </ul>
             
