@@ -28,6 +28,7 @@ let gwiKG = null;          // gw_index_kg.json .kgs
 let gwiMeta = null;
 let kgReg = null;          // kg_registry.json
 let gwStations = [];       // slim
+let plantInfl = null;      // plant_influence.json (hydropower downstream impact)
 let no3Stations = [];      // nitrate stations
 let muniByIso = {}, muniByName = {};
 let gwTrendsCache = null;  // lazy full annual data
@@ -72,14 +73,16 @@ async function boot() {
         attribution: '&copy; OSM &copy; CARTO', subdomains: 'abcd', maxZoom: 19,
     }).addTo(map);
 
-    const [geo, slim, no3, gwi, reg, munis] = await Promise.all([
+    const [geo, slim, no3, gwi, reg, munis, pinf] = await Promise.all([
         fetch('data/municipalities_risk.geojson').then(r => r.json()),
         fetch('data/gw_stations_slim.json').then(r => r.json()),
         fetch('data/nitrate_stations.json').then(r => r.json()),
         fetch('data/gw_index_kg.json').then(r => r.json()),
         fetch('data/kg_registry.json').then(r => r.json()),
         fetch('data/municipalities.json').then(r => r.json()),
+        fetch('data/plant_influence.json').then(r => r.json()).catch(() => null),
     ]);
+    plantInfl = pinf;
     gwiKG = gwi.kgs; gwiMeta = gwi; kgReg = reg;
     kgRegList = Object.entries(reg);
     gwStations = slim.filter(s => s.lat && s.lon);
@@ -289,6 +292,38 @@ function stationListHTML(lat, lon, radiusKm) {
     if (!html) html = '<p class="note">No monitoring stations within ' + radiusKm + ' km.</p>';
     return html;
 }
+// ---------- hydropower downstream impact (plant_influence.json) ----------
+function hydroLinksForKG(code) {
+    if (!plantInfl || !plantInfl.kg_map || !plantInfl.kg_map[code]) return [];
+    return plantInfl.kg_map[code].map(i => plantInfl.gw_links_sig[i]).filter(Boolean);
+}
+function hydroLinksForStation(id) {
+    if (!plantInfl || !plantInfl.gw_links_sig) return [];
+    return plantInfl.gw_links_sig.filter(l => String(l.station) === String(id));
+}
+function hydroLinkRowHTML(l, showStation) {
+    const p = plantInfl.plants[l.plant] || {};
+    const dir = l.beta_sum > 0 ? '↑ level rises with releases' : '↓ level falls with releases';
+    const share = Math.round(l.partial * 100);
+    return `<div class="station-item" style="cursor:default;">
+        <span class="dot" style="background:#8fb8f2"></span>
+        <span class="nm">${esc(p.name || l.plant)} <small style="color:#6a7194">${esc(p.type || '')} · ${p.mw || '?'} MW · ${esc(p.river || '')}</small>${showStation ? `<br><small style="color:#6a7194">at ${esc(l.name)} (<a href="#" onclick="openGWStationById('${esc(l.station)}');return false;">${esc(l.station)}</a>)</small>` : ''}</span>
+        <span class="meta">${l.km.toFixed(0)} km downstr.</span>
+        <span class="val" title="partial R² = ${l.partial}, p = ${l.p}, placebo = ${l.placebo}">${share}% <small style="color:#6a7194">${dir.slice(0, 1)}</small></span>
+    </div>`;
+}
+function hydroImpactHTML(links, showStation) {
+    if (!links.length) return '';
+    const anyDownscaled = links.some(l => (plantInfl.plants[l.plant] || {}).release_source !== 'a73');
+    return `<h3>Hydropower influence <small style="color:#6a7194;font-weight:400">detected downstream signal</small></h3>
+        <div class="station-list">${links.map(l => hydroLinkRowHTML(l, showStation)).join('')}</div>
+        <div class="note">% = share of day-to-day groundwater level variation at the monitoring well explained by the plant's
+        turbined releases (ENTSO-E${anyDownscaled ? ', partly downscaled from the national feed by plant type & capacity' : ' per-unit data'}),
+        after controlling for local precipitation. Only links passing significance tests (p&lt;0.01, above placebo) are shown.
+        Station and plant are connected along the actual river network. ↑/↓ = level response to releases.
+        <b>Correlation, not proven causation.</b> <a href="#" onclick="showMethods();return false;">Details</a></div>`;
+}
+
 function gemForKG(reg) {
     if (!reg) return null;
     if (muniByIso[reg.g]) return muniByIso[reg.g];
@@ -326,6 +361,7 @@ function showKGModal(code, opts = {}) {
             ${rec.gw_trend != null ? `<div class="kv"><div class="k">Level trend (interp.)</div><div class="v" style="color:${trendTint(rec.gw_trend)}">${(rec.gw_trend > 0 ? '+' : '') + (rec.gw_trend * 100).toFixed(0)} cm/dec</div></div>` : ''}
         </div>
         ${edoBarsHTML(gem)}
+        ${hydroImpactHTML(hydroLinksForKG(code), true)}
         ${lat != null ? stationListHTML(lat, lon, 12.5) : ''}
         <div class="apirow">API: <code><a href="/llm/kg/${esc(code)}" target="_blank">/llm/kg/${esc(code)}</a></code></div>`;
     openModal('kg-modal');
@@ -371,6 +407,7 @@ function openGWStation(s) {
         <h3>Level history <small style="color:#6a7194;font-weight:400">annual means, m above Adriatic</small></h3>
         <div class="chart-box" id="st-chart-box"><div style="text-align:center;padding-top:80px;"><div class="loading-spinner" style="margin:0 auto;"></div></div></div>
         <div class="note">Points from the last 10 years (red) drive the trend used in the GWI. Source: eHYD (BML).</div>
+        ${hydroImpactHTML(hydroLinksForStation(s.id), false)}
         <div class="apirow">API: <code><a href="/llm/point/gw:${esc(s.id)}" target="_blank">/llm/point/gw:${esc(s.id)}</a></code></div>`;
     openModal('st-modal');
     currentShare = { st: s.id };
@@ -644,6 +681,30 @@ function showMethods() {
     distribution lands at roughly 28% good / 40% watch / 31% stressed — the categories are relative national
     context, not regulatory judgements.</p>
 
+    <h3>Hydropower influence (informational, not in the GWI)</h3>
+    <p>Where a KG or station modal shows a <b>Hydropower influence</b> section, we detected a statistically
+    significant coupling between an upstream hydro plant's daily water releases and the day-to-day movements
+    of a downstream groundwater well. How it works:</p>
+    <ul>
+        <li><b>Releases.</b> ENTSO-E per-generation-unit output (A73, 15-min → daily MWh) for 22 major Austrian
+            hydro plants. Units still publishing in 2026 are used directly; for plants whose per-unit feed stopped
+            (mostly the Danube run-of-river cascade), the national per-type series is <b>downscaled</b> with a
+            per-plant linear fit calibrated on that plant's own 2023–24 unit data (calibration r ≈ 0.6–0.8).</li>
+        <li><b>River topology.</b> Each plant's tailrace is snapped to the OSM waterway network and the river is
+            walked <i>downstream</i> (flow direction, up to 120 km). Live eHYD groundwater wells within 4 km of the
+            downstream channel and river gauges within 800 m form the candidate set.</li>
+        <li><b>Test.</b> Per (plant, well) pair, daily first differences of the well level are regressed on local
+            precipitation (NASA POWER, lags 0–3 + 7-day sum) with and without the plant's release changes
+            (t, t−1). We report the partial R² of the release terms, an F-test p-value, and a placebo check
+            (release series shifted 60 days). Shown only if p&lt;0.01, partial R² ≥ 5%, and above placebo.</li>
+        <li><b>Limits.</b> This is correlation with controls, not proven causation — upstream releases and
+            downstream groundwater both respond to basin hydrology, and the precipitation control is coarse
+            (0.5° grid). Downscaled plants share the national daily signal shape, so attribution among plants on the
+            <i>same</i> river rests on topology, not unique signals. That is why this evidence is displayed but
+            <b>not folded into the index</b>. River gauges confirm the pathway: on the Ziller, releases explain
+            25–80% of daily stage changes at downstream gauges.</li>
+    </ul>
+
     <h3>Data sources</h3>
     <ul>
         <li><b>eHYD (BML)</b> — 3,732 groundwater level stations, annual means, most 1966–2022. Trends are
@@ -654,6 +715,10 @@ function showMethods() {
         <li><b>Copernicus European Drought Observatory</b> — Combined Drought Indicator, 10-day grids
             2012–2023, zonally aggregated per Gemeinde.</li>
         <li><b>NASA POWER</b> — daily precipitation (0.5° grid) behind the divergence component.</li>
+        <li><b>ENTSO-E Transparency</b> (via austria-power.exe.xyz) — per-unit hydro generation (A73) and
+            national per-type generation, 15-min since 2023, behind the hydropower influence section.</li>
+        <li><b>OSM/Geofabrik waterways</b> — 338k river/stream segments; directed flow network for the
+            downstream plant→station matching.</li>
         <li><b>BEV cadastre / Statistik Austria</b> (via the Kohlschwarz cadastre API) — canonical KG &amp;
             Gemeinde registry, geometry lookups, address search. Every station is snapped once to its KG by
             exact point-in-polygon.</li>

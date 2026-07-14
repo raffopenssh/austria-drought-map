@@ -240,6 +240,14 @@ def _load():
                               "weights": gwi.get("weights")}
     else:
         _state["gwi_kgs"], _state["gwi_meta"] = {}, {}
+    # Hydropower downstream influence (informational; not part of the GWI).
+    pi_path = os.path.join(DATA, "plant_influence.json")
+    if os.path.exists(pi_path):
+        pi = json.load(open(pi_path))
+        _state["plant_infl"] = pi
+        _state["plant_kg_map"] = pi.get("kg_map", {})
+    else:
+        _state["plant_infl"], _state["plant_kg_map"] = None, {}
     # Reverse map gemeinde_code -> [kg_code, ...] for the per-Gemeinde endpoint.
     gem2kgs = {}
     for kg, gem in _state["kg2gem"].items():
@@ -409,7 +417,52 @@ def _payload_for_kg(kg_code):
         "history": _history(m) if m else [],
         "points": points,
     }
+    hydro = _hydro_influence_for_kg(kg_code)
+    if hydro:
+        payload["hydropower_influence"] = hydro
     return payload, 200
+
+
+def _hydro_influence_for_kg(kg_code):
+    """Significant upstream hydro plant -> downstream GW well couplings
+    relevant to this KG (well within 12.5 km). Informational; not in GWI."""
+    pi = _state.get("plant_infl")
+    idxs = _state.get("plant_kg_map", {}).get(kg_code)
+    if not pi or not idxs:
+        return None
+    links = []
+    for i in idxs:
+        try:
+            l = pi["gw_links_sig"][i]
+        except (IndexError, KeyError):
+            continue
+        p = pi["plants"].get(l["plant"], {})
+        links.append({
+            "plant": p.get("name", l["plant"]),
+            "plant_type": p.get("type"),
+            "plant_mw": p.get("mw"),
+            "river": p.get("river"),
+            "release_source": p.get("release_source"),
+            "gw_station": l["station"],
+            "gw_station_name": l.get("name"),
+            "km_downstream": l["km"],
+            "partial_r2": l["partial"],
+            "p_value": l["p"],
+            "placebo_partial_r2": l["placebo"],
+            "direction": "level_rises_with_release" if l.get("beta_sum", 0) > 0
+                         else "level_falls_with_release",
+        })
+    if not links:
+        return None
+    return {
+        "note": ("Daily turbined releases of the listed upstream hydro plants "
+                 "(ENTSO-E) explain partial_r2 of the day-to-day level variation "
+                 "at the listed downstream monitoring well (river-network "
+                 "topology, precipitation-controlled, p<0.01, above placebo). "
+                 "Correlation with controls, not proven causation; NOT part of "
+                 "the GWI."),
+        "links": links,
+    }
 
 
 _lookup_cache = {}

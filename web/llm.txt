@@ -27,6 +27,14 @@ A legacy composite drought risk_score (per Gemeinde) plus per-point station
 observations (groundwater levels, nitrate, hydropower, WFD sites) with full
 annual histories are carried alongside.
 
+Where relevant, KG payloads also carry "hydropower_influence": statistically
+significant couplings between upstream hydro plant releases (ENTSO-E A73
+per-unit generation, partly downscaled from the national feed by plant type &
+capacity) and downstream groundwater wells near the KG, matched along the OSM
+river network (partial R2 over a precipitation baseline, F-test p<0.01, above
+a 60-day-shift placebo). Informational only — NOT part of the GWI.
+Method: scripts/analyze_plant_downstream.py; data: web/data/plant_influence.json.
+
 Granularity: MIXED — gwi_* per KG, legacy metrics per Gemeinde, stations per
 point. Keys: official 5-char kg_code / gemeinde_code strings.
 
