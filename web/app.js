@@ -36,6 +36,7 @@ const filt = {
     cat: { good: true, watch: true, stressed: true },   // choropleth GWI categories
     trend: { falling: true, stable: true, rising: true }, // level-station classes
     no3: [true, true, true, true],                        // nitrate bands (see NO3_BANDS)
+    use: { low: true, mid: true, high: true },            // water-use intensity classes
 };
 let gwiKG = null;          // gw_index_kg.json .kgs
 let gwiMeta = null;
@@ -299,7 +300,7 @@ function buildStationLayers() {
             const gj = await fetchGwkGeo();
             gwkLayer = L.geoJSON(gj, {
                 pane: 'gwkfill',
-                style: f => ({ color: useColor(f.properties.u), weight: 1.2, opacity: 0.6, fill: true, fillOpacity: 0.03 }),
+                style: gwkStyle,
                 onEachFeature: (f, ly) => {
                     ly.bindTooltip(`<b>${esc(f.properties.n)}</b><br>${f.properties.u}% of resource abstracted`, { sticky: true });
                     // pass taps through to the KG choropleth underneath
@@ -308,6 +309,7 @@ function buildStationLayers() {
             });
         }
         gwkLayer.addTo(map);
+        hintChips($('leg-gwk'));
     });
     // append updateURL to gwk toggle too
     $('tg-gwk').addEventListener('change', updateURL);
@@ -527,6 +529,14 @@ function fmtM3(v) {
 function useColor(pct) {
     return pct >= 40 ? '#f28a7d' : pct >= 20 ? '#f5cf6b' : '#7ed37e';
 }
+function useClass(pct) { return pct >= 40 ? 'high' : pct >= 20 ? 'mid' : 'low'; }
+function gwkStyle(f) {
+    const on = filt.use[useClass(f.properties.u)];
+    return on
+        ? { color: useColor(f.properties.u), weight: 1.2, opacity: 0.6, fill: true, fillOpacity: 0.03 }
+        : { opacity: 0, fillOpacity: 0, weight: 0 };
+}
+function refreshGwk() { if (gwkLayer) gwkLayer.setStyle(gwkStyle); }
 const SECTORS = [ // [key, label, color]
     ['supply', 'Drinking water supply', '#4fc3f7'],
     ['industry', 'Industry & trade', '#b48ce0'],
@@ -866,6 +876,8 @@ function wireLegend() {
         tap(el, () => { filt.trend[el.dataset.trend] = !filt.trend[el.dataset.trend]; applyStationFilters(); }));
     document.querySelectorAll('[data-band]').forEach(el =>
         tap(el, () => { const i = +el.dataset.band; filt.no3[i] = !filt.no3[i]; applyStationFilters(); }));
+    document.querySelectorAll('[data-use]').forEach(el =>
+        tap(el, () => { filt.use[el.dataset.use] = !filt.use[el.dataset.use]; refreshGwk(); }));
     syncLegendUI();
 }
 // One-time staggered pop when a sublegend opens, so people discover the chips are filters.
@@ -879,6 +891,7 @@ function syncLegendUI() {
     document.querySelectorAll('[data-cat]').forEach(el => el.classList.toggle('leg-off', !filt.cat[el.dataset.cat]));
     document.querySelectorAll('[data-trend]').forEach(el => el.classList.toggle('leg-off', !filt.trend[el.dataset.trend]));
     document.querySelectorAll('[data-band]').forEach(el => el.classList.toggle('leg-off', !filt.no3[+el.dataset.band]));
+    document.querySelectorAll('[data-use]').forEach(el => el.classList.toggle('leg-off', !filt.use[el.dataset.use]));
 }
 function hideResults() { $('search-results').style.display = 'none'; activeIdx = -1; }
 function norm(s) { return s.toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss'); }
@@ -986,9 +999,11 @@ function updateURL() {
     const hc = Object.keys(filt.cat).filter(k => !filt.cat[k]);
     const ht = Object.keys(filt.trend).filter(k => !filt.trend[k]);
     const hn = filt.no3.map((v, i) => v ? null : i).filter(v => v != null);
+    const hu = Object.keys(filt.use).filter(k => !filt.use[k]);
     if (hc.length) p.set('hc', hc.join(','));
     if (ht.length) p.set('ht', ht.join(','));
     if (hn.length) p.set('hn', hn.join(','));
+    if (hu.length) p.set('hu', hu.join(','));
     history.replaceState(null, '', '?' + p.toString());
 }
 function copyShare(btn) {
@@ -1016,6 +1031,7 @@ function restoreFromURL() {
     if (p.get('hc')) { for (const k of p.get('hc').split(',')) if (k in filt.cat) { filt.cat[k] = false; } refreshChoropleth(); refilter = true; }
     if (p.get('ht')) { for (const k of p.get('ht').split(',')) if (k in filt.trend) filt.trend[k] = false; refilter = true; }
     if (p.get('hn')) { for (const k of p.get('hn').split(',')) { const i = +k; if (i >= 0 && i < filt.no3.length) filt.no3[i] = false; } refilter = true; }
+    if (p.get('hu')) { for (const k of p.get('hu').split(',')) if (k in filt.use) filt.use[k] = false; refreshGwk(); refilter = true; }
     if (refilter) { applyStationFilters(); syncLegendUI(); }
     const v = p.get('v');
     if (v) {

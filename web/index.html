@@ -313,10 +313,10 @@
                 <div style="font-size:8.5px;color:#6a7194;margin-top:3px">dots = stations · shading = aquifer median</div>
             </div>
             <label title="Groundwater bodies (Wasserschatz 2021): outline colour = total abstraction as % of available resource (≥20% stress, ≥40% severe)"><input type="checkbox" id="tg-gwk"> Water use</label>
-            <div class="sublegend" id="leg-gwk" style="display:none;">
-                <span><i style="background:#7ed37e"></i>&lt;20%</span>
-                <span><i style="background:#f5cf6b"></i>20–40%</span>
-                <span><i style="background:#f28a7d"></i>&ge;40% used</span>
+            <div class="sublegend" id="leg-gwk" style="display:none;" title="Abstraction as % of available resource (EEA WEI+: ≥20% stress, ≥40% severe). Click a chip to show/hide those bodies.">
+                <span class="leg-btn" data-use="low" title="below 20% of the resource abstracted"><i style="background:#7ed37e"></i>&lt;20%</span>
+                <span class="leg-btn" data-use="mid" title="20–40% — water stress (EEA WEI+)"><i style="background:#f5cf6b"></i>20–40%</span>
+                <span class="leg-btn" data-use="high" title="40%+ — severe stress (EEA WEI+)"><i style="background:#f28a7d"></i>&ge;40% used</span>
             </div>
         </div>
         <div class="hint">Tap the map for any Katastralgemeinde</div>
@@ -356,6 +356,6 @@
 
     <div id="toast" style="display:none; position:fixed; bottom:44px; left:50%; transform:translateX(-50%); background:#202a55; border:1px solid #4fc3f7; color:#cfe3ff; padding:8px 18px; border-radius:8px; z-index:3000; font-size:0.85em;"></div>
 
-    <script src="app.js?v=11"></script>
+    <script src="app.js?v=12"></script>
 </body>
 </html>
