@@ -61,7 +61,34 @@ is the documented mechanism (channel bed LOWERS, which can lower adjacent GW
 base level) — colmation/silting is not. GAUGE_CLASS in the script maps the 34
 Schwebstoff gauges to storage/ror/control; reuse for follow-ups.
 
-Population integration (2026-07-17, IN PROGRESS):
+Water-use / GWK integration (2026-07-17, DONE):
+- scripts/build_gwk_context.py: Wasserschatz Oesterreichs 2021 xlsx
+  (data/pop/wasserschatz_ergebnistabelle.xlsx) + INSPIRE NGP2015 GWK
+  boundaries (data/gwk/gwk.zip, 138 feats, 129 match xlsx) ->
+  web/data/gwk_context.json (per body: resource m3/a, sector demand
+  wells+springs, Nutzungsintensitaet %, population via KG-share allocation,
+  supply_lcd L/cap/d) + kg2gwk (PiP of KG centroids, 6 lakeside via
+  nearest) + web/data/gwk.geojson overlay (simplified, ~360KB).
+- GWI now has 6 components: q_use = clamp(intensity/40%) at w 15%
+  (WEI+ convention: 20% stress, 40% severe). New weights: trend .30,
+  div .10, use .15, nitrate .20, wfd .10, edo .15 -> 23/42/35
+  good/watch/stressed. corr(intensity, old gwi)=0.21 so it adds signal
+  (it's the only demand-pressure component; others are observed state).
+- app.js v8: KG modal 'The water body underneath' (use%, resource,
+  people-on-body, supply L/cap/d w/ 'likely exports' hint >300, sector
+  bars); legend toggle 'Water bodies & use' (outline colour by intensity,
+  taps pass through to KG); Methods + sources updated.
+- llm_api.py: gwi_q_use/gwi_use_pct/gwi_gwk metrics; 'groundwater_body'
+  block on KG+Gemeinde payloads (dominant body when spanning several);
+  'population' block (per-year series only on Gemeinde endpoint).
+- Re-run order now: fetch_* -> build_gwk_context.py (only if xlsx/GML
+  change) -> build_gw_index.py -> snap_points.py -> restart drought-map.
+- Possible next: 2050 scenarios (xlsx sheet '3 - Szenarienergebnisse',
+  89 Szenarienregionen, guenstig/unguenstig demand+resource; region names
+  are aggregations of GWK names -- 15 ambiguous matches, needs manual map
+  or the report's region shapefile).
+
+Population integration (2026-07-17, DONE except per-capita consumption):
 - DONE: scripts/build_population.py -> web/data/population.json(.gz).
   Source: Statistik Austria OGD OGD_bevstandjbab2002_BevStand_{2002..2026}
   (~18MB/yr CSVs in data/pop/, gitignored; re-download loop in script docstring
@@ -73,7 +100,7 @@ Population integration (2026-07-17, IN PROGRESS):
 - DONE: app.js "People on this water" in KG modal (pop, growth since 2002,
   65+ share, est. household demand at 130 L/cap/d, sparkline total+65+),
   choropleth tooltip pop+growth. app.js?v=7. Tested in browser, works.
-- NOT COMMITTED/NOT DONE: per-capita consumption. Research findings:
+- NOT DONE: measured per-capita consumption (research findings below):
   * No measured per-Gemeinde consumption exists publicly. Best available:
   * Wasserschatz Oesterreichs (BMLUK 2021) Ergebnistabelle.xlsx COMMITTED at
     data/pop/wasserschatz_ergebnistabelle.xlsx: per GWK (129 groundwater
