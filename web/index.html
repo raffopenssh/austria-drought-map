@@ -249,6 +249,13 @@
         .chart-box { height: 260px; background: #10142b; border-radius: 8px; padding: 10px; }
         .edo-bars { display: flex; align-items: stretch; gap: 4px; height: 90px; padding: 4px 0; }
         .note { font-size: 0.68em; color: #6a7194; margin-top: 6px; }
+        .live-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 0.62em; font-weight: 600;
+            color: #7ed37e; background: rgba(126,211,126,0.1); border: 1px solid rgba(126,211,126,0.35);
+            border-radius: 9px; padding: 1px 7px 1px 5px; vertical-align: 2px; letter-spacing: 0.04em; }
+        .live-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #7ed37e;
+            animation: live-pulse 2.2s ease-in-out infinite; }
+        @keyframes live-pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(126,211,126,0.5); }
+            50% { opacity: 0.55; box-shadow: 0 0 0 4px rgba(126,211,126,0); } }
         .apirow { margin-top: 14px; font-size: 0.75em; color: #6a7194; }
         .apirow code { background: #10142b; padding: 2px 7px; border-radius: 5px; color: #8fd0ff; font-size: 0.95em; }
 
@@ -393,6 +400,18 @@
         </div>
     </div>
 
+    <!-- Hydropower plant modal -->
+    <div class="modal-overlay" id="hp-modal">
+        <div class="modal-wrap">
+            <div class="modal">
+                <button class="modal-close" onclick="closeModal('hp-modal')">&times;</button>
+                <button class="modal-share" onclick="copyShare(this)">🔗 Share</button>
+                <div class="modal-topnav" id="hp-topnav"></div>
+                <div class="modal-body" id="hp-modal-body"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Methods modal -->
     <div class="modal-overlay" id="methods-modal">
         <div class="modal-wrap" style="max-width: 760px;">
@@ -405,6 +424,6 @@
 
     <div id="toast" style="display:none; position:fixed; bottom:44px; left:50%; transform:translateX(-50%); background:#202a55; border:1px solid #4fc3f7; color:#cfe3ff; padding:8px 18px; border-radius:8px; z-index:3000; font-size:0.85em;"></div>
 
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
 </body>
 </html>

@@ -254,6 +254,14 @@ def _load():
         _state["plant_kg_map"] = pi.get("kg_map", {})
     else:
         _state["plant_infl"], _state["plant_kg_map"] = None, {}
+    # Per-plant profiles (generation history, downstream gauges, reservoir).
+    ppf_path = os.path.join(DATA, "plant_profiles.json")
+    _state["plant_profiles"] = (json.load(open(ppf_path))
+                                if os.path.exists(ppf_path) else None)
+    # Per-gauge profiles (annual + live flow, sediment).
+    gpf_path = os.path.join(DATA, "gauge_profiles.json")
+    _state["gauge_profiles"] = (json.load(open(gpf_path))
+                                if os.path.exists(gpf_path) else None)
     # Groundwater-body context (Wasserschatz 2021) + population (Statistik AT).
     gc_path = os.path.join(DATA, "gwk_context.json")
     if os.path.exists(gc_path):
@@ -733,6 +741,63 @@ def handle(path, query):
             results.append(obj)
         return 200, {"results": results,
                      "meta": {"requested": len(code_list)}}
+    if path.startswith("/llm/plant/"):
+        pid = urllib.parse.unquote(path[len("/llm/plant/"):]).strip("/")
+        if pid.endswith(".json"):
+            pid = pid[:-5]
+        _load()
+        pp = _state.get("plant_profiles")
+        if not pp:
+            return 404, {"error": "no_plant_profiles"}
+        if not pid:
+            return 200, {"plants": sorted(pp["plants"].keys()),
+                         "generated": pp.get("generated"),
+                         "endpoint": "/llm/plant/{plant_id}"}
+        p = pp["plants"].get(pid)
+        if not p:
+            return 404, {"plant_id": pid, "error": "no_data",
+                         "known_plants": sorted(pp["plants"].keys())}
+        obj = dict(p)
+        obj.update({
+            "service": SERVICE, "dataset": DATASET, "plant_id": pid,
+            "granularity": "plant",
+            "reservoir_at": pp.get("reservoir", {}).get("latest"),
+            "as_of": AS_OF, "updated_at": _state["updated_at"],
+            "source": "ENTSO-E Transparency (generation, reservoir storage); "
+                      "eHYD/OWF (downstream gauges, flow & sediment trends)",
+            "license": LICENSE,
+            "notes": "gen = daily turbined MWh (last 365 d); gw/pegel = downstream "
+                     "monitoring points along the river network with share of daily "
+                     "variation explained by this plant's releases. Correlation, "
+                     "not proven causation.",
+        })
+        return 200, obj
+    if path.startswith("/llm/gauge/"):
+        hzb = urllib.parse.unquote(path[len("/llm/gauge/"):]).strip("/")
+        if hzb.endswith(".json"):
+            hzb = hzb[:-5]
+        _load()
+        gp = _state.get("gauge_profiles")
+        if not gp:
+            return 404, {"error": "no_gauge_profiles"}
+        if not hzb:
+            return 200, {"gauges": sorted(gp["stations"].keys()),
+                         "generated": gp.get("generated"),
+                         "endpoint": "/llm/gauge/{hzb_number}"}
+        g = gp["stations"].get(hzb)
+        if not g:
+            return 404, {"hzb": hzb, "error": "no_data"}
+        obj = dict(g)
+        obj.update({
+            "service": SERVICE, "dataset": DATASET, "hzb": hzb,
+            "granularity": "river_gauge",
+            "as_of": AS_OF, "updated_at": _state["updated_at"],
+            "source": gp.get("source"), "license": LICENSE,
+            "notes": "annual = annual mean flow m3/s (OWF yearbook); live = daily "
+                     "flow this year (eHYD, refreshed daily); sed = suspended "
+                     "sediment t/day and long-term trend percent.",
+        })
+        return 200, obj
     if path.startswith("/llm/point/"):
         pid = urllib.parse.unquote(path[len("/llm/point/"):]).strip("/")
         if pid.endswith(".json"):

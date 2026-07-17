@@ -46,6 +46,10 @@ let plantInfl = null;      // plant_influence.json (hydropower downstream impact
 let no3Stations = [];      // nitrate stations
 let muniByIso = {}, muniByName = {};
 let gwTrendsCache = null;  // lazy full annual data
+let plantProfiles = null;  // lazy plant_profiles.json (per-plant generation + downstream)
+let gaugesSlim = null;     // eager gauges_slim.json (river gauge index for proximity lists)
+let gaugeProfiles = null;  // lazy gauge_profiles.json (per-gauge annual + live flow)
+let hpStack = [];          // modal back-stack for plant/gauge modals: [{kind:'kg'|'gw'|'no3'|'hp'|'pg', id}]
 let popData = null;        // population.json (Statistik Austria)
 let gwkCtx = null;         // gwk_context.json (Wasserschatz per GW body)
 let gwkLayer = null;       // GW-body boundary overlay (lazy)
@@ -115,6 +119,7 @@ async function boot() {
         fetch('data/plant_influence.json').then(r => r.json()).catch(() => null),
     ]);
     popData = await fetch('data/population.json').then(r => r.json()).catch(() => null);
+    gaugesSlim = await fetch('data/gauges_slim.json').then(r => r.json()).catch(() => null);
     gwkCtx = await fetch('data/gwk_context.json').then(r => r.json()).catch(() => null);
     plantInfl = pinf;
     gwiKG = gwi.kgs; gwiMeta = gwi; kgReg = reg;
@@ -467,6 +472,23 @@ function stationListHTML(lat, lon, radiusKm) {
                     <span class="val" style="color:${no3Tint(s.latest)}">${s.latest != null ? s.latest.toFixed(1) + ' mg/L' : '–'}</span>
                 </div>`).join('') + '</div>';
     }
+    const pgs = !gaugesSlim ? [] : gaugesSlim
+        .map(s => ({ s, d: distKm(lat, lon, s.lat, s.lon) }))
+        .filter(x => x.d <= radiusKm)
+        .sort((a, b) => a.d - b.d).slice(0, 6);
+    if (pgs.length) {
+        html += `<h3>River gauges <small style="color:#6a7194;font-weight:400">≤ ${radiusKm} km</small></h3><div class="station-list">` +
+            pgs.map(({ s, d }) => {
+                const tr = s.t;
+                const trCol = tr == null ? '#8b93b8' : tr < -5 ? '#f28a7d' : tr > 5 ? '#7ed37e' : '#8b93b8';
+                return `<div class="station-item" onclick="pgOpen('${esc(s.id)}')">
+                    <span class="dot" style="background:${s.live ? '#8fd08a' : '#8b93b8'}"></span>
+                    <span class="nm">${esc(s.n)} <small style="color:#6a7194">${esc(s.riv)}</small></span>
+                    <span class="meta">${d.toFixed(1)} km${s.q != null ? ' · ' + s.q + ' m³/s' : ''}</span>
+                    <span class="val" style="color:${trCol}">${tr != null ? (tr > 0 ? '+' : '') + tr + '%/dec' : (s.live ? 'live' : '–')}</span>
+                </div>`;
+            }).join('') + '</div>';
+    }
     if (!html) html = '<p class="note">No monitoring stations within ' + radiusKm + ' km.</p>';
     return html;
 }
@@ -487,14 +509,14 @@ function hydroSparkSVG(l) {
         `${(i / (n - 1) * W).toFixed(1)},${(H - 4 - v / 100 * (H - 10)).toFixed(1)}`).join(' ');
     const d0 = sp.d0.slice(5).replace('-', '/'), d1 = sp.d1.slice(5).replace('-', '/');
     const range = (sp.lvl_max - sp.lvl_min);
-    return `<div class="hydro-spark" style="margin:2px 0 6px 20px;">
+    return `<div class="hydro-spark" style="margin:2px 0 6px 20px;cursor:pointer;" onclick="hpOpen('${esc(l.plant)}')" title="Tap for plant details: generation history, reservoir storage, downstream gauges">
         <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;background:#141a2e;border-radius:6px;">
             <line x1="0" y1="${H / 2}" x2="${W}" y2="${H / 2}" stroke="#26315e" stroke-width="0.6"/>
             <polyline points="${pts(sp.rel)}" fill="none" stroke="#8fb8f2" stroke-width="1.1" opacity="0.7" stroke-linejoin="round"/>
             <polyline points="${pts(sp.lvl)}" fill="none" stroke="#facc6b" stroke-width="1.6" stroke-linejoin="round"/>
         </svg>
         <small style="color:#6a7194;"><span style="color:#facc6b">━</span> well level ${sp.lvl_min}–${sp.lvl_max} m <span title="Both curves are independently scaled to their own min–max over the window shown, to make co-movement visible — vertical positions are not comparable between the two curves." style="cursor:help;border-bottom:1px dotted #4a5578">(span ${range < 0.995 ? (range * 100).toFixed(0) + ' cm' : range.toFixed(2) + ' m'})</span>
-        &nbsp;<span style="color:#8fb8f2">━</span> daily release &nbsp;·&nbsp; ${d0}–${d1} · each scaled to own range</small>
+        &nbsp;<span style="color:#8fb8f2">━</span> daily release &nbsp;·&nbsp; ${d0}–${d1} · each scaled to own range${liveTag(sp.d1, 8)}</small>
     </div>`;
 }
 function hydroLinkRowHTML(l, showStation) {
@@ -504,7 +526,7 @@ function hydroLinkRowHTML(l, showStation) {
     return `<div class="station-item" style="cursor:default;display:block;">
         <div style="display:flex;align-items:center;gap:8px;">
         <span class="dot" style="background:#8fb8f2"></span>
-        <span class="nm">${esc(p.name || l.plant)} <small style="color:#6a7194">${esc(p.type || '')} · ${p.mw || '?'} MW · ${esc(p.river || '')}</small>${showStation ? `<br><small style="color:#6a7194">at ${esc(l.name)} (<a href="#" onclick="stNavOpen('gw','${esc(l.station)}');return false;">${esc(l.station)}</a>)</small>` : ''}</span>
+        <span class="nm"><a href="#" onclick="hpOpen('${esc(l.plant)}');return false;" title="Open plant details: generation history, reservoir storage, downstream gauges">${esc(p.name || l.plant)}</a> <small style="color:#6a7194">${esc(p.type || '')} · ${p.mw || '?'} MW · ${esc(p.river || '')}</small>${showStation ? `<br><small style="color:#6a7194">at ${esc(l.name)} (<a href="#" onclick="stNavOpen('gw','${esc(l.station)}');return false;">${esc(l.station)}</a>)</small>` : ''}</span>
         <span class="meta">${l.km.toFixed(0)} km downstr.</span>
         <span class="val" title="partial R² = ${l.partial}, p = ${l.p}, placebo = ${l.placebo}">${share}% <small style="color:#6a7194">${dir.slice(0, 1)}</small></span>
         </div>
@@ -521,6 +543,260 @@ function hydroImpactHTML(links, showStation) {
         after controlling for local precipitation. Only links passing significance tests (p&lt;0.01, above placebo) are shown.
         Station and plant are connected along the actual river network. ↑/↓ = level response to releases.
         <b>Correlation, not proven causation.</b> <a href="#" onclick="showMethods();return false;">Details</a></div>`;
+}
+
+// ---------- live-data tag ----------
+function liveTag(lastDate, maxAgeDays) {
+    if (!lastDate) return '';
+    const age = (Date.now() - new Date(lastDate + 'T00:00:00Z').getTime()) / 86400e3;
+    if (age > (maxAgeDays || 8)) return '';
+    return ` <span class="live-tag" title="Refreshed daily from live feeds · latest data point ${esc(lastDate)}">LIVE</span>`;
+}
+function lastDateOf(d0, vals) { // last non-null index -> ISO date
+    let i = vals.length - 1;
+    while (i >= 0 && vals[i] == null) i--;
+    if (i < 0) return null;
+    return new Date(new Date(d0 + 'T00:00:00Z').getTime() + i * 86400e3).toISOString().slice(0, 10);
+}
+
+// ---------- hydropower plant & river gauge modals ----------
+function modalCtx() {
+    if ($('kg-modal').classList.contains('active') && lastKGCtx) return { kind: 'kg', id: lastKGCtx.code };
+    if ($('st-modal').classList.contains('active')) {
+        if (currentShare.st) return { kind: 'gw', id: currentShare.st };
+        if (currentShare.no3) return { kind: 'no3', id: currentShare.no3 };
+    }
+    if ($('hp-modal').classList.contains('active')) {
+        if (currentShare.hp) return { kind: 'hp', id: currentShare.hp };
+        if (currentShare.pg) return { kind: 'pg', id: currentShare.pg };
+    }
+    return null;
+}
+function hpPush(nextKind, nextId) {
+    const c = modalCtx();
+    if (c && !(c.kind === nextKind && c.id === String(nextId))) {
+        hpStack.push(c);
+        if (hpStack.length > 12) hpStack.shift();
+    }
+}
+function hpBackGo() {
+    const b = hpStack.pop();
+    closeModal('hp-modal', true); destroyChart();
+    if (!b) return;
+    if (b.kind === 'kg') showKGModal(b.id, { noFly: true });
+    else if (b.kind === 'gw' || b.kind === 'no3') stNavOpen(b.kind, b.id); // rebuilds ←-KG nav from lastKGCtx
+    else if (b.kind === 'hp') hpOpen(b.id, true);
+    else if (b.kind === 'pg') pgOpen(b.id, true);
+}
+function hpNavRender() {
+    const nav = $('hp-topnav');
+    const b = hpStack[hpStack.length - 1];
+    if (b) {
+        const lbl = b.kind === 'kg' ? (kgReg[b.id] ? kgReg[b.id].n : b.id)
+            : b.kind === 'hp' ? ((plantProfiles && plantProfiles.plants[b.id]) || {}).name || b.id
+            : b.kind === 'pg' ? 'gauge ' + b.id
+            : 'station ' + b.id;
+        nav.style.display = 'flex';
+        nav.innerHTML = `<button class="modal-back" onclick="hpBackGo()">← ${esc(lbl)}</button>`;
+    } else { nav.style.display = 'none'; nav.innerHTML = ''; }
+}
+async function hpOpen(pid, isBack) {
+    if (!isBack) hpPush('hp', pid);
+    const body = $('hp-modal-body');
+    body.innerHTML = '<div style="text-align:center;padding:60px 0;"><div class="loading-spinner" style="margin:0 auto;"></div></div>';
+    closeModal('kg-modal', true); closeModal('st-modal', true);
+    openModal('hp-modal');
+    try {
+        if (!plantProfiles) plantProfiles = await fetch('data/plant_profiles.json').then(r => r.json());
+    } catch (e) { body.innerHTML = '<p class="note">Plant data unavailable.</p>'; return; }
+    const p = plantProfiles.plants[pid];
+    if (!p) { body.innerHTML = '<p class="note">Unknown plant.</p>'; return; }
+    destroyChart();
+    currentShare = { hp: pid };
+    updateURL();
+    hpNavRender();
+
+    const gen = p.gen.vals.filter(v => v != null);
+    const last = gen.length ? gen[gen.length - 1] : null;
+    const cf = p.mean_mwh_day_2026 != null ? Math.round(p.mean_mwh_day_2026 / (p.mw * 24) * 100) : null;
+    const srcNote = p.release_source === 'a73'
+        ? 'per-unit ENTSO-E data (A73)'
+        : `downscaled from the national ${p.type.toLowerCase()} feed, calibrated on this plant's 2023–24 per-unit data (r = ${p.calib_r})`;
+    const res = plantProfiles.reservoir;
+    const showRes = p.psr !== 'ror';
+
+    // downstream lists
+    const gwRows = p.gw.map(l => `<div class="station-item" onclick="stNavOpen('gw','${esc(l.station)}')">
+            <span class="dot" style="background:#8fb8f2"></span>
+            <span class="nm">${esc(l.name)} <small style="color:#6a7194">well ${esc(l.station)}</small></span>
+            <span class="meta">${l.km.toFixed(0)} km</span>
+            <span class="val" title="partial R² = ${l.partial}, p = ${l.p}">${Math.round(l.partial * 100)}% <small style="color:#6a7194">${l.beta_sum > 0 ? '↑' : '↓'}</small></span>
+        </div>`).join('');
+    const pegRows = p.pegel.map(l => {
+        const f = l.flow, s = l.sediment;
+        const bits = [];
+        if (f) bits.push(`flow ${f.mean_m3s} m³/s · <span style="color:${f.trend_pct_decade < -5 ? '#f28a7d' : f.trend_pct_decade > 5 ? '#7ed37e' : '#8b93b8'}">${f.trend_pct_decade > 0 ? '+' : ''}${f.trend_pct_decade}%/decade</span> (${f.years} yr)`);
+        if (s) bits.push(`sediment ${Math.round(s.mean_daily_t)} t/day · ${s.trend_pct > 0 ? '+' : ''}${s.trend_pct}%`);
+        return `<div class="station-item" style="display:block;" onclick="pgOpen('${esc(l.station)}')">
+            <div style="display:flex;align-items:center;gap:8px;">
+            <span class="dot" style="background:${l.sig ? '#facc6b' : '#3a3f55'}"></span>
+            <span class="nm">${esc(l.name)} <small style="color:#6a7194">${esc(l.river)} · gauge ${esc(l.station)}</small></span>
+            <span class="meta">${l.km.toFixed(0)} km</span>
+            <span class="val" title="partial R² = ${l.partial}, p = ${l.p}${l.sig ? '' : ' — not significant'}">${l.sig ? Math.round(l.partial * 100) + '%' : '–'}</span>
+            </div>
+            ${bits.length ? `<div style="margin:2px 0 2px 20px;"><small style="color:#6a7194">${bits.join(' &nbsp;·&nbsp; ')}</small></div>` : ''}
+        </div>`;
+    }).join('');
+
+    body.innerHTML = `
+        <h2>${esc(p.name)}</h2>
+        <div class="subtitle">${esc(p.type)} · ${esc(p.river)} · ENTSO-E · releases ${srcNote}</div>
+        <div class="kv-grid kv3">
+            <div class="kv"><div class="k">Capacity</div><div class="v">${p.mw} MW</div></div>
+            <div class="kv"><div class="k">Mean output 2026</div><div class="v">${p.mean_mwh_day_2026 != null ? Math.round(p.mean_mwh_day_2026).toLocaleString('en') + ' MWh/d' : '–'}</div></div>
+            <div class="kv" title="Mean 2026 output as a share of running at full capacity 24/7"><div class="k">Capacity factor</div><div class="v">${cf != null ? cf + '%' : '–'}</div></div>
+        </div>
+        <h3>Daily turbined energy${liveTag(lastDateOf(p.gen.d0, p.gen.vals), 10)} <small style="color:#6a7194;font-weight:400">last 12 months, MWh/day${p.release_source !== 'a73' ? ' · downscaled estimate' : ''}</small></h3>
+        <div class="chart-box" style="height:170px;"><canvas id="hp-gen-chart"></canvas></div>
+        <div class="note">Turbined energy is the proxy for water released downstream. Pumped-storage plants also consume
+        energy to pump water back up (not shown); generation-side releases are what reach the river.</div>
+        ${showRes ? `
+        <h3>Austrian reservoir storage${liveTag(res.latest.date, 28)} <small style="color:#6a7194;font-weight:400">all AT hydro reservoirs, weekly</small></h3>
+        <div class="kv-grid kv3">
+            <div class="kv"><div class="k">Stored now (${esc(res.latest.date)})</div><div class="v">${res.latest.gwh.toLocaleString('en')} GWh</div></div>
+            <div class="kv" title="Share of the historical maximum since 2015"><div class="k">of record max</div><div class="v">${res.latest.pct_of_max}%</div></div>
+            <div class="kv" title="Rank of the current level among the same calendar weeks (±1) of ${res.latest.n_ref_years} previous observations since 2015"><div class="k">vs this week historically</div><div class="v">${res.latest.seasonal_percentile != null ? res.latest.seasonal_percentile + 'th pctl' : '–'}</div></div>
+        </div>
+        <div class="chart-box" style="height:150px;"><canvas id="hp-res-chart"></canvas></div>
+        <div class="note">National figure (ENTSO-E publishes no per-reservoir storage) — context for how much water
+        the storage fleet, including this plant's reservoirs, has left to release. Low storage in a dry summer means
+        releases compete directly with residual river flow.</div>` : ''}
+        ${p.gw.length ? `<h3>Downstream groundwater wells <small style="color:#6a7194;font-weight:400">significant coupling</small></h3>
+        <div class="station-list">${gwRows}</div>` : ''}
+        ${p.pegel.length ? `<h3>Downstream river gauges <small style="color:#6a7194;font-weight:400">OWF, along the river network</small></h3>
+        <div class="station-list" style="max-height:260px;">${pegRows}</div>
+        <div class="note">% = share of day-to-day river-stage variation explained by this plant's releases after
+        controlling for precipitation (p&lt;0.01; grey dot = no significant link). Long-term flow and suspended-sediment
+        trends are from OWF daily records — they reflect all drivers (climate, abstraction, regulation), not this plant alone.
+        <b>Correlation, not proven causation.</b> <a href="#" onclick="showMethods();return false;">Details</a></div>` : ''}
+        <div class="apirow">API: <code><a href="/llm/plant/${esc(pid)}" target="_blank">/llm/plant/${esc(pid)}</a></code></div>`;
+    $('hp-modal-body').scrollTop = 0;
+    hpDrawCharts(p, showRes ? res : null);
+}
+function hpDrawCharts(p, res) {
+    const genEl = document.getElementById('hp-gen-chart');
+    if (genEl) {
+        const labels = [], vals = [];
+        const d0 = new Date(p.gen.d0 + 'T00:00:00Z');
+        for (let i = 0; i < p.gen.vals.length; i++) {
+            const d = new Date(d0.getTime() + i * 86400e3);
+            labels.push(d.toISOString().slice(0, 10));
+            vals.push(p.gen.vals[i]);
+        }
+        chart = new Chart(genEl, {
+            type: 'line',
+            data: { labels, datasets: [{ data: vals, borderColor: 'rgba(143,184,242,0.9)', borderWidth: 1,
+                pointRadius: 0, fill: true, backgroundColor: 'rgba(143,184,242,0.12)', tension: 0.1, spanGaps: false }] },
+            options: { ...chartOpts('MWh'), scales: {
+                x: { ticks: { color: '#6a7194', maxTicksLimit: 8, font: { size: 10 }, callback(v, i) { return labels[i] && labels[i].endsWith('-01') ? labels[i].slice(0, 7) : (i % 45 === 0 ? labels[i].slice(5) : null); } }, grid: { color: 'rgba(58,63,85,0.3)' } },
+                y: { ticks: { color: '#6a7194', font: { size: 10 } }, grid: { color: 'rgba(58,63,85,0.3)' }, beginAtZero: true },
+            } },
+        });
+    }
+    const resEl = document.getElementById('hp-res-chart');
+    if (resEl && res) {
+        const labels = res.weekly.map(w => w[0]), vals = res.weekly.map(w => w[1]);
+        popChart = new Chart(resEl, {
+            type: 'line',
+            data: { labels, datasets: [{ data: vals, borderColor: 'rgba(250,204,107,0.85)', borderWidth: 1.2,
+                pointRadius: 0, fill: true, backgroundColor: 'rgba(250,204,107,0.08)', tension: 0.2 }] },
+            options: { ...chartOpts('GWh'), scales: {
+                x: { ticks: { color: '#6a7194', maxTicksLimit: 12, font: { size: 10 }, callback(v, i) { return labels[i] && labels[i].slice(5, 7) === '01' && labels[i].slice(8, 10) <= '07' ? labels[i].slice(0, 4) : null; } }, grid: { color: 'rgba(58,63,85,0.3)' } },
+                y: { ticks: { color: '#6a7194', font: { size: 10 } }, grid: { color: 'rgba(58,63,85,0.3)' }, beginAtZero: true },
+            } },
+        });
+    }
+}
+
+// ---------- river gauge modal (gauge_profiles.json) ----------
+async function pgOpen(hzb, isBack) {
+    if (!isBack) hpPush('pg', hzb);
+    const body = $('hp-modal-body');
+    body.innerHTML = '<div style="text-align:center;padding:60px 0;"><div class="loading-spinner" style="margin:0 auto;"></div></div>';
+    closeModal('kg-modal', true); closeModal('st-modal', true);
+    openModal('hp-modal');
+    try {
+        if (!gaugeProfiles) gaugeProfiles = await fetch('data/gauge_profiles.json').then(r => r.json());
+    } catch (e) { body.innerHTML = '<p class="note">Gauge data unavailable.</p>'; return; }
+    const g = gaugeProfiles.stations[hzb];
+    if (!g) { body.innerHTML = '<p class="note">Unknown gauge.</p>'; return; }
+    destroyChart();
+    currentShare = { pg: hzb };
+    updateURL();
+    hpNavRender();
+
+    const tr = g.trend_pct_decade;
+    const trCol = tr == null ? '#8b93b8' : tr < -5 ? '#f28a7d' : tr > 5 ? '#7ed37e' : '#8b93b8';
+    const liveLast = g.live ? lastDateOf(g.live.d0, g.live.vals) : null;
+    // upstream plants with detected influence at this gauge
+    const links = (plantInfl && plantInfl.pegel_links || []).filter(l => String(l.station) === String(hzb));
+    links.sort((a, b) => (b.sig - a.sig) || (b.partial - a.partial));
+    const plantRows = links.map(l => {
+        const p = plantInfl.plants[l.plant] || {};
+        return `<div class="station-item" onclick="hpOpen('${esc(l.plant)}')">
+            <span class="dot" style="background:${l.sig ? '#facc6b' : '#3a3f55'}"></span>
+            <span class="nm">${esc(p.name || l.plant)} <small style="color:#6a7194">${esc(p.type || '')} · ${p.mw || '?'} MW</small></span>
+            <span class="meta">${l.km.toFixed(0)} km upstr.</span>
+            <span class="val" title="partial R² = ${l.partial}, p = ${l.p}${l.sig ? '' : ' — not significant'}">${l.sig ? Math.round(l.partial * 100) + '%' : '–'}</span>
+        </div>`;
+    }).join('');
+
+    body.innerHTML = `
+        <h2>${esc(g.name)}</h2>
+        <div class="subtitle">River gauge · ${esc(g.river)} · HZB ${esc(hzb)}${g.km2 ? ` · catchment ${g.km2.toLocaleString('en')} km²` : ''}</div>
+        <div class="kv-grid kv3">
+            <div class="kv"><div class="k">Mean flow</div><div class="v">${g.mean_m3s != null ? g.mean_m3s + ' m³/s' : '–'}</div></div>
+            <div class="kv" title="Linear trend of annual mean flow over the full record"><div class="k">Flow trend</div><div class="v" style="color:${trCol}">${tr != null ? (tr > 0 ? '+' : '') + tr + '%/decade' : '–'}</div></div>
+            <div class="kv" title="Suspended sediment transport (OWF Schwebstoff-Tagesfracht)"><div class="k">Sediment</div><div class="v">${g.sed ? Math.round(g.sed.t_day).toLocaleString('en') + ' t/d <small style=\"color:#6a7194\">' + (g.sed.trend_pct > 0 ? '+' : '') + g.sed.trend_pct + '%</small>' : '–'}</div></div>
+        </div>
+        ${g.live ? `<h3>Flow this year${liveTag(liveLast, 8)} <small style="color:#6a7194;font-weight:400">daily ${esc(g.live.param || 'flow').toLowerCase()}, ${esc(g.live.unit)}</small></h3>
+        <div class="chart-box" style="height:160px;"><canvas id="pg-live-chart"></canvas></div>
+        <div class="note">eHYD live feed (BML), refreshed daily.</div>` : ''}
+        ${g.annual.length > 4 ? `<h3>Annual mean flow <small style="color:#6a7194;font-weight:400">${g.annual[0][0]}–${g.annual[g.annual.length - 1][0]}, m³/s</small></h3>
+        <div class="chart-box" style="height:160px;"><canvas id="pg-annual-chart"></canvas></div>
+        <div class="note">OWF hydrographic yearbook daily means, aggregated per year (years with ≥300 days).
+        The long-term trend reflects all drivers — climate, abstraction, regulation.</div>` : ''}
+        ${plantRows ? `<h3>Upstream hydropower <small style="color:#6a7194;font-weight:400">release signal at this gauge</small></h3>
+        <div class="station-list">${plantRows}</div>
+        <div class="note">% = share of day-to-day stage variation explained by the plant's turbined releases after
+        controlling for precipitation (grey dot = no significant link). <b>Correlation, not proven causation.</b></div>` : ''}
+        <div class="apirow">API: <code><a href="/llm/gauge/${esc(hzb)}" target="_blank">/llm/gauge/${esc(hzb)}</a></code></div>`;
+    $('hp-modal-body').scrollTop = 0;
+
+    const liveEl = document.getElementById('pg-live-chart');
+    if (liveEl && g.live) {
+        const d0 = new Date(g.live.d0 + 'T00:00:00Z');
+        const labels = g.live.vals.map((_, i) => new Date(d0.getTime() + i * 86400e3).toISOString().slice(0, 10));
+        chart = new Chart(liveEl, {
+            type: 'line',
+            data: { labels, datasets: [{ data: g.live.vals, borderColor: 'rgba(143,184,242,0.9)', borderWidth: 1.2,
+                pointRadius: 0, fill: true, backgroundColor: 'rgba(143,184,242,0.12)', tension: 0.15, spanGaps: false }] },
+            options: { ...chartOpts(g.live.unit), scales: {
+                x: { ticks: { color: '#6a7194', maxTicksLimit: 8, font: { size: 10 }, callback: (v, i) => labels[i] && labels[i].endsWith('-01') ? labels[i].slice(5, 7) : null }, grid: { color: 'rgba(58,63,85,0.3)' } },
+                y: { ticks: { color: '#6a7194', font: { size: 10 } }, grid: { color: 'rgba(58,63,85,0.3)' }, beginAtZero: true },
+            } },
+        });
+    }
+    const annEl = document.getElementById('pg-annual-chart');
+    if (annEl && g.annual.length > 4) {
+        popChart = new Chart(annEl, {
+            type: 'line',
+            data: { labels: g.annual.map(a => a[0]), datasets: [{ data: g.annual.map(a => a[1]),
+                borderColor: 'rgba(79,195,247,0.8)', borderWidth: 1.5, pointRadius: 2,
+                pointBackgroundColor: 'rgba(79,195,247,0.9)', fill: false, tension: 0.15 }] },
+            options: chartOpts('m³/s'),
+        });
+    }
 }
 
 // ---------- groundwater body context (Wasserschatz 2021) ----------
@@ -701,13 +977,19 @@ function closeModal(id, silent) {
     if (!ov.classList.contains('active') && silent) return;
     ov.classList.remove('active');
     if (id === 'st-modal') { stNav = null; renderStNav(); }
-    if (!silent && (id === 'st-modal' || id === 'kg-modal')) {
+    if (id === 'hp-modal' && !silent) hpStack = [];
+    if (!silent && (id === 'st-modal' || id === 'kg-modal' || id === 'hp-modal')) {
         destroyChart(); currentShare = {}; updateURL();
     }
 }
 function openModal(id) { $(id).classList.add('active'); }
+// Tap outside the modal card = CLOSE (back to the map, discard nav stack).
+// The ← button = BACK (pop one level). e.target can be the overlay itself or
+// the .modal-wrap spacer flanking the card — both count as "outside".
 document.querySelectorAll('.modal-overlay').forEach(ov =>
-    ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
+    ov.addEventListener('click', e => {
+        if (e.target === ov || e.target.classList.contains('modal-wrap')) closeModal(ov.id);
+    }));
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(ov => closeModal(ov.id));
     if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && $('st-modal').classList.contains('active') && stNav) {
@@ -1068,7 +1350,7 @@ function updateURL() {
     const c = map.getCenter();
     const p = new URLSearchParams();
     p.set('v', c.lat.toFixed(4) + ',' + c.lng.toFixed(4) + ',' + map.getZoom());
-    for (const k of ['kg', 'st', 'no3', 'gem']) if (currentShare[k]) p.set(k, currentShare[k]);
+    for (const k of ['kg', 'st', 'no3', 'gem', 'hp', 'pg']) if (currentShare[k]) p.set(k, currentShare[k]);
     // layer toggles (default: gw on, no3+gwk off) — only encode when non-default
     const ly = [];
     if ($('tg-gw').checked) ly.push('gw');
@@ -1119,6 +1401,8 @@ function restoreFromURL() {
         if (isFinite(lat) && isFinite(lng)) map.setView([lat, lng], isFinite(z) ? z : 9, { animate: false });
     }
     if (p.get('kg') && kgReg[p.get('kg')]) showKGModal(p.get('kg'), { noFly: !v });
+    else if (p.get('hp')) hpOpen(p.get('hp'));
+    else if (p.get('pg')) pgOpen(p.get('pg'));
     else if (p.get('st')) openGWStationById(p.get('st'));
     else if (p.get('no3')) openNO3StationById(p.get('no3'));
     else if (p.get('gem') && muniByIso[p.get('gem')]) {
