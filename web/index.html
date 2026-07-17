@@ -107,7 +107,7 @@
 
         /* ---- legend ---- */
         #legend {
-            position: fixed; right: 10px; bottom: 26px; z-index: 800;
+            position: fixed; right: 10px; bottom: 10px; z-index: 800;
             background: rgba(20, 24, 45, 0.92); backdrop-filter: blur(6px);
             border: 1px solid #26315e; border-radius: 10px; padding: 10px 12px;
             font-size: 11px; max-width: 210px;
@@ -127,18 +127,20 @@
         #legend .sublegend { margin: 0 0 4px 22px; font-size: 9px; color: #8b93b8; }
         #legend .sublegend span { margin-right: 7px; white-space: nowrap; }
         #legend .sublegend i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; vertical-align: -1px; }
+        .leg-btn { cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; padding: 2px 3px; margin: -2px -3px; border-radius: 4px; transition: opacity .12s; }
+        .leg-btn:hover { background: rgba(79,195,247,0.12); }
+        .leg-btn.leg-off { opacity: 0.32; text-decoration: line-through; }
 
-        /* ---- footer ---- */
+        /* ---- footer (compact pill) ---- */
         #footbar {
-            position: fixed; left: 0; right: 0; bottom: 0; z-index: 800;
-            background: rgba(15, 17, 33, 0.92); backdrop-filter: blur(6px);
-            border-top: 1px solid #1d2547;
-            font-size: 11px; padding: 4px 12px; color: #6a7194;
-            display: flex; gap: 14px; align-items: center;
+            position: fixed; left: 54px; bottom: 10px; z-index: 800;
+            background: rgba(15, 17, 33, 0.88); backdrop-filter: blur(6px);
+            border: 1px solid #1d2547; border-radius: 8px;
+            font-size: 10.5px; padding: 4px 10px; color: #6a7194;
+            display: inline-flex; gap: 12px; align-items: center;
         }
         #footbar a { color: #8b93b8; text-decoration: none; }
         #footbar a:hover { color: #cfe3ff; }
-        #footbar .right { margin-left: auto; }
 
         /* ---- modals ---- */
         .modal-overlay {
@@ -233,12 +235,13 @@
             #brand p { display: none; }
             #share-btn { order: 2; margin-left: auto; padding: 8px 10px; font-size: 0.78em; }
             #searchwrap { order: 3; flex-basis: 100%; max-width: none; }
-            #legend { right: 8px; bottom: 24px; padding: 8px 9px; max-width: 168px; }
+            #legend { right: 8px; bottom: 34px; padding: 8px 9px; max-width: 168px; }
+            #legend .hint { display: none; }
+            .leaflet-bottom.leaflet-left { margin-bottom: 26px; }
             .comp-label { flex-basis: 118px; font-size: 0.72em; }
             .comp-val { flex-basis: 70px; font-size: 0.7em; }
             .modal { padding: 16px; border-radius: 12px; }
-            #footbar { font-size: 10px; gap: 10px; }
-            #footbar .right { display: none; }
+            #footbar { left: 8px; bottom: 8px; font-size: 9.5px; gap: 8px; padding: 3px 8px; }
         }
     </style>
 </head>
@@ -277,17 +280,17 @@
             <span style="position:absolute;left:50%;transform:translateX(-50%)">.50</span>
             <span style="position:absolute;right:0">1</span>
         </div>
-        <div style="position:relative;height:12px;font-size:9.5px;">
-            <span style="position:absolute;left:0;color:#7ed37e">good</span>
-            <span style="position:absolute;left:40%;transform:translateX(-50%);color:#f5cf6b">watch</span>
-            <span style="position:absolute;right:0;color:#f28a7d">stressed</span>
+        <div style="position:relative;height:14px;font-size:9.5px;" title="Click a category to show/hide it on the map">
+            <span class="leg-btn" data-cat="good" style="position:absolute;left:0;color:#7ed37e">good</span>
+            <span class="leg-btn" data-cat="watch" style="position:absolute;left:40%;transform:translateX(-50%);color:#f5cf6b">watch</span>
+            <span class="leg-btn" data-cat="stressed" style="position:absolute;right:0;color:#f28a7d">stressed</span>
         </div>
         <div class="toggles">
             <label><input type="checkbox" id="tg-gw" checked> Level stations <span id="n-gw" style="color:#6a7194"></span></label>
-            <div class="sublegend" id="leg-gw" title="Colour = 10-year groundwater level trend (change per decade)">
-                <span><i style="background:#c98a9a"></i>falling</span>
-                <span><i style="background:#7a8ac0"></i>stable</span>
-                <span><i style="background:#7ec8e0"></i>rising</span>
+            <div class="sublegend" id="leg-gw" title="Colour = 10-year groundwater level trend (change per decade). Click to show/hide.">
+                <span class="leg-btn" data-trend="falling"><i style="background:#c98a9a"></i>falling</span>
+                <span class="leg-btn" data-trend="stable"><i style="background:#7a8ac0"></i>stable</span>
+                <span class="leg-btn" data-trend="rising"><i style="background:#7ec8e0"></i>rising</span>
             </div>
             <label><input type="checkbox" id="tg-no3"> Nitrate stations <span id="n-no3" style="color:#6a7194"></span></label>
             <label title="Groundwater bodies (Wasserschatz 2021): outline colour = total abstraction as % of available resource (≥20% stress, ≥40% severe)"><input type="checkbox" id="tg-gwk"> Water bodies &amp; use</label>
@@ -296,16 +299,23 @@
                 <span><i style="background:#f5cf6b"></i>20–40%</span>
                 <span><i style="background:#f28a7d"></i>&ge;40% used</span>
             </div>
-            <div class="sublegend" id="leg-no3" style="display:none;" title="Colour = latest nitrate concentration. 37.5 mg/L = WFD trend-reversal threshold, 50 mg/L = EU quality standard">
+            <div class="sublegend" id="leg-no3" style="display:none;" title="Colour = latest nitrate concentration (dots = stations, shaded areas = median per groundwater body). 37.5 mg/L = WFD trend-reversal threshold, 50 mg/L = EU quality standard. Click a band to show/hide those stations.">
                 <div class="grad" style="height:7px;background:linear-gradient(to right,#5f8ac7,#8fb08a 25%,#d8b455 37.5%,#e88a48 45%,#e05252 50%,#8f1d2f)">
                     <i style="position:relative;display:block;left:37.5%;top:-1px;height:9px;width:1px;background:rgba(13,16,34,0.85)"></i>
                 </div>
                 <div style="position:relative;height:10px;font-size:8.5px;color:#8b93b8">
                     <span style="position:absolute;left:0">0</span>
                     <span style="position:absolute;left:37.5%;transform:translateX(-50%)">37.5</span>
-                    <span style="position:absolute;left:56%">50</span>
+                    <span style="position:absolute;left:50%;transform:translateX(-50%)">50</span>
                     <span style="position:absolute;right:0">100+ mg/L</span>
                 </div>
+                <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap">
+                    <span class="leg-btn" data-band="0"><i style="background:#8fb08a"></i>&lt;25</span>
+                    <span class="leg-btn" data-band="1"><i style="background:#d8b455"></i>25–37.5</span>
+                    <span class="leg-btn" data-band="2"><i style="background:#e88a48"></i>37.5–50</span>
+                    <span class="leg-btn" data-band="3"><i style="background:#e05252"></i>≥50</span>
+                </div>
+                <div style="font-size:8.5px;color:#6a7194;margin-top:3px">shaded aquifers = median of stations in that groundwater body</div>
             </div>
         </div>
         <div class="hint">Tap the map for any Katastralgemeinde</div>
@@ -315,8 +325,6 @@
         <a href="#" id="methods-link">Methods &amp; sources</a>
         <a href="/llm/manifest.json" target="_blank">API</a>
         <a href="data/austria_drought_risk.gpkg" download>GeoPackage</a>
-        <a href="explore.html">Advanced explorer</a>
-        <span class="right">eHYD · EEA WISE · Copernicus EDO · BEV cadastre</span>
     </div>
 
     <!-- KG / Gemeinde detail modal -->
@@ -347,6 +355,6 @@
 
     <div id="toast" style="display:none; position:fixed; bottom:44px; left:50%; transform:translateX(-50%); background:#202a55; border:1px solid #4fc3f7; color:#cfe3ff; padding:8px 18px; border-radius:8px; z-index:3000; font-size:0.85em;"></div>
 
-    <script src="app.js?v=8"></script>
+    <script src="app.js?v=9"></script>
 </body>
 </html>

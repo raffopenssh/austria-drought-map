@@ -29,6 +29,14 @@ const COMPONENTS = [ // [key in gwi record, label, weight, raw key, raw formatte
 
 // ---------- state ----------
 let map, choroLayer, gwLayerGroup, no3LayerGroup;
+let no3BodyLayer = null;        // GWK polygons tinted by aquifer nitrate (heat layer)
+let no3BodyOn = false;          // nitrate aquifer fill active -> dim choropleth
+// legend filters: which classes are visible
+const filt = {
+    cat: { good: true, watch: true, stressed: true },   // choropleth GWI categories
+    trend: { falling: true, stable: true, rising: true }, // level-station classes
+    no3: [true, true, true, true],                        // nitrate bands (see NO3_BANDS)
+};
 let gwiKG = null;          // gw_index_kg.json .kgs
 let gwiMeta = null;
 let kgReg = null;          // kg_registry.json
@@ -87,6 +95,9 @@ async function boot() {
         zoomSnap: 0.5, attributionControl: true,
     });
     map.zoomControl.setPosition('bottomleft');
+    // Dedicated panes so station dots always render above choropleth + GWK polygons.
+    map.createPane('gwkfill');  map.getPane('gwkfill').style.zIndex = 410;
+    map.createPane('stations'); map.getPane('stations').style.zIndex = 620;
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OSM &copy; CARTO', subdomains: 'abcd', maxZoom: 19,
     }).addTo(map);
@@ -120,13 +131,26 @@ async function boot() {
 }
 
 // ---------- choropleth ----------
+function gwiCat(g) {
+    if (g == null) return null;
+    return g < 0.30 ? 'good' : g < 0.50 ? 'watch' : 'stressed';
+}
+function choroStyle(f) {
+    const g = f.properties.gwi;
+    const cat = gwiCat(g);
+    const shown = cat == null || filt.cat[cat];
+    // dim the whole choropleth when the nitrate aquifer layer is on, so it reads clearly
+    const base = no3BodyOn ? 0.12 : 0.55;
+    return {
+        fillColor: gwiColor(g),
+        fillOpacity: shown ? base : 0.03,
+        color: '#0d1022', weight: 0.5, opacity: shown ? (no3BodyOn ? 0.2 : 0.6) : 0.1,
+    };
+}
+function refreshChoropleth() { if (choroLayer) choroLayer.setStyle(choroStyle); }
 function buildChoropleth(geo) {
     choroLayer = L.geoJSON(geo, {
-        style: f => ({
-            fillColor: gwiColor(f.properties.gwi),
-            fillOpacity: 0.55,
-            color: '#0d1022', weight: 0.5, opacity: 0.6,
-        }),
+        style: choroStyle,
         onEachFeature: (f, layer) => {
             const p = f.properties;
             const g = p.gwi != null ? p.gwi.toFixed(2) : '–';
@@ -183,21 +207,47 @@ function no3Tint(v) {
 function dotStyle() {
     const z = map.getZoom();
     return {
-        radius: z <= 7 ? 1.2 : z <= 9 ? 2 : z <= 11 ? 3 : 4.5,
-        fillOpacity: z <= 7 ? 0.35 : z <= 9 ? 0.55 : 0.75,
-        weight: z <= 8 ? 0 : 0.8,
+        radius: z <= 7 ? 2.2 : z <= 9 ? 3 : z <= 11 ? 4 : 5.5,
+        fillOpacity: z <= 7 ? 0.85 : 0.92,
+        weight: z <= 8 ? 0.6 : 1,
     };
 }
+// classify stations for legend filtering
+function trendClass(t) { return t == null ? 'stable' : t < -0.1 ? 'falling' : t > 0.1 ? 'rising' : 'stable'; }
+// nitrate legend bands: [label, test]
+const NO3_BANDS = [
+    [v => v < 25, '< 25'],
+    [v => v >= 25 && v < 37.5, '25–37.5'],
+    [v => v >= 37.5 && v < 50, '37.5–50'],
+    [v => v >= 50, '≥ 50'],
+];
+function no3Band(v) {
+    if (v == null || isNaN(v)) return 0;
+    for (let i = 0; i < NO3_BANDS.length; i++) if (NO3_BANDS[i][0](v)) return i;
+    return NO3_BANDS.length - 1;
+}
+function applyStationFilters() {
+    const d = dotStyle();
+    gwLayerGroup.eachLayer(m => {
+        const on = filt.trend[m._cls];
+        m.setStyle({ radius: on ? d.radius : 0.1, fillOpacity: on ? d.fillOpacity : 0, opacity: on ? 1 : 0, weight: on ? d.weight : 0 });
+    });
+    no3LayerGroup.eachLayer(m => {
+        const on = filt.no3[m._cls];
+        m.setStyle({ radius: on ? d.radius : 0.1, fillOpacity: on ? d.fillOpacity : 0, opacity: on ? 1 : 0, weight: on ? d.weight : 0 });
+    });
+}
 function buildStationLayers() {
-    const rnd = L.canvas({ padding: 0.4 });
+    const rnd = L.canvas({ padding: 0.4, pane: 'stations' });
     const ds = dotStyle();
     gwLayerGroup = L.layerGroup();
     for (const s of gwStations) {
         const m = L.circleMarker([s.lat, s.lon], {
-            renderer: rnd, radius: ds.radius, weight: ds.weight,
-            color: 'rgba(10,14,30,0.7)',
+            renderer: rnd, pane: 'stations', radius: ds.radius, weight: ds.weight,
+            color: 'rgba(8,10,24,0.9)',
             fillColor: trendTint(s.trend_m_per_decade), fillOpacity: ds.fillOpacity,
         });
+        m._cls = trendClass(s.trend_m_per_decade);
         m.on('click', e => { L.DomEvent.stop(e); openGWStation(s); });
         m.bindTooltip(() => `<b>${esc(s.name)}</b><br>level trend ${fmtTrend(s.trend_m_per_decade)}`,
             { className: 'gw-tip' });
@@ -206,38 +256,48 @@ function buildStationLayers() {
     no3LayerGroup = L.layerGroup();
     for (const s of no3Stations) {
         const m = L.circleMarker([s.lat, s.lon], {
-            renderer: rnd, radius: ds.radius, weight: ds.weight,
-            color: 'rgba(10,14,30,0.7)',
+            renderer: rnd, pane: 'stations', radius: ds.radius, weight: ds.weight,
+            color: 'rgba(8,10,24,0.9)',
             fillColor: no3Tint(s.latest), fillOpacity: ds.fillOpacity,
         });
+        m._cls = no3Band(s.latest);
         m.on('click', e => { L.DomEvent.stop(e); openNO3Station(s); });
         m.bindTooltip(() => `<b>${esc(s.id)}</b><br>${s.latest != null ? s.latest.toFixed(1) + ' mg/L NO₃ (' + s.latest_year + ') · ' + Math.round(s.latest / NO3_LIMIT * 100) + '% of 50 mg/L' : '–'}`,
             { className: 'gw-tip' });
         no3LayerGroup.addLayer(m);
     }
-    map.on('zoomend', () => {
-        const d = dotStyle();
-        for (const grp of [gwLayerGroup, no3LayerGroup]) {
-            grp.eachLayer(m => m.setStyle({ radius: d.radius, fillOpacity: d.fillOpacity, weight: d.weight }));
-        }
-    });
+    map.on('zoomend', applyStationFilters);
     gwLayerGroup.addTo(map);
     $('n-gw').textContent = `(${gwStations.length})`;
     $('n-no3').textContent = `(${no3Stations.length})`;
     $('tg-gw').addEventListener('change', e => {
         e.target.checked ? gwLayerGroup.addTo(map) : map.removeLayer(gwLayerGroup);
         $('leg-gw').style.display = e.target.checked ? '' : 'none';
+        updateURL();
     });
-    $('tg-no3').addEventListener('change', e => {
-        e.target.checked ? no3LayerGroup.addTo(map) : map.removeLayer(no3LayerGroup);
+    $('tg-no3').addEventListener('change', async e => {
         $('leg-no3').style.display = e.target.checked ? '' : 'none';
+        if (e.target.checked) {
+            no3LayerGroup.addTo(map);
+            await ensureNO3BodyLayer();
+            no3BodyLayer.addTo(map);
+            no3BodyOn = true;
+        } else {
+            map.removeLayer(no3LayerGroup);
+            if (no3BodyLayer) map.removeLayer(no3BodyLayer);
+            no3BodyOn = false;
+        }
+        refreshChoropleth();
+        applyStationFilters();
+        updateURL();
     });
     $('tg-gwk').addEventListener('change', async e => {
         $('leg-gwk').style.display = e.target.checked ? '' : 'none';
         if (!e.target.checked) { if (gwkLayer) map.removeLayer(gwkLayer); return; }
         if (!gwkLayer) {
-            const gj = await fetch('data/gwk.geojson').then(r => r.json());
+            const gj = await fetchGwkGeo();
             gwkLayer = L.geoJSON(gj, {
+                pane: 'gwkfill',
                 style: f => ({ color: useColor(f.properties.u), weight: 1.2, opacity: 0.6, fill: true, fillOpacity: 0.03 }),
                 onEachFeature: (f, ly) => {
                     ly.bindTooltip(`<b>${esc(f.properties.n)}</b><br>${f.properties.u}% of resource abstracted`, { sticky: true });
@@ -248,6 +308,51 @@ function buildStationLayers() {
         }
         gwkLayer.addTo(map);
     });
+    // append updateURL to gwk toggle too
+    $('tg-gwk').addEventListener('change', updateURL);
+}
+
+// ---------- nitrate aquifer heat layer ----------
+let gwkGeoCache = null;
+async function fetchGwkGeo() {
+    if (!gwkGeoCache) gwkGeoCache = await fetch('data/gwk.geojson').then(r => r.json());
+    return gwkGeoCache;
+}
+// median of latest NO3 per groundwater body, recent stations only
+function no3ByBody() {
+    const acc = {};
+    for (const s of no3Stations) {
+        if (!s.body || s.latest == null || s.latest_year < 2015) continue;
+        (acc[s.body] = acc[s.body] || []).push(s.latest);
+    }
+    const out = {};
+    for (const b in acc) {
+        const v = acc[b].sort((a, x) => a - x);
+        out[b] = { med: v[Math.floor(v.length / 2)], n: v.length };
+    }
+    return out;
+}
+async function ensureNO3BodyLayer() {
+    if (no3BodyLayer) return no3BodyLayer;
+    const gj = await fetchGwkGeo();
+    const agg = no3ByBody();
+    no3BodyLayer = L.geoJSON(gj, {
+        pane: 'gwkfill',
+        style: f => {
+            const a = agg[f.properties.id];
+            return a
+                ? { fillColor: no3Tint(a.med), fillOpacity: 0.42, color: '#0d1022', weight: 0.8, opacity: 0.5 }
+                : { fillOpacity: 0, opacity: 0, weight: 0 };
+        },
+        onEachFeature: (f, ly) => {
+            const a = agg[f.properties.id];
+            ly.bindTooltip(`<b>${esc(f.properties.n)}</b><br>${a
+                ? `median ${a.med.toFixed(1)} mg/L NO₃ · ${Math.round(a.med / NO3_LIMIT * 100)}% of 50 mg/L · ${a.n} stations`
+                : 'no recent nitrate data'}`, { className: 'gw-tip', sticky: true });
+            ly.on('click', e => openKGAt(e.latlng.lat, e.latlng.lng));
+        },
+    });
+    return no3BodyLayer;
 }
 
 // ---------- KG resolution (click -> KG) ----------
@@ -740,6 +845,27 @@ function wireUI() {
     $('share-btn').addEventListener('click', () => copyShare($('share-btn')));
     $('methods-link').addEventListener('click', e => { e.preventDefault(); showMethods(); });
     map.on('moveend', updateURL);
+    wireLegend();
+}
+
+// ---------- interactive legend ----------
+function wireLegend() {
+    const tap = (el, fn) => {
+        el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); fn(); syncLegendUI(); updateURL(); });
+        el.style.cursor = 'pointer';
+    };
+    document.querySelectorAll('[data-cat]').forEach(el =>
+        tap(el, () => { filt.cat[el.dataset.cat] = !filt.cat[el.dataset.cat]; refreshChoropleth(); }));
+    document.querySelectorAll('[data-trend]').forEach(el =>
+        tap(el, () => { filt.trend[el.dataset.trend] = !filt.trend[el.dataset.trend]; applyStationFilters(); }));
+    document.querySelectorAll('[data-band]').forEach(el =>
+        tap(el, () => { const i = +el.dataset.band; filt.no3[i] = !filt.no3[i]; applyStationFilters(); }));
+    syncLegendUI();
+}
+function syncLegendUI() {
+    document.querySelectorAll('[data-cat]').forEach(el => el.classList.toggle('leg-off', !filt.cat[el.dataset.cat]));
+    document.querySelectorAll('[data-trend]').forEach(el => el.classList.toggle('leg-off', !filt.trend[el.dataset.trend]));
+    document.querySelectorAll('[data-band]').forEach(el => el.classList.toggle('leg-off', !filt.no3[+el.dataset.band]));
 }
 function hideResults() { $('search-results').style.display = 'none'; activeIdx = -1; }
 function norm(s) { return s.toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss'); }
@@ -837,6 +963,19 @@ function updateURL() {
     const p = new URLSearchParams();
     p.set('v', c.lat.toFixed(4) + ',' + c.lng.toFixed(4) + ',' + map.getZoom());
     for (const k of ['kg', 'st', 'no3', 'gem']) if (currentShare[k]) p.set(k, currentShare[k]);
+    // layer toggles (default: gw on, no3+gwk off) — only encode when non-default
+    const ly = [];
+    if ($('tg-gw').checked) ly.push('gw');
+    if ($('tg-no3').checked) ly.push('no3');
+    if ($('tg-gwk').checked) ly.push('gwk');
+    if (ly.join(',') !== 'gw') p.set('ly', ly.join(',') || 'none');
+    // legend filters — encode hidden classes only
+    const hc = Object.keys(filt.cat).filter(k => !filt.cat[k]);
+    const ht = Object.keys(filt.trend).filter(k => !filt.trend[k]);
+    const hn = filt.no3.map((v, i) => v ? null : i).filter(v => v != null);
+    if (hc.length) p.set('hc', hc.join(','));
+    if (ht.length) p.set('ht', ht.join(','));
+    if (hn.length) p.set('hn', hn.join(','));
     history.replaceState(null, '', '?' + p.toString());
 }
 function copyShare(btn) {
@@ -851,6 +990,20 @@ function toast(msg) {
 }
 function restoreFromURL() {
     const p = new URLSearchParams(location.search);
+    // layer toggles
+    if (p.get('ly') != null) {
+        const ly = p.get('ly') === 'none' ? [] : p.get('ly').split(',');
+        for (const [param, id] of [['gw', 'tg-gw'], ['no3', 'tg-no3'], ['gwk', 'tg-gwk']]) {
+            const want = ly.includes(param), el = $(id);
+            if (el.checked !== want) { el.checked = want; el.dispatchEvent(new Event('change')); }
+        }
+    }
+    // legend filters (hidden classes)
+    let refilter = false;
+    if (p.get('hc')) { for (const k of p.get('hc').split(',')) if (k in filt.cat) { filt.cat[k] = false; } refreshChoropleth(); refilter = true; }
+    if (p.get('ht')) { for (const k of p.get('ht').split(',')) if (k in filt.trend) filt.trend[k] = false; refilter = true; }
+    if (p.get('hn')) { for (const k of p.get('hn').split(',')) { const i = +k; if (i >= 0 && i < filt.no3.length) filt.no3[i] = false; } refilter = true; }
+    if (refilter) { applyStationFilters(); syncLegendUI(); }
     const v = p.get('v');
     if (v) {
         const [lat, lng, z] = v.split(',').map(Number);
@@ -871,122 +1024,82 @@ function restoreFromURL() {
 function showMethods() {
     $('methods-body').innerHTML = `
     <h2>Methods &amp; sources</h2>
-    <div class="subtitle">Everything on this map, honestly documented. Generated ${esc(gwiMeta.generated)}.</div>
+    <div class="subtitle">What this map shows and how it is computed. Generated ${esc(gwiMeta.generated)}.</div>
 
     <h3>The Groundwater Status Index (GWI)</h3>
-    <p>One number per Katastralgemeinde (KG), 0 = good → 1 = stressed, evaluated at each of Austria's
-    7,850 KG centroids and averaged per Gemeinde for the map colouring. It is a <b>weighted mean of six
-    sub-risks</b>, each clamped to 0–1:</p>
+    <p>One number per Katastralgemeinde (KG), <b>0 = good → 1 = stressed</b>, computed at 7,850 KG centroids
+    and averaged per Gemeinde for the map colour. A weighted mean of six sub-risks, each clamped to 0–1;
+    weights renormalize over the components actually available, so missing data is never counted as zero risk.</p>
     <ul>
-        <li><b>Level trend — 30%.</b> Inverse-distance-weighted (IDW) mean of the 10-year groundwater level
-            trend of eHYD stations within 12.5&nbsp;km (fallback: nearest 3 within 30&nbsp;km, flagged
-            <i>estimated</i>). Risk = clamp(−trend / 0.5&nbsp;m per decade): a sustained decline of 0.5&nbsp;m/decade
-            scores maximum risk; rising levels score 0.</li>
-        <li><b>Precipitation divergence — 10%.</b> How far the 5-year groundwater level sits below what local
-            precipitation history would explain (regression of levels on NASA POWER precipitation; residual in
-            σ units). Persistent negative divergence suggests abstraction or structural loss rather than weather.
-            Risk = clamp(−divergence / 1.5σ).</li>
-        <li><b>Abstraction vs resource — 15%.</b> The <i>Nutzungsintensität</i> of the groundwater body (GWK)
-            the KG sits on: total groundwater abstraction (wells + springs; drinking-water supply, irrigation,
-            livestock, industry, services) divided by the available groundwater resource, from
-            <b>Wasserschatz Österreichs</b> (BMLRT/Umweltbundesamt 2021; demand ~2017–2021, resource =
-            usable share of mean 1998–2017 recharge, 129 bodies, NGP-2015 boundaries). Each KG centroid is
-            assigned to its body by point-in-polygon. Risk = clamp(intensity / 40%), following the EEA WEI+
-            convention that ≥20% of the renewable resource means water stress and ≥40% severe stress.
-            This is the only component measuring <i>demand pressure</i> rather than an observed state — a body
-            can be heavily used yet stable (managed), or lightly used yet declining (climate).</li>
-        <li><b>Nitrate — 20%.</b> IDW mean of the latest annual-mean NO₃ concentration of EEA WISE-6 stations
-            (only stations still reporting since ≥ 2015), same radii. Risk = clamp(latest / 50&nbsp;mg/L).
-            The regulatory anchors shown throughout the app come from the Water Framework / Groundwater
-            Directives: <b>50&nbsp;mg/L</b> is the EU groundwater quality standard (GWD 2006/118/EC Annex I,
-            same as the drinking-water limit), <b>37.5&nbsp;mg/L</b> (75% of the standard) is the threshold above
-            which a rising trend must be reversed (GWD Art.&nbsp;5), and <b>45&nbsp;mg/L</b> is the Austrian QZV
-            Chemie GW quality target. Station dots use a continuous blue→amber→red scale anchored at
-            these thresholds (dark red ≥ 100&nbsp;mg/L).</li>
-        <li><b>WFD status — 10%.</b> WISE Water Framework Directive 2022 chemical + ecological status of water
-            bodies attributed to the Gemeinde (0–1). Only counted where GW bodies are actually monitored.</li>
-        <li><b>Drought pressure — 15%.</b> Copernicus EDO Combined Drought Indicator mean class of the Gemeinde,
-            2012–2023. Risk = clamp(mean CDI / 2).</li>
+        <li><b>Level trend — 30%.</b> IDW mean of the 10-year level trend of eHYD stations ≤ 12.5 km
+            (fallback nearest-3 ≤ 30 km, flagged <i>◌ estimated</i>). Max risk at −0.5 m/decade.</li>
+        <li><b>Nitrate — 20%.</b> IDW mean of the latest annual-mean NO₃ (stations reporting since ≥ 2015).
+            Risk = latest / 50 mg/L. Anchors: <b>50</b> = EU quality standard (GWD 2006/118/EC),
+            <b>37.5</b> = trend-reversal threshold (75%), <b>45</b> = Austrian QZV target.</li>
+        <li><b>Abstraction vs resource — 15%.</b> Groundwater-body <i>Nutzungsintensität</i>: total abstraction
+            (supply, irrigation, livestock, industry, services) ÷ available resource, from Wasserschatz
+            Österreichs 2021. Max risk at 40% (EEA WEI+ convention: ≥ 20% stress, ≥ 40% severe).
+            Demand pressure, not observed state.</li>
+        <li><b>Drought pressure — 15%.</b> Copernicus EDO Combined Drought Indicator, Gemeinde mean 2012–2023.</li>
+        <li><b>Precipitation divergence — 10%.</b> How far the 5-year level sits below what local precipitation
+            would explain (residual in σ). Persistent deficits suggest abstraction/structural loss, not weather.</li>
+        <li><b>WFD status — 10%.</b> WISE 2022 chemical + ecological status of monitored water bodies.</li>
     </ul>
-    <p>Weights are <b>renormalized over available components</b>: where e.g. no nitrate station is in reach,
-    the remaining components carry the weight — the index never silently treats missing data as zero risk.
-    Categories: <span class="badge good">good</span> &lt; 0.30 ≤ <span class="badge watch">watch</span>
-    &lt; 0.50 ≤ <span class="badge stressed">stressed</span>. The trend scale was calibrated so the national
-    distribution lands at roughly 23% good / 42% watch / 35% stressed — the categories are relative national
-    context, not regulatory judgements.</p>
+    <p>Categories: <span class="badge good">good</span> &lt; 0.30 ≤ <span class="badge watch">watch</span>
+    &lt; 0.50 ≤ <span class="badge stressed">stressed</span> — calibrated to the national distribution
+    (~23 / 42 / 35%), i.e. relative context, not regulatory judgements.</p>
+
+    <h3>Map layers</h3>
+    <ul>
+        <li><b>Level stations</b> — 3,732 eHYD wells, coloured by 10-year trend (falling / stable / rising).</li>
+        <li><b>Nitrate stations</b> — 2,250 EEA WISE-6 stations, continuous blue→red scale anchored at the
+            WFD thresholds. Toggling this also shades each <b>groundwater body</b> by the median of its
+            recent (≥ 2015) stations — the aquifer-scale picture behind the dots.</li>
+        <li><b>Water bodies &amp; use</b> — the 129 NGP-2015 groundwater bodies outlined by abstraction
+            intensity (Wasserschatz 2021).</li>
+        <li>The legend is interactive: click <i>good/watch/stressed</i>, trend classes or nitrate bands to
+            filter the map; all toggles are encoded in the share link.</li>
+    </ul>
 
     <h3>Hydropower influence (informational, not in the GWI)</h3>
-    <p>Where a KG or station modal shows a <b>Hydropower influence</b> section, we detected a statistically
-    significant coupling between an upstream hydro plant's daily water releases and the day-to-day movements
-    of a downstream groundwater well. How it works:</p>
-    <ul>
-        <li><b>Releases.</b> ENTSO-E per-generation-unit output (A73, 15-min → daily MWh) for 22 major Austrian
-            hydro plants. Units still publishing in 2026 are used directly; for plants whose per-unit feed stopped
-            (mostly the Danube run-of-river cascade), the national per-type series is <b>downscaled</b> with a
-            per-plant linear fit calibrated on that plant's own 2023–24 unit data (calibration r ≈ 0.6–0.8).</li>
-        <li><b>River topology.</b> Each plant's tailrace is snapped to the OSM waterway network and the river is
-            walked <i>downstream</i> (flow direction, up to 120 km). Live eHYD groundwater wells within 4 km of the
-            downstream channel and river gauges within 800 m form the candidate set.</li>
-        <li><b>Test.</b> Per (plant, well) pair, daily first differences of the well level are regressed on local
-            precipitation (NASA POWER, lags 0–3 + 7-day sum) with and without the plant's release changes
-            (t, t−1). We report the partial R² of the release terms, an F-test p-value, and a placebo check
-            (release series shifted 60 days). Shown only if p&lt;0.01, partial R² ≥ 5%, and above placebo.</li>
-        <li><b>Limits.</b> This is correlation with controls, not proven causation — upstream releases and
-            downstream groundwater both respond to basin hydrology, and the precipitation control is coarse
-            (0.5° grid). Downscaled plants share the national daily signal shape, so attribution among plants on the
-            <i>same</i> river rests on topology, not unique signals. That is why this evidence is displayed but
-            <b>not folded into the index</b>. River gauges confirm the pathway: on the Ziller, releases explain
-            25–80% of daily stage changes at downstream gauges.</li>
-    </ul>
+    <p>Some station/KG views show statistically significant coupling between an upstream hydro plant's daily
+    releases (ENTSO-E per-unit generation) and a downstream well's day-to-day level changes. Wells are matched
+    along the actual OSM river network (≤ 120 km downstream, ≤ 4 km lateral); the effect is a partial R² over a
+    precipitation-controlled regression, reported only if p &lt; 0.01, R² ≥ 5% and above a 60-day placebo.
+    This is correlation with controls, <b>not proven causation</b>, which is why it is displayed but never
+    folded into the index.</p>
 
     <h3>Data sources</h3>
     <ul>
-        <li><b>eHYD (BML)</b> — 3,732 groundwater level stations, annual means, most 1966–2022. Trends are
-            Theil–Sen/OLS on annual means; the 10-year window drives the model.</li>
-        <li><b>EEA Waterbase ICM 2026 (WISE-6 SoE)</b> — 2,250 Austrian groundwater quality stations, nitrate
-            1992–2024, annual means per station.</li>
-        <li><b>WISE WFD 2022</b> — water-body chemical/ecological status and at-risk flags.</li>
-        <li><b>Copernicus European Drought Observatory</b> — Combined Drought Indicator, 10-day grids
-            2012–2023, zonally aggregated per Gemeinde.</li>
-        <li><b>NASA POWER</b> — daily precipitation (0.5° grid) behind the divergence component.</li>
-        <li><b>Wasserschatz Österreichs (BMLRT/Umweltbundesamt 2021)</b> — per-groundwater-body available
-            resource and sector water demand (public supply, irrigation, livestock, industry, services;
-            wells + springs) behind the abstraction component and the “water body underneath” section.
-            GWK boundaries: INSPIRE WFD GroundWaterBody NGP-2015 (129 bodies).</li>
-        <li><b>Statistik Austria</b> — population 2002–2026 per Gemeinde (OGD, CC-BY-4.0), behind the
-            “people on this water” section; per-body population is allocated by each Gemeinde's KG shares.</li>
-        <li><b>ENTSO-E Transparency</b> (via austria-power.exe.xyz) — per-unit hydro generation (A73) and
-            national per-type generation, 15-min since 2023, behind the hydropower influence section.</li>
-        <li><b>OSM/Geofabrik waterways</b> — 338k river/stream segments; directed flow network for the
-            downstream plant→station matching.</li>
-        <li><b>BEV cadastre / Statistik Austria</b> (via the Kohlschwarz cadastre API) — canonical KG &amp;
-            Gemeinde registry, geometry lookups, address search. Every station is snapped once to its KG by
-            exact point-in-polygon.</li>
+        <li><b>eHYD (BML)</b> — groundwater levels, annual means, most 1966–2022.</li>
+        <li><b>EEA Waterbase ICM 2026 (WISE-6)</b> — nitrate 1992–2024; <b>WISE WFD 2022</b> — body status.</li>
+        <li><b>Wasserschatz Österreichs</b> (BMLRT/Umweltbundesamt 2021) — per-body resource &amp; demand;
+            GWK boundaries INSPIRE NGP-2015.</li>
+        <li><b>Copernicus EDO</b> — Combined Drought Indicator 2012–2023, aggregated per Gemeinde.</li>
+        <li><b>NASA POWER</b> — daily precipitation (0.5°) behind the divergence component.</li>
+        <li><b>Statistik Austria OGD</b> — KG/Gemeinde registry &amp; boundaries (CC-BY-4.0) and population
+            2002–2026 behind the “people on this water” section.</li>
+        <li><b>ENTSO-E Transparency</b> — hydro generation behind the hydropower section.</li>
+        <li><b>OSM/Geofabrik</b> — directed waterway network for plant→well matching.</li>
     </ul>
 
     <h3>Honest limitations</h3>
     <ul>
-        <li><b>Interpolation is not measurement.</b> Between stations the index is an IDW estimate; the
-            ◌&nbsp;<i>estimated</i> flag marks KGs where even the 12.5&nbsp;km radius was empty and the nearest-3
-            (≤ 30 km) fallback was used. Alpine areas are sparsely monitored.</li>
-        <li><b>Groundwater doesn't follow administrative borders.</b> Aquifers ignore KG lines; treat sharp
-            colour steps between neighbours with skepticism.</li>
-        <li><b>WFD status is per water body, not per station</b>, and its Gemeinde attribution is approximate.</li>
-        <li><b>Nitrate values below the limit of quantification are counted as LOQ/2</b> (standard convention) —
-            very clean stations may be slightly overstated.</li>
-        <li><b>Precipitation grid is coarse</b> (~50 km); the divergence component blurs local rainfall
-            differences, especially in mountain valleys.</li>
-        <li><b>Trend windows differ per station</b> (records end 2020–2022 for most eHYD stations; nitrate runs
-            to 2024). "Latest" is the newest year each source provides.</li>
-        <li>The Gemeinde colour is the <b>mean over its KGs</b> — tap the map for KG-level values.</li>
+        <li><b>Interpolation is not measurement</b> — between stations the index is an IDW estimate; Alpine
+            coverage is sparse (◌ marks the nearest-3 fallback).</li>
+        <li><b>Aquifers ignore administrative borders</b> — treat sharp colour steps between neighbouring
+            KGs with skepticism.</li>
+        <li>WFD status is per water body; its Gemeinde attribution is approximate.</li>
+        <li>Values below the limit of quantification count as LOQ/2 — very clean stations may be slightly
+            overstated.</li>
+        <li>Trend windows differ per station (most level records end 2020–2022; nitrate runs to 2024).</li>
+        <li>The Gemeinde colour is the mean over its KGs — tap the map for KG-level values.</li>
     </ul>
 
     <h3>Reproducibility &amp; API</h3>
-    <p>The full pipeline is open: <code>scripts/build_gw_index.py</code> in the repo computes the index;
-    every per-KG value is served machine-readably at <code>/llm/kg/{kg_code}</code>
-    (<a href="/llm/manifest.json" target="_blank">manifest</a>), following the Kohlschwarz sibling-service
-    integration spec. The old multi-layer explorer with all raw layers lives on at
-    <a href="explore.html">explore.html</a>. Data license CC-BY-4.0; underlying sources retain their own terms.</p>`;
+    <p><code>scripts/build_gw_index.py</code> computes the index; per-KG values are served at
+    <code>/llm/kg/{kg_code}</code> (<a href="/llm/manifest.json" target="_blank">manifest</a>).
+    Data license CC-BY-4.0; sources retain their own terms.</p>`;
     openModal('methods-modal');
 }
 
