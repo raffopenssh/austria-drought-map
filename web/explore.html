@@ -346,6 +346,15 @@
             margin: 0 8px;
             color: #3a3a5a;
         }
+        * { scrollbar-width: thin; scrollbar-color: #2e3a6e transparent; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: #2e3a6e; border-radius: 4px;
+            border: 2px solid transparent; background-clip: padding-box;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #3d4c8a; background-clip: padding-box; }
+        ::-webkit-scrollbar-corner { background: transparent; }
         .modal-overlay {
             display: none;
             position: fixed;

@@ -154,17 +154,51 @@
         #footbar a { color: #8b93b8; text-decoration: none; }
         #footbar a:hover { color: #cfe3ff; }
 
+        /* ---- scrollbars (global) ---- */
+        * { scrollbar-width: thin; scrollbar-color: #2e3a6e transparent; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: #2e3a6e; border-radius: 4px;
+            border: 2px solid transparent; background-clip: padding-box;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #3d4c8a; background-clip: padding-box; }
+        ::-webkit-scrollbar-corner { background: transparent; }
+
         /* ---- modals ---- */
         .modal-overlay {
             display: none; position: fixed; inset: 0; background: rgba(5,7,16,0.82);
             z-index: 2000; justify-content: center; align-items: center; padding: 14px;
         }
         .modal-overlay.active { display: flex; }
+        .modal-wrap { position: relative; width: 100%; max-width: 620px; display: flex; justify-content: center; }
         .modal {
             background: #171c36; border: 1px solid #26315e; border-radius: 14px;
-            padding: 22px; width: 100%; max-width: 620px; max-height: 88vh; max-height: 88dvh;
-            overflow-y: auto; position: relative;
-            scrollbar-width: thin; scrollbar-color: #3a3a5a #171c36;
+            padding: 0; width: 100%; max-height: 88vh; max-height: 88dvh;
+            overflow: hidden; position: relative; display: flex; flex-direction: column;
+        }
+        .modal-body { overflow-y: auto; padding: 20px 22px; overscroll-behavior: contain; }
+        .modal-topnav { display: none; align-items: center; gap: 10px; padding: 12px 130px 0 16px; flex: none; }
+        .modal-back {
+            background: #202a55; border: none; color: #b9c0dd; padding: 5px 12px;
+            border-radius: 6px; cursor: pointer; font-size: 0.78em; max-width: 55%;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .modal-back:hover { background: #2b3870; color: #fff; }
+        .mnav-pos { color: #6a7194; font-size: 0.72em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .modal-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
+            width: 40px; height: 56px; display: none; align-items: center; justify-content: center;
+            background: rgba(32,42,85,0.92); border: 1px solid #26315e; border-radius: 10px;
+            color: #cfe3ff; font-size: 1.6em; cursor: pointer; padding-bottom: 4px;
+        }
+        .modal-arrow:hover { background: #2b3870; color: #fff; }
+        .modal-arrow.prev { left: -52px; }
+        .modal-arrow.next { right: -52px; }
+        @media (max-width: 740px) {
+            .modal-arrow.prev { left: 6px; }
+            .modal-arrow.next { right: 6px; }
+            .modal-arrow { opacity: 0.85; }
         }
         .modal h2 { color: #4fc3f7; font-size: 1.25em; margin-bottom: 4px; padding-right: 90px; }
         .modal .subtitle { color: #8b93b8; font-size: 0.8em; margin-bottom: 14px; }
@@ -196,6 +230,7 @@
         .comp-val { flex: 0 0 88px; text-align: right; font-size: 0.78em; color: #cfe3ff; }
 
         .kv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+        .kv-grid.kv3 { grid-template-columns: repeat(3, 1fr); }
         .kv { background: #10142b; padding: 9px 10px; border-radius: 8px; }
         .kv .k { font-size: 0.68em; color: #6a7194; margin-bottom: 2px; }
         .kv .v { font-size: 0.95em; font-weight: 600; }
@@ -252,7 +287,9 @@
             .leaflet-bottom.leaflet-left { margin-bottom: 26px; }
             .comp-label { flex-basis: 118px; font-size: 0.72em; }
             .comp-val { flex-basis: 70px; font-size: 0.7em; }
-            .modal { padding: 16px; border-radius: 12px; }
+            .modal { border-radius: 12px; }
+            .modal-body { padding: 14px 16px; }
+            .kv-grid.kv3 { grid-template-columns: repeat(2, 1fr); }
             #footbar { left: 8px; bottom: 8px; font-size: 9.5px; gap: 8px; padding: 3px 8px; }
         }
     </style>
@@ -330,32 +367,44 @@
 
     <!-- KG / Gemeinde detail modal -->
     <div class="modal-overlay" id="kg-modal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('kg-modal')">&times;</button>
-            <button class="modal-share" onclick="copyShare(this)">🔗 Share</button>
-            <div id="kg-modal-body"></div>
+        <div class="modal-wrap">
+            <button class="modal-arrow prev" id="kg-prev" title="Previous (←)">‹</button>
+            <div class="modal">
+                <button class="modal-close" onclick="closeModal('kg-modal')">&times;</button>
+                <button class="modal-share" onclick="copyShare(this)">🔗 Share</button>
+                <div class="modal-topnav" id="kg-topnav"></div>
+                <div class="modal-body" id="kg-modal-body"></div>
+            </div>
+            <button class="modal-arrow next" id="kg-next" title="Next (→)">›</button>
         </div>
     </div>
 
     <!-- Station detail modal -->
     <div class="modal-overlay" id="st-modal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('st-modal')">&times;</button>
-            <button class="modal-share" onclick="copyShare(this)">🔗 Share</button>
-            <div id="st-modal-body"></div>
+        <div class="modal-wrap">
+            <button class="modal-arrow prev" id="st-prev" title="Previous station (←)">‹</button>
+            <div class="modal">
+                <button class="modal-close" onclick="closeModal('st-modal')">&times;</button>
+                <button class="modal-share" onclick="copyShare(this)">🔗 Share</button>
+                <div class="modal-topnav" id="st-topnav"></div>
+                <div class="modal-body" id="st-modal-body"></div>
+            </div>
+            <button class="modal-arrow next" id="st-next" title="Next station (→)">›</button>
         </div>
     </div>
 
     <!-- Methods modal -->
     <div class="modal-overlay" id="methods-modal">
-        <div class="modal" style="max-width: 760px;">
-            <button class="modal-close" onclick="closeModal('methods-modal')">&times;</button>
-            <div id="methods-body"></div>
+        <div class="modal-wrap" style="max-width: 760px;">
+            <div class="modal">
+                <button class="modal-close" onclick="closeModal('methods-modal')">&times;</button>
+                <div class="modal-body" id="methods-body"></div>
+            </div>
         </div>
     </div>
 
     <div id="toast" style="display:none; position:fixed; bottom:44px; left:50%; transform:translateX(-50%); background:#202a55; border:1px solid #4fc3f7; color:#cfe3ff; padding:8px 18px; border-radius:8px; z-index:3000; font-size:0.85em;"></div>
 
-    <script src="app.js?v=12"></script>
+    <script src="app.js?v=13"></script>
 </body>
 </html>

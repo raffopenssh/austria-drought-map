@@ -52,6 +52,8 @@ let gwkLayer = null;       // GW-body boundary overlay (lazy)
 let chart = null;          // active Chart.js instance
 let popChart = null;       // population trend chart in KG modal
 let currentShare = {};     // extra params beyond view
+let stNav = null;          // station-browsing context: {kg, kgName, items:[{k,id,name}], idx}
+let lastKGCtx = null;      // last opened KG: {code, name, lat, lon}
 let kgRegList = null;      // [[code, rec], ...] cached array
 
 const $ = id => document.getElementById(id);
@@ -249,7 +251,7 @@ function buildStationLayers() {
             fillColor: trendTint(s.trend_m_per_decade), fillOpacity: ds.fillOpacity,
         });
         m._cls = trendClass(s.trend_m_per_decade);
-        m.on('click', e => { L.DomEvent.stop(e); openGWStation(s); });
+        m.on('click', e => { L.DomEvent.stop(e); stNav = null; openGWStation(s); });
         m.bindTooltip(() => `<b>${esc(s.name)}</b><br>level trend ${fmtTrend(s.trend_m_per_decade)}`,
             { className: 'gw-tip' });
         gwLayerGroup.addLayer(m);
@@ -262,7 +264,7 @@ function buildStationLayers() {
             fillColor: no3Tint(s.latest), fillOpacity: ds.fillOpacity,
         });
         m._cls = no3Band(s.latest);
-        m.on('click', e => { L.DomEvent.stop(e); openNO3Station(s); });
+        m.on('click', e => { L.DomEvent.stop(e); stNav = null; openNO3Station(s); });
         m.bindTooltip(() => `<b>${esc(s.id)}</b><br>${s.latest != null ? s.latest.toFixed(1) + ' mg/L NO₃ (' + s.latest_year + ') · ' + Math.round(s.latest / NO3_LIMIT * 100) + '% of 50 mg/L' : '–'}`,
             { className: 'gw-tip' });
         no3LayerGroup.addLayer(m);
@@ -434,19 +436,21 @@ function edoBarsHTML(muni) {
         <div class="edo-bars">${bars}</div>
         <div class="note">Bar = yearly mean Combined Drought Indicator of the Gemeinde (0 none … 3+ alert). Source: Copernicus EDO.</div>`;
 }
-function stationListHTML(lat, lon, radiusKm) {
+function nearStations(lat, lon, radiusKm) {
     const near = t => t
         .map(s => ({ s, d: distKm(lat, lon, s.lat, s.lon) }))
         .filter(x => x.d <= radiusKm)
         .sort((a, b) => a.d - b.d).slice(0, 8);
-    const gws = near(gwStations);
-    const n3s = near(no3Stations);
+    return { gws: near(gwStations), n3s: near(no3Stations) };
+}
+function stationListHTML(lat, lon, radiusKm) {
+    const { gws, n3s } = nearStations(lat, lon, radiusKm);
     let html = '';
     if (gws.length) {
         html += `<h3>Groundwater level stations <small style="color:#6a7194;font-weight:400">≤ ${radiusKm} km</small></h3><div class="station-list">` +
             gws.map(({ s, d }) => {
                 const t = s.trend_m_per_decade;
-                return `<div class="station-item" onclick="openGWStationById('${esc(s.id)}')">
+                return `<div class="station-item" onclick="stNavOpen('gw','${esc(s.id)}')">
                     <span class="dot" style="background:${trendTint(t)}"></span>
                     <span class="nm">${esc(s.name)}</span>
                     <span class="meta">${d.toFixed(1)} km</span>
@@ -456,7 +460,7 @@ function stationListHTML(lat, lon, radiusKm) {
     }
     if (n3s.length) {
         html += `<h3>Nitrate stations <small style="color:#6a7194;font-weight:400">≤ ${radiusKm} km</small></h3><div class="station-list">` +
-            n3s.map(({ s, d }) => `<div class="station-item" onclick="openNO3StationById('${esc(s.id)}')">
+            n3s.map(({ s, d }) => `<div class="station-item" onclick="stNavOpen('no3','${esc(s.id)}')">
                     <span class="dot" style="background:${no3Tint(s.latest)}"></span>
                     <span class="nm">${esc(s.id)}</span>
                     <span class="meta">${d.toFixed(1)} km · ${s.latest_year || ''}</span>
@@ -500,7 +504,7 @@ function hydroLinkRowHTML(l, showStation) {
     return `<div class="station-item" style="cursor:default;display:block;">
         <div style="display:flex;align-items:center;gap:8px;">
         <span class="dot" style="background:#8fb8f2"></span>
-        <span class="nm">${esc(p.name || l.plant)} <small style="color:#6a7194">${esc(p.type || '')} · ${p.mw || '?'} MW · ${esc(p.river || '')}</small>${showStation ? `<br><small style="color:#6a7194">at ${esc(l.name)} (<a href="#" onclick="openGWStationById('${esc(l.station)}');return false;">${esc(l.station)}</a>)</small>` : ''}</span>
+        <span class="nm">${esc(p.name || l.plant)} <small style="color:#6a7194">${esc(p.type || '')} · ${p.mw || '?'} MW · ${esc(p.river || '')}</small>${showStation ? `<br><small style="color:#6a7194">at ${esc(l.name)} (<a href="#" onclick="stNavOpen('gw','${esc(l.station)}');return false;">${esc(l.station)}</a>)</small>` : ''}</span>
         <span class="meta">${l.km.toFixed(0)} km downstr.</span>
         <span class="val" title="partial R² = ${l.partial}, p = ${l.p}, placebo = ${l.placebo}">${share}% <small style="color:#6a7194">${dir.slice(0, 1)}</small></span>
         </div>
@@ -675,8 +679,11 @@ function showKGModal(code, opts = {}) {
         ${hydroImpactHTML(hydroLinksForKG(code), true)}
         ${lat != null ? stationListHTML(lat, lon, 12.5) : ''}
         <div class="apirow">API: <code><a href="/llm/kg/${esc(code)}" target="_blank">/llm/kg/${esc(code)}</a></code></div>`;
+    closeModal('st-modal', true);
     openModal('kg-modal');
+    body.scrollTop = 0;
     renderPopChart(gem);
+    lastKGCtx = { code, name: reg ? reg.n : code, lat, lon };
     currentShare = { kg: code };
     updateURL();
     if (!opts.noFly && lat != null && !map.getBounds().contains([lat, lon])) {
@@ -689,19 +696,84 @@ function destroyChart() {
     if (chart) { chart.destroy(); chart = null; }
     if (popChart) { popChart.destroy(); popChart = null; }
 }
-function closeModal(id) {
-    $(id).classList.remove('active');
-    if (id === 'st-modal' || id === 'kg-modal') { destroyChart(); currentShare = {}; updateURL(); }
+function closeModal(id, silent) {
+    const ov = $(id);
+    if (!ov.classList.contains('active') && silent) return;
+    ov.classList.remove('active');
+    if (id === 'st-modal') { stNav = null; renderStNav(); }
+    if (!silent && (id === 'st-modal' || id === 'kg-modal')) {
+        destroyChart(); currentShare = {}; updateURL();
+    }
 }
 function openModal(id) { $(id).classList.add('active'); }
 document.querySelectorAll('.modal-overlay').forEach(ov =>
     ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(ov => closeModal(ov.id));
+    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && $('st-modal').classList.contains('active') && stNav) {
+        e.preventDefault();
+        stNavStep(e.key === 'ArrowRight' ? 1 : -1);
+    }
 });
 
 function openGWStationById(id) { const s = gwStations.find(x => String(x.id) === String(id)); if (s) openGWStation(s); }
 function openNO3StationById(id) { const s = no3Stations.find(x => String(x.id) === String(id)); if (s) openNO3Station(s); }
+
+// ---------- station browsing (KG -> stations, prev/next, back) ----------
+function buildStNav(kind, id) {
+    if (!lastKGCtx || lastKGCtx.lat == null) return null;
+    const { gws, n3s } = nearStations(lastKGCtx.lat, lastKGCtx.lon, 12.5);
+    const items = [
+        ...gws.map(({ s }) => ({ k: 'gw', id: String(s.id), name: s.name })),
+        ...n3s.map(({ s }) => ({ k: 'no3', id: String(s.id), name: 'NO\u2083 ' + s.id })),
+    ];
+    const idx = items.findIndex(it => it.k === kind && it.id === String(id));
+    if (idx < 0) return { kg: lastKGCtx.code, kgName: lastKGCtx.name, items: [], idx: -1 }; // back only
+    return { kg: lastKGCtx.code, kgName: lastKGCtx.name, items, idx };
+}
+function stNavSync(kind, id) {
+    if (!stNav) return;
+    const i = stNav.items.findIndex(it => it.k === kind && it.id === String(id));
+    if (i >= 0) stNav.idx = i;
+    else if (stNav.items.length) stNav = { kg: stNav.kg, kgName: stNav.kgName, items: [], idx: -1 };
+}
+function stNavOpen(kind, id) {
+    stNav = buildStNav(kind, id);
+    (kind === 'gw' ? openGWStationById : openNO3StationById)(id);
+}
+function stNavStep(dir) {
+    if (!stNav || !stNav.items.length) return;
+    const n = stNav.items.length;
+    stNav.idx = (stNav.idx + dir + n) % n;
+    const it = stNav.items[stNav.idx];
+    (it.k === 'gw' ? openGWStationById : openNO3StationById)(it.id);
+    const s = (it.k === 'gw' ? gwStations : no3Stations).find(x => String(x.id) === it.id);
+    if (s && !map.getBounds().contains([s.lat, s.lon])) map.panTo([s.lat, s.lon], { duration: 0.5 });
+}
+function stNavBack() {
+    if (!stNav) return;
+    const kg = stNav.kg;
+    closeModal('st-modal', true);
+    destroyChart();
+    showKGModal(kg, { noFly: true });
+}
+function renderStNav() {
+    const nav = $('st-topnav'), prev = $('st-prev'), next = $('st-next');
+    if (!nav) return;
+    if (stNav) {
+        const many = stNav.items.length > 1;
+        nav.style.display = 'flex';
+        nav.innerHTML = `
+            <button class="modal-back" onclick="stNavBack()" title="Back to ${esc(stNav.kgName)}">← ${esc(stNav.kgName)}</button>` +
+            (many ? `<span class="mnav-pos">station ${stNav.idx + 1} / ${stNav.items.length} near this KG · ← → keys</span>` : '');
+        prev.style.display = next.style.display = many ? 'flex' : 'none';
+    } else {
+        nav.style.display = 'none'; nav.innerHTML = '';
+        prev.style.display = next.style.display = 'none';
+    }
+}
+$('st-prev').addEventListener('click', () => stNavStep(-1));
+$('st-next').addEventListener('click', () => stNavStep(1));
 
 function openGWStation(s) {
     destroyChart();
@@ -711,7 +783,7 @@ function openGWStation(s) {
     body.innerHTML = `
         <h2>${esc(s.name)}</h2>
         <div class="subtitle">eHYD groundwater level station · ID ${esc(s.id)}${s.start_year ? ` · ${s.start_year}–${s.end_year}` : ''}</div>
-        <div class="kv-grid">
+        <div class="kv-grid kv3">
             <div class="kv" title="${TREND_TITLE}"><div class="k">10-yr trend</div><div class="v" style="color:${trendTint(t)}">${fmtTrend(t, 1)}</div></div>
             <div class="kv"><div class="k">Status</div><div class="v">${status}</div></div>
             <div class="kv"><div class="k">p-value (10-yr)</div><div class="v">${s.p_value_10yr != null ? (s.p_value_10yr < 0.001 ? '<0.001' : s.p_value_10yr.toFixed(3)) : (s.p_value != null ? s.p_value.toFixed(3) : '–')}</div></div>
@@ -724,7 +796,11 @@ function openGWStation(s) {
         <div class="note">Points from the last 10 years (red) drive the trend used in the GWI. Source: eHYD (BML).</div>
         ${hydroImpactHTML(hydroLinksForStation(s.id), false)}
         <div class="apirow">API: <code><a href="/llm/point/gw:${esc(s.id)}" target="_blank">/llm/point/gw:${esc(s.id)}</a></code></div>`;
+    closeModal('kg-modal', true);
+    stNavSync('gw', s.id);
+    renderStNav();
     openModal('st-modal');
+    $('st-modal-body').scrollTop = 0;
     currentShare = { st: s.id };
     updateURL();
     loadGWChart(s.id);
@@ -793,7 +869,11 @@ function openNO3Station(s) {
         <span style="color:#d8b455">···</span> 37.5 mg/L WFD trend-reversal threshold (75% of the standard — if concentrations rise above it, the Water Framework/Groundwater Directive requires measures to reverse the trend).
         Values below LOQ counted as LOQ/2. Source: EEA Waterbase ICM.</div>
         <div class="apirow">API: <code><a href="/llm/point/no3:${esc(s.id)}" target="_blank">/llm/point/no3:${esc(s.id)}</a></code></div>`;
+    closeModal('kg-modal', true);
+    stNavSync('no3', s.id);
+    renderStNav();
     openModal('st-modal');
+    $('st-modal-body').scrollTop = 0;
     currentShare = { no3: s.id };
     updateURL();
     const box = $('st-chart-box');
