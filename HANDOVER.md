@@ -60,3 +60,40 @@ Interpretation: sediment starvation + incision below storage plants (T2/T5)
 is the documented mechanism (channel bed LOWERS, which can lower adjacent GW
 base level) — colmation/silting is not. GAUGE_CLASS in the script maps the 34
 Schwebstoff gauges to storage/ror/control; reuse for follow-ups.
+
+Population integration (2026-07-17, IN PROGRESS):
+- DONE: scripts/build_population.py -> web/data/population.json(.gz).
+  Source: Statistik Austria OGD OGD_bevstandjbab2002_BevStand_{2002..2026}
+  (~18MB/yr CSVs in data/pop/, gitignored; re-download loop in script docstring
+  comments / see git log). Per Gemeinde: t[] total & y65[] 65+ per year,
+  2026 Gebietsstand, Vienna districts + 90001 aggregate, alias map for
+  merged Gemeinden (Fuerstenfeld 62280, Matrei a.B. 70370).
+  Verified vs ODS upload: AT 2026 = 9,215,956. Deliberately NO gender/pyramid
+  (male share 49.8+-1.5pp everywhere; 65+ share corr -0.62 with growth).
+- DONE: app.js "People on this water" in KG modal (pop, growth since 2002,
+  65+ share, est. household demand at 130 L/cap/d, sparkline total+65+),
+  choropleth tooltip pop+growth. app.js?v=7. Tested in browser, works.
+- NOT COMMITTED/NOT DONE: per-capita consumption. Research findings:
+  * No measured per-Gemeinde consumption exists publicly. Best available:
+  * Wasserschatz Oesterreichs (BMLUK 2021) Ergebnistabelle.xlsx COMMITTED at
+    data/pop/wasserschatz_ergebnistabelle.xlsx: per GWK (129 groundwater
+    bodies) water demand m3/a by sector (Wasserversorgung/Landwirtschaft
+    Bewaesserung+Vieh/Industrie/Dienstleistungen, Brunnen+Quellen) +
+    verfuegbare Ressource + Nutzungsintensitaet %. Sheet '5 - GWK_Wasserbedarf'
+    rows 7+, sheet '4 - GWK_Ressourcen'. GWK geometry: INSPIRE GML
+    https://inspire.lfrz.gv.at/000801/ds/WFDGroundWaterBody_NGP2015.zip
+    (138 features incl 9 TGWK deep bodies; localId GK1xxxxx matches xlsx
+    'GWK Nummer'; converted OK w/ ogr2ogr to EPSG:4326, in /tmp/pop/gwk.geojson).
+    All 129 xlsx GWKs present in GML. => Plan: point-in-polygon Gemeinde/KG
+    centroid -> GWK, show sector demand + Nutzungsintensitaet in modal
+    ("water body context"), maybe demand/capita using summed GWK population.
+  * WAVE update 2024 (unsertrinkwasser.at, in /tmp/pop/wave.txt): household
+    use 130-141 L/cap/d AT average; per-dwelling-type model (EFH 231,
+    Reihenhaus 179, Mehrparteien 120 L/cap/d base) driven by
+    Gebaeude/Wohnungszaehlung -- OGD_rzgwz_gwz_zr_geb_GWZ_GEB_1 exists but
+    only Bezirk-level (117 regions), NOT Gemeinde. So a dwelling-mix-weighted
+    per-capita estimate is possible only per Bezirk.
+  * Eurostat env_wat_abs: national only. WISA H2O DB: quality only, no volumes.
+- Next steps if continued: build_gwk_context.py (xlsx+GML -> web/data/
+  gwk_context.json keyed by GWK, plus kg/gem->GWK mapping), modal section,
+  Methods update, llm_api exposure. Restart drought-map after data changes.
