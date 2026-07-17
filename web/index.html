@@ -290,6 +290,12 @@
                 <span><i style="background:#7ec8e0"></i>rising</span>
             </div>
             <label><input type="checkbox" id="tg-no3"> Nitrate stations <span id="n-no3" style="color:#6a7194"></span></label>
+            <label title="Groundwater bodies (Wasserschatz 2021): outline colour = total abstraction as % of available resource (≥20% stress, ≥40% severe)"><input type="checkbox" id="tg-gwk"> Water bodies &amp; use</label>
+            <div class="sublegend" id="leg-gwk" style="display:none;">
+                <span><i style="background:#7ed37e"></i>&lt;20%</span>
+                <span><i style="background:#f5cf6b"></i>20–40%</span>
+                <span><i style="background:#f28a7d"></i>&ge;40% used</span>
+            </div>
             <div class="sublegend" id="leg-no3" style="display:none;" title="Colour = latest nitrate concentration. 37.5 mg/L = WFD trend-reversal threshold, 50 mg/L = EU quality standard">
                 <div class="grad" style="height:7px;background:linear-gradient(to right,#5f8ac7,#8fb08a 25%,#d8b455 37.5%,#e88a48 45%,#e05252 50%,#8f1d2f)">
                     <i style="position:relative;display:block;left:37.5%;top:-1px;height:9px;width:1px;background:rgba(13,16,34,0.85)"></i>
@@ -341,6 +347,6 @@
 
     <div id="toast" style="display:none; position:fixed; bottom:44px; left:50%; transform:translateX(-50%); background:#202a55; border:1px solid #4fc3f7; color:#cfe3ff; padding:8px 18px; border-radius:8px; z-index:3000; font-size:0.85em;"></div>
 
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=8"></script>
 </body>
 </html>

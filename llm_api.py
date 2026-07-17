@@ -44,14 +44,18 @@ AS_OF = "2023-12-31"
 GWI_GLOSSARY = {
     "gwi": "Groundwater Status Index 0-1 (higher = more stressed); KG-granular",
     "gwi_category": "good|watch|stressed bucket of gwi (<0.30 / <0.50 / >=0.50)",
-    "gwi_q_trend": "GWI quantity component: 10-yr level-trend sub-risk 0-1 (w 35%)",
-    "gwi_q_div": "GWI quantity component: precip-divergence sub-risk 0-1 (w 15%)",
-    "gwi_q_nitrate": "GWI quality component: nitrate sub-risk 0-1 vs 50 mg/L EU limit (w 25%)",
+    "gwi_q_trend": "GWI quantity component: 10-yr level-trend sub-risk 0-1 (w 30%)",
+    "gwi_q_div": "GWI quantity component: precip-divergence sub-risk 0-1 (w 10%)",
+    "gwi_q_use": ("GWI use component: groundwater-body abstraction intensity sub-risk 0-1 "
+                  "= clamp(Nutzungsintensitaet/40%), Wasserschatz 2021 (w 15%)"),
+    "gwi_q_nitrate": "GWI quality component: nitrate sub-risk 0-1 vs 50 mg/L EU limit (w 20%)",
     "gwi_q_wfd": "GWI quality component: WFD 2022 status sub-risk 0-1 (w 10%)",
     "gwi_q_edo": "GWI drought component: EDO CDI sub-risk 0-1 (w 15%)",
     "gwi_gw_trend": "IDW groundwater level trend at the KG centroid, m/decade (neg = declining)",
     "gwi_gw_div": "IDW 5-yr precip-vs-level divergence, sigma (neg = below precip-explained)",
     "gwi_no3": "IDW latest annual-mean nitrate at the KG centroid, mg/L",
+    "gwi_use_pct": "groundwater body Nutzungsintensitaet: abstraction / available resource, %",
+    "gwi_gwk": "groundwater body (GWK) id of the KG, e.g. GK100026",
     "gwi_n_gw_stations": "# groundwater level stations used for the interpolation",
     "gwi_n_no3_stations": "# nitrate stations used for the interpolation",
     "gwi_estimated": "1 = >=1 component used the nearest-3 <=30 km fallback (sparse area)",
@@ -61,10 +65,12 @@ GWI_GLOSSARY = {
 _GWI_KEYMAP = [
     ("i", "gwi"), ("c", "gwi_category"),
     ("q_trend", "gwi_q_trend"), ("q_div", "gwi_q_div"),
+    ("q_use", "gwi_q_use"),
     ("q_nitrate", "gwi_q_nitrate"), ("q_wfd", "gwi_q_wfd"),
     ("q_edo", "gwi_q_edo"),
     ("gw_trend", "gwi_gw_trend"), ("gw_div", "gwi_gw_div"),
     ("no3", "gwi_no3"),
+    ("use_pct", "gwi_use_pct"), ("gwk", "gwi_gwk"),
     ("n_gw", "gwi_n_gw_stations"), ("n_no3", "gwi_n_no3_stations"),
     ("est", "gwi_estimated"),
 ]
@@ -248,6 +254,18 @@ def _load():
         _state["plant_kg_map"] = pi.get("kg_map", {})
     else:
         _state["plant_infl"], _state["plant_kg_map"] = None, {}
+    # Groundwater-body context (Wasserschatz 2021) + population (Statistik AT).
+    gc_path = os.path.join(DATA, "gwk_context.json")
+    if os.path.exists(gc_path):
+        gc = json.load(open(gc_path))
+        _state["gwk_ctx"] = gc
+    else:
+        _state["gwk_ctx"] = None
+    pop_path = os.path.join(DATA, "population.json")
+    if os.path.exists(pop_path):
+        _state["pop"] = json.load(open(pop_path))
+    else:
+        _state["pop"] = None
     # Reverse map gemeinde_code -> [kg_code, ...] for the per-Gemeinde endpoint.
     gem2kgs = {}
     for kg, gem in _state["kg2gem"].items():
@@ -420,7 +438,61 @@ def _payload_for_kg(kg_code):
     hydro = _hydro_influence_for_kg(kg_code)
     if hydro:
         payload["hydropower_influence"] = hydro
+    gwk = _gwk_block(kg_code)
+    if gwk:
+        payload["groundwater_body"] = gwk
+    popb = _population_block(gem_code)
+    if popb:
+        popb["per_year"] = None  # keep per-KG payloads small
+        payload["population"] = {k: v for k, v in popb.items() if v is not None}
     return payload, 200
+
+
+def _gwk_block(kg_code):
+    """Wasserschatz groundwater-body context for the KG's body, or None."""
+    gc = _state.get("gwk_ctx")
+    if not gc:
+        return None
+    gid = gc["kg2gwk"].get(kg_code)
+    g = gc["gwks"].get(gid) if gid else None
+    if not g:
+        return None
+    out = {
+        "gwk_id": gid, "name": g["name"], "aquifer_type": g["aquifer"],
+        "area_km2": g["area_km2"],
+        "available_resource_m3_per_year": g["resource_m3a"],
+        "total_abstraction_m3_per_year": g["demand_m3a"],
+        "abstraction_intensity_pct": g["intensity_pct"],
+        "abstraction_by_sector_m3_per_year": g["demand"],
+        "population_on_body": g["population"],
+        "source": "Wasserschatz Oesterreichs (BMLRT/Umweltbundesamt 2021)",
+    }
+    if g.get("supply_lcd") is not None:
+        out["public_supply_abstraction_l_per_cap_day"] = g["supply_lcd"]
+    if g.get("note"):
+        out["note"] = g["note"]
+    return out
+
+
+def _population_block(gem_code):
+    """Population time-series summary for a Gemeinde, or None."""
+    pop = _state.get("pop")
+    if not pop or not gem_code:
+        return None
+    code = pop.get("alias", {}).get(gem_code, gem_code)
+    r = pop["gemeinden"].get(code)
+    if not r:
+        return None
+    yrs = pop["years"]
+    n = len(yrs) - 1
+    return {
+        "latest_year": yrs[n], "population": r["t"][n],
+        "population_2002": r["t"][0],
+        "growth_since_2002_pct": round((r["t"][n] - r["t"][0]) / r["t"][0] * 100, 1),
+        "share_65plus_pct": round(r["y65"][n] / r["t"][n] * 100, 1),
+        "per_year": {"years": yrs, "total": r["t"], "age_65plus": r["y65"]},
+        "source": "Statistik Austria OGD (CC-BY-4.0), Jan 1, 2026 boundaries",
+    }
 
 
 def _hydro_influence_for_kg(kg_code):
@@ -552,6 +624,26 @@ def _payload_for_gemeinde(ident):
         "history": _history(m),
         "points": points,
     }
+    popb = _population_block(gem_code)
+    if popb:
+        payload["population"] = popb
+    if kgs and _state.get("gwk_ctx"):
+        # a Gemeinde can span several groundwater bodies: use the dominant one
+        k2g = _state["gwk_ctx"]["kg2gwk"]
+        counts = {}
+        for kg in kgs:
+            gid = k2g.get(kg)
+            if gid:
+                counts[gid] = counts.get(gid, 0) + 1
+        if counts:
+            dominant_kg = next(kg for kg in kgs
+                               if k2g.get(kg) == max(counts, key=counts.get))
+            gwk = _gwk_block(dominant_kg)
+            if gwk:
+                if len(counts) > 1:
+                    gwk["note_span"] = (f"Gemeinde spans {len(counts)} "
+                                        "groundwater bodies; dominant shown")
+                payload["groundwater_body"] = gwk
     return payload, 200
 
 

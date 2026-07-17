@@ -6,18 +6,24 @@ for the choropleth. Higher = more stressed groundwater (0..1).
 
 Components (weights renormalized over available components):
 
-  QUANTITY (50%)
-    trend  (35%)  IDW mean of eHYD station 10-yr level trend (m/decade),
+  QUANTITY & USE (55%)
+    trend  (30%)  IDW mean of eHYD station 10-yr level trend (m/decade),
                   stations within 12.5 km (fallback: nearest 3 <= 30 km,
                   flagged estimated).  risk = clamp(-trend / 0.50)
                   (-0.50 m/decade or worse = max risk; rising = 0)
-    diverg (15%)  IDW mean of 5-yr precip-vs-GW divergence (sigma units,
+    diverg (10%)  IDW mean of 5-yr precip-vs-GW divergence (sigma units,
                   from analyze_precip_gw_correlation.py; negative = level
                   below what precipitation explains -> abstraction /
                   structural loss).  risk = clamp(-div / 1.5)
+    use    (15%)  Nutzungsintensitaet of the KG's groundwater body (GWK):
+                  total abstraction (wells+springs, all sectors) / available
+                  GW resource, from Wasserschatz Oesterreichs (BMLRT 2021),
+                  via kg2gwk in gwk_context.json (build_gwk_context.py).
+                  risk = clamp(intensity / 40%), WEI+-style: >=20% stress,
+                  >=40% severe stress = max risk.
 
-  QUALITY (35%)
-    nitrate (25%) IDW mean of latest annual-mean nitrate (WISE-6, stations
+  QUALITY (30%)
+    nitrate (20%) IDW mean of latest annual-mean nitrate (WISE-6, stations
                   reporting since >= 2015, within 12.5 km / nearest 3
                   <= 30 km).  risk = clamp(latest / 50 mg/L)  (EU limit)
     wfd     (10%) WFD 2022 chemical+eco status of water bodies near the
@@ -48,7 +54,9 @@ DATA = ROOT / "web/data"
 
 R_NEAR_KM = 12.5      # primary radius
 R_FALLBACK_KM = 30.0  # nearest-3 fallback radius (flagged estimated)
-W = {"trend": 0.35, "div": 0.15, "nitrate": 0.25, "wfd": 0.10, "edo": 0.15}
+W = {"trend": 0.30, "div": 0.10, "use": 0.15,
+     "nitrate": 0.20, "wfd": 0.10, "edo": 0.15}
+USE_SCALE = 40.0  # % Nutzungsintensitaet at which use sub-risk saturates
 CAT = [(0.30, "good"), (0.50, "watch"), (10, "stressed")]
 
 KEYS = {
@@ -56,12 +64,15 @@ KEYS = {
     "c": "category good|watch|stressed",
     "q_trend": "quantity: trend sub-risk 0-1",
     "q_div": "quantity: precip-divergence sub-risk 0-1",
+    "q_use": "quantity: GWK abstraction-intensity sub-risk 0-1",
     "q_nitrate": "quality: nitrate sub-risk 0-1",
     "q_wfd": "quality: WFD status sub-risk 0-1",
     "q_edo": "drought: EDO CDI sub-risk 0-1",
     "gw_trend": "IDW GW level trend m/decade (neg = declining)",
     "gw_div": "IDW 5-yr divergence sigma (neg = below precip-explained)",
     "no3": "IDW latest nitrate mg/L",
+    "use_pct": "GWK Nutzungsintensitaet % (abstraction/resource)",
+    "gwk": "groundwater body id (see gwk_context.json)",
     "n_gw": "# GW stations used", "n_no3": "# nitrate stations used",
     "est": "1 = fallback radius used for >=1 component",
 }
@@ -118,7 +129,11 @@ def main():
     f_no3 = Field([s["lat"] for s in no3], [s["lon"] for s in no3],
                   [s["latest"] for s in no3])
 
-    print(f"fields: {len(gw)} gw-trend, {len(div)} divergence, {len(no3)} nitrate(>=2015)")
+    gwk_ctx = json.loads((DATA / "gwk_context.json").read_text())
+    kg2gwk, gwk_info = gwk_ctx["kg2gwk"], gwk_ctx["gwks"]
+
+    print(f"fields: {len(gw)} gw-trend, {len(div)} divergence, "
+          f"{len(no3)} nitrate(>=2015), {len(gwk_info)} GWKs")
 
     out = {}
     for code, k in kg_reg.items():
@@ -144,6 +159,11 @@ def main():
             comps["nitrate"] = clamp(v / 50.0)
             rec.update(no3=round(v, 1), n_no3=n)
             est |= e
+        gwk = kg2gwk.get(code)
+        if gwk and gwk in gwk_info:
+            use = gwk_info[gwk]["intensity_pct"]
+            comps["use"] = clamp(use / USE_SCALE)
+            rec.update(use_pct=round(use, 1), gwk=gwk)
         if m and m.get("wq_gw_stations"):          # WFD only where GW bodies monitored
             comps["wfd"] = clamp(m.get("wq_risk", 0.0))
         if m and m.get("edo_cdi_mean") is not None:
@@ -201,11 +221,11 @@ def main():
         gwi = float(np.mean([r["i"] for r in recs]))
         m["gwi"] = round(gwi, 4)
         m["gwi_category"] = next(name for th, name in CAT if gwi < th)
-        for comp in ("q_trend", "q_div", "q_nitrate", "q_wfd", "q_edo"):
+        for comp in ("q_trend", "q_div", "q_use", "q_nitrate", "q_wfd", "q_edo"):
             cv = [r[comp] for r in recs if comp in r]
             if cv:
                 m["gwi_" + comp] = round(float(np.mean(cv)), 3)
-        for raw in ("gw_trend", "gw_div", "no3"):
+        for raw in ("gw_trend", "gw_div", "no3", "use_pct"):
             cv = [r[raw] for r in recs if raw in r]
             if cv:
                 m["gwi_" + raw] = round(float(np.mean(cv)), 3)
@@ -223,7 +243,7 @@ def main():
             mm = next((m for m in munis if m["name"] == p.get("name")), None)
         if mm:
             for f in ("gwi", "gwi_category", "gwi_q_trend", "gwi_q_div",
-                      "gwi_q_nitrate", "gwi_q_wfd", "gwi_q_edo",
+                      "gwi_q_use", "gwi_q_nitrate", "gwi_q_wfd", "gwi_q_edo",
                       "gwi_gw_trend", "gwi_no3"):
                 if f in mm:
                     p[f] = mm[f]

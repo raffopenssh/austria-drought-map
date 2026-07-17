@@ -19,9 +19,10 @@ const NO3_LIMIT = 50;          // EU groundwater quality standard (GWD 2006/118/
 const NO3_TREND_REVERSAL = 37.5; // 75% of standard: trend-reversal trigger (GWD Art. 5(2))
 const NO3_AT_TARGET = 45;      // Austrian QZV Chemie GW quality target
 const COMPONENTS = [ // [key in gwi record, label, weight, raw key, raw formatter]
-    ['q_trend',   'Level trend',        0.35, 'gw_trend', v => fmtTrend(v)],
-    ['q_div',     'Precip divergence',  0.15, 'gw_div',   v => v.toFixed(2) + ' σ'],
-    ['q_nitrate', 'Nitrate',            0.25, 'no3',      v => v.toFixed(1) + ' mg/L'],
+    ['q_trend',   'Level trend',        0.30, 'gw_trend', v => fmtTrend(v)],
+    ['q_div',     'Precip divergence',  0.10, 'gw_div',   v => v.toFixed(2) + ' σ'],
+    ['q_use',     'Abstraction vs resource', 0.15, 'use_pct', v => v.toFixed(0) + '% of GWK'],
+    ['q_nitrate', 'Nitrate',            0.20, 'no3',      v => v.toFixed(1) + ' mg/L'],
     ['q_wfd',     'WFD status risk',    0.10, null,       null],
     ['q_edo',     'Drought pressure',   0.15, null,       null],
 ];
@@ -37,6 +38,8 @@ let no3Stations = [];      // nitrate stations
 let muniByIso = {}, muniByName = {};
 let gwTrendsCache = null;  // lazy full annual data
 let popData = null;        // population.json (Statistik Austria)
+let gwkCtx = null;         // gwk_context.json (Wasserschatz per GW body)
+let gwkLayer = null;       // GW-body boundary overlay (lazy)
 let chart = null;          // active Chart.js instance
 let popChart = null;       // population trend chart in KG modal
 let currentShare = {};     // extra params beyond view
@@ -98,6 +101,7 @@ async function boot() {
         fetch('data/plant_influence.json').then(r => r.json()).catch(() => null),
     ]);
     popData = await fetch('data/population.json').then(r => r.json()).catch(() => null);
+    gwkCtx = await fetch('data/gwk_context.json').then(r => r.json()).catch(() => null);
     plantInfl = pinf;
     gwiKG = gwi.kgs; gwiMeta = gwi; kgReg = reg;
     kgRegList = Object.entries(reg);
@@ -227,6 +231,22 @@ function buildStationLayers() {
     $('tg-no3').addEventListener('change', e => {
         e.target.checked ? no3LayerGroup.addTo(map) : map.removeLayer(no3LayerGroup);
         $('leg-no3').style.display = e.target.checked ? '' : 'none';
+    });
+    $('tg-gwk').addEventListener('change', async e => {
+        $('leg-gwk').style.display = e.target.checked ? '' : 'none';
+        if (!e.target.checked) { if (gwkLayer) map.removeLayer(gwkLayer); return; }
+        if (!gwkLayer) {
+            const gj = await fetch('data/gwk.geojson').then(r => r.json());
+            gwkLayer = L.geoJSON(gj, {
+                style: f => ({ color: useColor(f.properties.u), weight: 1.2, opacity: 0.6, fill: true, fillOpacity: 0.03 }),
+                onEachFeature: (f, ly) => {
+                    ly.bindTooltip(`<b>${esc(f.properties.n)}</b><br>${f.properties.u}% of resource abstracted`, { sticky: true });
+                    // pass taps through to the KG choropleth underneath
+                    ly.on('click', e => openKGAt(e.latlng.lat, e.latlng.lng));
+                },
+            });
+        }
+        gwkLayer.addTo(map);
     });
 }
 
@@ -391,6 +411,56 @@ function hydroImpactHTML(links, showStation) {
         <b>Correlation, not proven causation.</b> <a href="#" onclick="showMethods();return false;">Details</a></div>`;
 }
 
+// ---------- groundwater body context (Wasserschatz 2021) ----------
+function fmtM3(v) {
+    if (v >= 1e9) return (v / 1e9).toFixed(1) + ' bn m\u00b3/yr';
+    if (v >= 1e6) return (v / 1e6).toFixed(1) + ' M m\u00b3/yr';
+    if (v >= 1e3) return Math.round(v / 1e3).toLocaleString('en') + ' k m\u00b3/yr';
+    return Math.round(v) + ' m\u00b3/yr';
+}
+function useColor(pct) {
+    return pct >= 40 ? '#f28a7d' : pct >= 20 ? '#f5cf6b' : '#7ed37e';
+}
+const SECTORS = [ // [key, label, color]
+    ['supply', 'Drinking water supply', '#4fc3f7'],
+    ['industry', 'Industry & trade', '#b48ce0'],
+    ['irrigation', 'Irrigation', '#8fd08a'],
+    ['livestock', 'Livestock', '#d8b455'],
+    ['services', 'Services', '#8b93b8'],
+];
+function gwkHTML(kgCode) {
+    if (!gwkCtx) return '';
+    const gid = gwkCtx.kg2gwk[kgCode];
+    const g = gid && gwkCtx.gwks[gid];
+    if (!g) return '';
+    const dem = g.demand || {};
+    const total = g.demand_m3a || 1;
+    let bars = '';
+    for (const [key, label, color] of SECTORS) {
+        const v = dem[key] || 0;
+        if (!v) continue;
+        const pct = v / total * 100;
+        bars += `<div class="comp-row">
+            <div class="comp-label">${label}</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:${Math.max(1, Math.round(pct))}%;background:${color}"></div></div>
+            <div class="comp-val">${fmtM3(v)}<br><small style="color:#6a7194">${pct.toFixed(0)}%</small></div>
+        </div>`;
+    }
+    const perCap = g.supply_lcd != null ?
+        `<div class="kv" title="Public-supply groundwater abstraction divided by the ~${Math.round(g.population / 1000)}k residents of this body. Includes network losses, small business & public uses \u2014 compare to ~130 L/person/day household consumption (WAVE). Values far above that usually mean the body's waterworks also supply people living elsewhere (water export)."><div class="k">Supply abstraction/resident</div><div class="v">${Math.round(g.supply_lcd)} L/day${g.supply_lcd > 300 ? ' <small style="color:#6a7194;font-size:.72em">likely exports</small>' : ''}</div></div>` : '';
+    return `<h3>The water body underneath <small style="color:#6a7194;font-weight:400">${esc(g.name)}</small></h3>
+        <div class="kv-grid">
+            <div class="kv" title="Total groundwater abstraction (wells + springs, all sectors) as % of the available resource. EEA WEI+ convention: \u226520% = water stress, \u226540% = severe stress. This is the 'Abstraction vs resource' GWI component."><div class="k">Use of resource</div><div class="v" style="color:${useColor(g.intensity_pct)}">${g.intensity_pct}%</div></div>
+            <div class="kv" title="Available groundwater resource: sustainably usable share of recharge (mean 1998\u20132017)"><div class="k">Available resource</div><div class="v">${fmtM3(g.resource_m3a)}</div></div>
+            <div class="kv"><div class="k">People on this body</div><div class="v">${g.population >= 1000 ? Math.round(g.population / 1000).toLocaleString('en') + 'k' : g.population}</div></div>
+            ${perCap}
+        </div>
+        ${bars ? `<div style="margin-top:8px">${bars}</div>` : ''}
+        <div class="note">${esc(g.aquifer)}, ${Math.round(g.area_km2).toLocaleString('en')} km\u00b2${g.group ? ' (group of bodies)' : ''}.
+        Groundwater demand by sector, Wasserschatz \u00d6sterreichs (BMLRT 2021).${g.note ? ' ' + esc(g.note) + '.' : ''}
+        <a href="#" onclick="showMethods();return false;">Details</a></div>`;
+}
+
 // ---------- population (Statistik Austria) ----------
 function popForIso(iso) {
     if (!popData || iso == null) return null;
@@ -484,6 +554,7 @@ function showKGModal(code, opts = {}) {
             ${rec.gw_trend != null ? `<div class="kv" title="${TREND_TITLE}"><div class="k">Level trend (interp.)</div><div class="v" style="color:${trendTint(rec.gw_trend)}">${fmtTrend(rec.gw_trend)}</div></div>` : ''}
         </div>
         ${popHTML(gem)}
+        ${gwkHTML(code)}
         ${edoBarsHTML(gem)}
         ${hydroImpactHTML(hydroLinksForKG(code), true)}
         ${lat != null ? stationListHTML(lat, lon, 12.5) : ''}
@@ -804,18 +875,27 @@ function showMethods() {
 
     <h3>The Groundwater Status Index (GWI)</h3>
     <p>One number per Katastralgemeinde (KG), 0 = good → 1 = stressed, evaluated at each of Austria's
-    7,850 KG centroids and averaged per Gemeinde for the map colouring. It is a <b>weighted mean of five
+    7,850 KG centroids and averaged per Gemeinde for the map colouring. It is a <b>weighted mean of six
     sub-risks</b>, each clamped to 0–1:</p>
     <ul>
-        <li><b>Level trend — 35%.</b> Inverse-distance-weighted (IDW) mean of the 10-year groundwater level
+        <li><b>Level trend — 30%.</b> Inverse-distance-weighted (IDW) mean of the 10-year groundwater level
             trend of eHYD stations within 12.5&nbsp;km (fallback: nearest 3 within 30&nbsp;km, flagged
             <i>estimated</i>). Risk = clamp(−trend / 0.5&nbsp;m per decade): a sustained decline of 0.5&nbsp;m/decade
             scores maximum risk; rising levels score 0.</li>
-        <li><b>Precipitation divergence — 15%.</b> How far the 5-year groundwater level sits below what local
+        <li><b>Precipitation divergence — 10%.</b> How far the 5-year groundwater level sits below what local
             precipitation history would explain (regression of levels on NASA POWER precipitation; residual in
             σ units). Persistent negative divergence suggests abstraction or structural loss rather than weather.
             Risk = clamp(−divergence / 1.5σ).</li>
-        <li><b>Nitrate — 25%.</b> IDW mean of the latest annual-mean NO₃ concentration of EEA WISE-6 stations
+        <li><b>Abstraction vs resource — 15%.</b> The <i>Nutzungsintensität</i> of the groundwater body (GWK)
+            the KG sits on: total groundwater abstraction (wells + springs; drinking-water supply, irrigation,
+            livestock, industry, services) divided by the available groundwater resource, from
+            <b>Wasserschatz Österreichs</b> (BMLRT/Umweltbundesamt 2021; demand ~2017–2021, resource =
+            usable share of mean 1998–2017 recharge, 129 bodies, NGP-2015 boundaries). Each KG centroid is
+            assigned to its body by point-in-polygon. Risk = clamp(intensity / 40%), following the EEA WEI+
+            convention that ≥20% of the renewable resource means water stress and ≥40% severe stress.
+            This is the only component measuring <i>demand pressure</i> rather than an observed state — a body
+            can be heavily used yet stable (managed), or lightly used yet declining (climate).</li>
+        <li><b>Nitrate — 20%.</b> IDW mean of the latest annual-mean NO₃ concentration of EEA WISE-6 stations
             (only stations still reporting since ≥ 2015), same radii. Risk = clamp(latest / 50&nbsp;mg/L).
             The regulatory anchors shown throughout the app come from the Water Framework / Groundwater
             Directives: <b>50&nbsp;mg/L</b> is the EU groundwater quality standard (GWD 2006/118/EC Annex I,
@@ -832,7 +912,7 @@ function showMethods() {
     the remaining components carry the weight — the index never silently treats missing data as zero risk.
     Categories: <span class="badge good">good</span> &lt; 0.30 ≤ <span class="badge watch">watch</span>
     &lt; 0.50 ≤ <span class="badge stressed">stressed</span>. The trend scale was calibrated so the national
-    distribution lands at roughly 28% good / 40% watch / 31% stressed — the categories are relative national
+    distribution lands at roughly 23% good / 42% watch / 35% stressed — the categories are relative national
     context, not regulatory judgements.</p>
 
     <h3>Hydropower influence (informational, not in the GWI)</h3>
@@ -869,6 +949,12 @@ function showMethods() {
         <li><b>Copernicus European Drought Observatory</b> — Combined Drought Indicator, 10-day grids
             2012–2023, zonally aggregated per Gemeinde.</li>
         <li><b>NASA POWER</b> — daily precipitation (0.5° grid) behind the divergence component.</li>
+        <li><b>Wasserschatz Österreichs (BMLRT/Umweltbundesamt 2021)</b> — per-groundwater-body available
+            resource and sector water demand (public supply, irrigation, livestock, industry, services;
+            wells + springs) behind the abstraction component and the “water body underneath” section.
+            GWK boundaries: INSPIRE WFD GroundWaterBody NGP-2015 (129 bodies).</li>
+        <li><b>Statistik Austria</b> — population 2002–2026 per Gemeinde (OGD, CC-BY-4.0), behind the
+            “people on this water” section; per-body population is allocated by each Gemeinde's KG shares.</li>
         <li><b>ENTSO-E Transparency</b> (via austria-power.exe.xyz) — per-unit hydro generation (A73) and
             national per-type generation, 15-min since 2023, behind the hydropower influence section.</li>
         <li><b>OSM/Geofabrik waterways</b> — 338k river/stream segments; directed flow network for the

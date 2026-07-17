@@ -12,9 +12,11 @@ GW Power: the groundwater status of Austria. The headline model is the
 **Groundwater Status Index (GWI)** — one 0–1 value (good/watch/stressed) for
 each of the 7,850 Katastralgemeinden (KGs), fusing:
 
-  gwi_q_trend   35%  IDW 10-yr eHYD groundwater level trend (clamp(-t/0.5 m/dec))
-  gwi_q_div     15%  5-yr precip-vs-level divergence (clamp(-d/1.5 sigma))
-  gwi_q_nitrate 25%  IDW latest WISE-6 nitrate (clamp(no3/50 mg/L))
+  gwi_q_trend   30%  IDW 10-yr eHYD groundwater level trend (clamp(-t/0.5 m/dec))
+  gwi_q_div     10%  5-yr precip-vs-level divergence (clamp(-d/1.5 sigma))
+  gwi_q_use     15%  groundwater-body abstraction intensity, Wasserschatz 2021
+                     (clamp(Nutzungsintensitaet/40%), WEI+ convention)
+  gwi_q_nitrate 20%  IDW latest WISE-6 nitrate (clamp(no3/50 mg/L))
   gwi_q_wfd     10%  WISE WFD 2022 water-body status risk
   gwi_q_edo     15%  Copernicus EDO CDI mean 2012-2023 (clamp(cdi/2))
 
@@ -26,6 +28,12 @@ the Methods modal on the map, and scripts/build_gw_index.py in the repo.
 A legacy composite drought risk_score (per Gemeinde) plus per-point station
 observations (groundwater levels, nitrate, hydropower, WFD sites) with full
 annual histories are carried alongside.
+
+KG and Gemeinde payloads also carry "groundwater_body" (Wasserschatz 2021:
+available resource, sector water demand m3/a, abstraction intensity %,
+population on the body, public-supply L/cap/d) and "population" (Statistik
+Austria 2002-2026 per Gemeinde: total, growth, 65+ share; per-year series
+on the Gemeinde endpoint).
 
 Where relevant, KG payloads also carry "hydropower_influence": statistically
 significant couplings between upstream hydro plant releases (ENTSO-E A73
@@ -95,9 +103,10 @@ All kg_code / gemeinde_code values are 5-character zero-padded strings.
     "unit_glossary": { "<metric>": "<unit/meaning>", ... },
     "metrics": {
       "gwi": 0.45, "gwi_category": "watch",
-      "gwi_q_trend": 0.53, "gwi_q_div": 0.17, "gwi_q_nitrate": 0.63,
-      "gwi_q_wfd": 0.0, "gwi_q_edo": 0.53,
+      "gwi_q_trend": 0.53, "gwi_q_div": 0.17, "gwi_q_use": 0.28,
+      "gwi_q_nitrate": 0.63, "gwi_q_wfd": 0.0, "gwi_q_edo": 0.53,
       "gwi_gw_trend": -0.27, "gwi_gw_div": -0.26, "gwi_no3": 31.6,
+      "gwi_use_pct": 11.2, "gwi_gwk": "GK100113",
       "gwi_n_gw_stations": 125, "gwi_n_no3_stations": 42,
       "risk_score": 0.14, "risk_category": "low",
       "edo_cdi_mean": 0.70, "edo_cdi_max": 4.8, "edo_risk": 0.35,
