@@ -14,8 +14,12 @@ const GRAD = [
     [1.00, [0xd7, 0x30, 0x27]],
 ];
 const CAT_COLOR = { good: '#7ed37e', watch: '#f5cf6b', stressed: '#f28a7d' };
+// WFD / GWD thresholds for nitrate (mg/L NO3)
+const NO3_LIMIT = 50;          // EU groundwater quality standard (GWD 2006/118/EC Annex I)
+const NO3_TREND_REVERSAL = 37.5; // 75% of standard: trend-reversal trigger (GWD Art. 5(2))
+const NO3_AT_TARGET = 45;      // Austrian QZV Chemie GW quality target
 const COMPONENTS = [ // [key in gwi record, label, weight, raw key, raw formatter]
-    ['q_trend',   'Level trend',        0.35, 'gw_trend', v => (v > 0 ? '+' : '') + (v * 100).toFixed(0) + ' cm/dec'],
+    ['q_trend',   'Level trend',        0.35, 'gw_trend', v => fmtTrend(v)],
     ['q_div',     'Precip divergence',  0.15, 'gw_div',   v => v.toFixed(2) + ' σ'],
     ['q_nitrate', 'Nitrate',            0.25, 'no3',      v => v.toFixed(1) + ' mg/L'],
     ['q_wfd',     'WFD status risk',    0.10, null,       null],
@@ -60,6 +64,15 @@ function distKm(lat1, lon1, lat2, lon2) {
 
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g,
     c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// Trend formatter: "cm/decade" spelled out (expert feedback: "/dec" was unclear).
+// Input is m/decade.
+function fmtTrend(v, digits = 0) {
+    if (v == null) return '–';
+    return (v > 0 ? '+' : '') + (v * 100).toFixed(digits) + ' cm/decade';
+}
+const TREND_TITLE = 'Change of the groundwater level per 10 years (linear trend over the last decade of annual means). Negative = falling level.';
+const NO3_TITLE = 'Nitrate concentration. EU/WFD groundwater quality standard: 50 mg/L; trend reversal required from 37.5 mg/L (75% of the standard) if rising; Austrian target: 45 mg/L.';
 
 // ---------- boot ----------
 async function boot() {
@@ -130,9 +143,28 @@ function trendTint(t) {
     if (t == null) return '#5a6a9a';
     return t < -0.1 ? '#c98a9a' : t > 0.1 ? '#7ec8e0' : '#7a8ac0';
 }
+// Continuous nitrate colour scale anchored on the WFD/GWD thresholds so that
+// e.g. 14 and 100 mg/L never share a colour. Stops: [mg/L, rgb].
+const NO3_GRAD = [
+    [0,    [0x5f, 0x8a, 0xc7]],  // clean – blue
+    [25,   [0x8f, 0xb0, 0x8a]],  // half the trend-reversal trigger – blue-green
+    [37.5, [0xd8, 0xb4, 0x55]],  // GWD trend-reversal threshold (75%) – amber
+    [45,   [0xe8, 0x8a, 0x48]],  // Austrian target – orange
+    [50,   [0xe0, 0x52, 0x52]],  // EU quality standard – red
+    [100,  [0x8f, 0x1d, 0x2f]],  // gross exceedance – dark red
+];
 function no3Tint(v) {
-    if (v == null) return '#6a6a8a';
-    return v >= 50 ? '#e06a6a' : v >= 25 ? '#d0a860' : '#7a9ac0';
+    if (v == null || isNaN(v)) return '#6a6a8a';
+    v = Math.max(0, Math.min(100, v));
+    for (let i = 1; i < NO3_GRAD.length; i++) {
+        if (v <= NO3_GRAD[i][0]) {
+            const [p0, c0] = NO3_GRAD[i - 1], [p1, c1] = NO3_GRAD[i];
+            const t = (v - p0) / (p1 - p0);
+            const c = c0.map((a, j) => Math.round(a + t * (c1[j] - a)));
+            return `rgb(${c[0]},${c[1]},${c[2]})`;
+        }
+    }
+    return '#8f1d2f';
 }
 function dotStyle() {
     const z = map.getZoom();
@@ -153,7 +185,7 @@ function buildStationLayers() {
             fillColor: trendTint(s.trend_m_per_decade), fillOpacity: ds.fillOpacity,
         });
         m.on('click', e => { L.DomEvent.stop(e); openGWStation(s); });
-        m.bindTooltip(() => `<b>${esc(s.name)}</b><br>trend ${s.trend_m_per_decade != null ? (s.trend_m_per_decade * 100).toFixed(0) + ' cm/dec' : '–'}`,
+        m.bindTooltip(() => `<b>${esc(s.name)}</b><br>level trend ${fmtTrend(s.trend_m_per_decade)}`,
             { className: 'gw-tip' });
         gwLayerGroup.addLayer(m);
     }
@@ -165,7 +197,7 @@ function buildStationLayers() {
             fillColor: no3Tint(s.latest), fillOpacity: ds.fillOpacity,
         });
         m.on('click', e => { L.DomEvent.stop(e); openNO3Station(s); });
-        m.bindTooltip(() => `<b>${esc(s.id)}</b><br>${s.latest != null ? s.latest.toFixed(1) + ' mg/L NO₃ (' + s.latest_year + ')' : '–'}`,
+        m.bindTooltip(() => `<b>${esc(s.id)}</b><br>${s.latest != null ? s.latest.toFixed(1) + ' mg/L NO₃ (' + s.latest_year + ') · ' + Math.round(s.latest / NO3_LIMIT * 100) + '% of 50 mg/L' : '–'}`,
             { className: 'gw-tip' });
         no3LayerGroup.addLayer(m);
     }
@@ -178,10 +210,14 @@ function buildStationLayers() {
     gwLayerGroup.addTo(map);
     $('n-gw').textContent = `(${gwStations.length})`;
     $('n-no3').textContent = `(${no3Stations.length})`;
-    $('tg-gw').addEventListener('change', e =>
-        e.target.checked ? gwLayerGroup.addTo(map) : map.removeLayer(gwLayerGroup));
-    $('tg-no3').addEventListener('change', e =>
-        e.target.checked ? no3LayerGroup.addTo(map) : map.removeLayer(no3LayerGroup));
+    $('tg-gw').addEventListener('change', e => {
+        e.target.checked ? gwLayerGroup.addTo(map) : map.removeLayer(gwLayerGroup);
+        $('leg-gw').style.display = e.target.checked ? '' : 'none';
+    });
+    $('tg-no3').addEventListener('change', e => {
+        e.target.checked ? no3LayerGroup.addTo(map) : map.removeLayer(no3LayerGroup);
+        $('leg-no3').style.display = e.target.checked ? '' : 'none';
+    });
 }
 
 // ---------- KG resolution (click -> KG) ----------
@@ -276,7 +312,7 @@ function stationListHTML(lat, lon, radiusKm) {
                     <span class="dot" style="background:${trendTint(t)}"></span>
                     <span class="nm">${esc(s.name)}</span>
                     <span class="meta">${d.toFixed(1)} km</span>
-                    <span class="val" style="color:${t != null && t < -0.1 ? '#f28a7d' : t != null && t > 0.1 ? '#7ec8e0' : '#b9c0dd'}">${t != null ? (t > 0 ? '+' : '') + (t * 100).toFixed(0) + ' cm/dec' : '–'}</span>
+                    <span class="val" title="${TREND_TITLE}" style="color:${t != null && t < -0.1 ? '#f28a7d' : t != null && t > 0.1 ? '#7ec8e0' : '#b9c0dd'}">${fmtTrend(t)}</span>
                 </div>`;
             }).join('') + '</div>';
     }
@@ -304,17 +340,19 @@ function hydroLinksForStation(id) {
 function hydroSparkSVG(l) {
     const sp = l.spark;
     if (!sp || !sp.lvl || sp.lvl.length < 10) return '';
-    const W = 260, H = 44, n = sp.lvl.length;
+    const W = 260, H = 48, n = sp.lvl.length;
     const pts = a => a.map((v, i) =>
-        `${(i / (n - 1) * W).toFixed(1)},${(H - 3 - v / 100 * (H - 8)).toFixed(1)}`).join(' ');
+        `${(i / (n - 1) * W).toFixed(1)},${(H - 4 - v / 100 * (H - 10)).toFixed(1)}`).join(' ');
     const d0 = sp.d0.slice(5).replace('-', '/'), d1 = sp.d1.slice(5).replace('-', '/');
+    const range = (sp.lvl_max - sp.lvl_min);
     return `<div class="hydro-spark" style="margin:2px 0 6px 20px;">
         <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;background:#141a2e;border-radius:6px;">
-            <polyline points="${pts(sp.rel)}" fill="none" stroke="#8fb8f2" stroke-width="1" opacity="0.75"/>
-            <polyline points="${pts(sp.lvl)}" fill="none" stroke="#facc6b" stroke-width="1.4"/>
+            <line x1="0" y1="${H / 2}" x2="${W}" y2="${H / 2}" stroke="#26315e" stroke-width="0.6"/>
+            <polyline points="${pts(sp.rel)}" fill="none" stroke="#8fb8f2" stroke-width="1.1" opacity="0.7" stroke-linejoin="round"/>
+            <polyline points="${pts(sp.lvl)}" fill="none" stroke="#facc6b" stroke-width="1.6" stroke-linejoin="round"/>
         </svg>
-        <small style="color:#6a7194;"><span style="color:#facc6b">━</span> well level (${sp.lvl_min}–${sp.lvl_max} m)
-        &nbsp;<span style="color:#8fb8f2">━</span> plant release &nbsp;·&nbsp; ${d0}–${d1}</small>
+        <small style="color:#6a7194;"><span style="color:#facc6b">━</span> well level ${sp.lvl_min}–${sp.lvl_max} m <span title="Both curves are independently scaled to their own min–max over the window shown, to make co-movement visible — vertical positions are not comparable between the two curves." style="cursor:help;border-bottom:1px dotted #4a5578">(span ${range < 0.995 ? (range * 100).toFixed(0) + ' cm' : range.toFixed(2) + ' m'})</span>
+        &nbsp;<span style="color:#8fb8f2">━</span> daily release &nbsp;·&nbsp; ${d0}–${d1} · each scaled to own range</small>
     </div>`;
 }
 function hydroLinkRowHTML(l, showStation) {
@@ -376,8 +414,8 @@ function showKGModal(code, opts = {}) {
         <div class="kv-grid" style="margin-top:10px;">
             <div class="kv"><div class="k">GW stations used</div><div class="v">${rec.n_gw ?? '–'}</div></div>
             <div class="kv"><div class="k">Nitrate stations used</div><div class="v">${rec.n_no3 ?? '–'}</div></div>
-            ${rec.no3 != null ? `<div class="kv"><div class="k">Nitrate (interp.)</div><div class="v" style="color:${no3Tint(rec.no3)}">${rec.no3.toFixed(1)} mg/L</div></div>` : ''}
-            ${rec.gw_trend != null ? `<div class="kv"><div class="k">Level trend (interp.)</div><div class="v" style="color:${trendTint(rec.gw_trend)}">${(rec.gw_trend > 0 ? '+' : '') + (rec.gw_trend * 100).toFixed(0)} cm/dec</div></div>` : ''}
+            ${rec.no3 != null ? `<div class="kv" title="${NO3_TITLE}"><div class="k">Nitrate (interp.)</div><div class="v" style="color:${no3Tint(rec.no3)}">${rec.no3.toFixed(1)} mg/L <small style="color:#6a7194;font-weight:400;font-size:0.72em">${Math.round(rec.no3 / NO3_LIMIT * 100)}% of 50 mg/L</small></div></div>` : ''}
+            ${rec.gw_trend != null ? `<div class="kv" title="${TREND_TITLE}"><div class="k">Level trend (interp.)</div><div class="v" style="color:${trendTint(rec.gw_trend)}">${fmtTrend(rec.gw_trend)}</div></div>` : ''}
         </div>
         ${edoBarsHTML(gem)}
         ${hydroImpactHTML(hydroLinksForKG(code), true)}
@@ -416,10 +454,10 @@ function openGWStation(s) {
         <h2>${esc(s.name)}</h2>
         <div class="subtitle">eHYD groundwater level station · ID ${esc(s.id)}${s.start_year ? ` · ${s.start_year}–${s.end_year}` : ''}</div>
         <div class="kv-grid">
-            <div class="kv"><div class="k">10-yr trend</div><div class="v" style="color:${trendTint(t)}">${t != null ? (t > 0 ? '+' : '') + (t * 100).toFixed(1) + ' cm/dec' : '–'}</div></div>
+            <div class="kv" title="${TREND_TITLE}"><div class="k">10-yr trend</div><div class="v" style="color:${trendTint(t)}">${fmtTrend(t, 1)}</div></div>
             <div class="kv"><div class="k">Status</div><div class="v">${status}</div></div>
             <div class="kv"><div class="k">p-value (10-yr)</div><div class="v">${s.p_value_10yr != null ? (s.p_value_10yr < 0.001 ? '<0.001' : s.p_value_10yr.toFixed(3)) : (s.p_value != null ? s.p_value.toFixed(3) : '–')}</div></div>
-            <div class="kv"><div class="k">Full-period trend</div><div class="v">${s.trend_full_period != null ? (s.trend_full_period * 100).toFixed(1) + ' cm/dec' : '–'}</div></div>
+            <div class="kv" title="${TREND_TITLE}"><div class="k">Full-period trend</div><div class="v">${s.trend_full_period != null ? fmtTrend(s.trend_full_period, 1) : '–'}</div></div>
             <div class="kv"><div class="k">Mean level</div><div class="v">${s.mean_level != null ? s.mean_level.toFixed(2) + ' m' : '–'}</div></div>
             <div class="kv"><div class="k">Current level</div><div class="v">${s.current_level != null ? s.current_level.toFixed(2) + ' m' : '–'}</div></div>
         </div>
@@ -459,23 +497,43 @@ async function loadGWChart(stationId) {
     }
 }
 
+// WFD/GWD assessment for a nitrate station: quality standard 50 mg/L,
+// trend-reversal trigger at 75% of it (37.5 mg/L) when the trend is rising.
+function no3WFDBadge(latest, trendPerYr) {
+    if (latest == null) return '';
+    const rising = trendPerYr != null && trendPerYr > 0.05; // > +0.5 mg/L per decade
+    if (latest >= NO3_LIMIT)
+        return `<span class="badge stressed" title="${NO3_TITLE}">⚠ above 50 mg/L standard</span>`;
+    if (latest >= NO3_TREND_REVERSAL && rising)
+        return `<span class="badge stressed" title="${NO3_TITLE}">≥ 37.5 mg/L &amp; rising → WFD trend reversal due</span>`;
+    if (latest >= NO3_TREND_REVERSAL)
+        return `<span class="badge watch" title="${NO3_TITLE}">above 37.5 mg/L WFD trend-reversal threshold</span>`;
+    if (rising && latest >= 25)
+        return `<span class="badge watch" title="${NO3_TITLE}">below thresholds, but rising</span>`;
+    return `<span class="badge good" title="${NO3_TITLE}">below WFD thresholds</span>`;
+}
+
 function openNO3Station(s) {
     destroyChart();
-    const overLimit = s.latest != null && s.latest >= 50;
+    const overLimit = s.latest != null && s.latest >= NO3_LIMIT;
     const trend = s.trend_per_yr;
     const body = $('st-modal-body');
     body.innerHTML = `
         <h2>Nitrate station ${esc(s.id)}</h2>
         <div class="subtitle">EEA WISE-6 groundwater quality · ${s.first_year}–${s.last_year} · ${s.n_samples} samples</div>
+        <div style="margin:0 0 10px;">${no3WFDBadge(s.latest, trend)}</div>
         <div class="kv-grid">
             <div class="kv"><div class="k">Latest NO₃ (${s.latest_year})</div><div class="v" style="color:${no3Tint(s.latest)}">${s.latest != null ? s.latest.toFixed(1) + ' mg/L' : '–'}</div></div>
-            <div class="kv"><div class="k">vs EU limit 50</div><div class="v">${s.latest != null ? Math.round(s.latest / 50 * 100) + '%' : '–'}${overLimit ? ' ⚠' : ''}</div></div>
+            <div class="kv" title="${NO3_TITLE}"><div class="k">vs 50 mg/L standard</div><div class="v">${s.latest != null ? Math.round(s.latest / NO3_LIMIT * 100) + '%' : '–'}${overLimit ? ' ⚠' : ''}</div></div>
             <div class="kv"><div class="k">Mean (all years)</div><div class="v">${s.mean != null ? s.mean.toFixed(1) + ' mg/L' : '–'}</div></div>
-            <div class="kv"><div class="k">Trend</div><div class="v">${trend != null ? (trend > 0 ? '+' : '') + (trend * 10).toFixed(1) + ' mg/L/dec' : '–'}</div></div>
+            <div class="kv" title="Linear trend of the annual means, expressed as change per 10 years"><div class="k">Trend</div><div class="v">${trend != null ? (trend > 0 ? '+' : '') + (trend * 10).toFixed(1) + ' mg/L per decade' : '–'}</div></div>
         </div>
         <h3>Nitrate history <small style="color:#6a7194;font-weight:400">annual means, mg/L</small></h3>
         <div class="chart-box" id="st-chart-box"></div>
-        <div class="note">Red line: EU drinking-water limit (50 mg/L). Amber: Austrian quality target (45 mg/L). Values below LOQ counted as LOQ/2. Source: EEA Waterbase ICM.</div>
+        <div class="note"><span style="color:#e05252">——</span> 50 mg/L EU groundwater quality standard ·
+        <span style="color:#f39c12">––</span> 45 mg/L Austrian target ·
+        <span style="color:#d8b455">···</span> 37.5 mg/L WFD trend-reversal threshold (75% of the standard — if concentrations rise above it, the Water Framework/Groundwater Directive requires measures to reverse the trend).
+        Values below LOQ counted as LOQ/2. Source: EEA Waterbase ICM.</div>
         <div class="apirow">API: <code><a href="/llm/point/no3:${esc(s.id)}" target="_blank">/llm/point/no3:${esc(s.id)}</a></code></div>`;
     openModal('st-modal');
     currentShare = { no3: s.id };
@@ -492,8 +550,9 @@ function openNO3Station(s) {
         data: { labels: years, datasets: [
             { data: values, borderColor: 'rgba(240,170,90,0.9)', borderWidth: 1.5,
               pointRadius: 3, pointBackgroundColor: values.map(no3Tint), fill: false, tension: 0.15 },
-            { data: years.map(() => 50), borderColor: 'rgba(233,69,96,0.6)', borderWidth: 1, borderDash: [6, 4], pointRadius: 0 },
-            { data: years.map(() => 45), borderColor: 'rgba(243,156,18,0.4)', borderWidth: 1, borderDash: [3, 4], pointRadius: 0 },
+            { data: years.map(() => NO3_LIMIT), borderColor: 'rgba(224,82,82,0.65)', borderWidth: 1.2, borderDash: [6, 4], pointRadius: 0 },
+            { data: years.map(() => NO3_AT_TARGET), borderColor: 'rgba(243,156,18,0.4)', borderWidth: 1, borderDash: [3, 4], pointRadius: 0 },
+            { data: years.map(() => NO3_TREND_REVERSAL), borderColor: 'rgba(216,180,85,0.4)', borderWidth: 1, borderDash: [1.5, 3.5], pointRadius: 0 },
         ]},
         options: opts,
     });
@@ -686,8 +745,13 @@ function showMethods() {
             σ units). Persistent negative divergence suggests abstraction or structural loss rather than weather.
             Risk = clamp(−divergence / 1.5σ).</li>
         <li><b>Nitrate — 25%.</b> IDW mean of the latest annual-mean NO₃ concentration of EEA WISE-6 stations
-            (only stations still reporting since ≥ 2015), same radii. Risk = clamp(latest / 50&nbsp;mg/L, the EU
-            drinking-water limit).</li>
+            (only stations still reporting since ≥ 2015), same radii. Risk = clamp(latest / 50&nbsp;mg/L).
+            The regulatory anchors shown throughout the app come from the Water Framework / Groundwater
+            Directives: <b>50&nbsp;mg/L</b> is the EU groundwater quality standard (GWD 2006/118/EC Annex I,
+            same as the drinking-water limit), <b>37.5&nbsp;mg/L</b> (75% of the standard) is the threshold above
+            which a rising trend must be reversed (GWD Art.&nbsp;5), and <b>45&nbsp;mg/L</b> is the Austrian QZV
+            Chemie GW quality target. Station dots use a continuous blue→amber→red scale anchored at
+            these thresholds (dark red ≥ 100&nbsp;mg/L).</li>
         <li><b>WFD status — 10%.</b> WISE Water Framework Directive 2022 chemical + ecological status of water
             bodies attributed to the Gemeinde (0–1). Only counted where GW bodies are actually monitored.</li>
         <li><b>Drought pressure — 15%.</b> Copernicus EDO Combined Drought Indicator mean class of the Gemeinde,

@@ -124,6 +124,9 @@
         #legend .toggles label { display: flex; align-items: center; gap: 6px; padding: 3px 0; cursor: pointer; color: #b9c0dd; font-size: 10.5px; }
         #legend input { accent-color: #4fc3f7; }
         #legend .hint { color: #6a7194; font-size: 9px; margin-top: 6px; }
+        #legend .sublegend { margin: 0 0 4px 22px; font-size: 9px; color: #8b93b8; }
+        #legend .sublegend span { margin-right: 7px; white-space: nowrap; }
+        #legend .sublegend i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; vertical-align: -1px; }
 
         /* ---- footer ---- */
         #footbar {
@@ -264,12 +267,40 @@
 
     <div id="legend">
         <h4>Groundwater Status</h4>
-        <div class="grad"></div>
-        <div class="grad-labels"><span>0</span><span>0.5</span><span>1</span></div>
-        <div class="cats"><span>good</span><span>watch</span><span>stressed</span></div>
+        <div class="grad" style="position:relative;" title="Groundwater Status Index 0 (good) → 1 (stressed). Category thresholds: good < 0.30 ≤ watch < 0.50 ≤ stressed">
+            <i style="position:absolute;left:30%;top:-2px;bottom:-2px;width:1px;background:rgba(13,16,34,0.85)"></i>
+            <i style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:rgba(13,16,34,0.85)"></i>
+        </div>
+        <div style="position:relative;height:11px;color:#8b93b8;font-size:9px;margin-top:2px;">
+            <span style="position:absolute;left:0">0</span>
+            <span style="position:absolute;left:30%;transform:translateX(-50%)">.30</span>
+            <span style="position:absolute;left:50%;transform:translateX(-50%)">.50</span>
+            <span style="position:absolute;right:0">1</span>
+        </div>
+        <div style="position:relative;height:12px;font-size:9.5px;">
+            <span style="position:absolute;left:0;color:#7ed37e">good</span>
+            <span style="position:absolute;left:40%;transform:translateX(-50%);color:#f5cf6b">watch</span>
+            <span style="position:absolute;right:0;color:#f28a7d">stressed</span>
+        </div>
         <div class="toggles">
             <label><input type="checkbox" id="tg-gw" checked> Level stations <span id="n-gw" style="color:#6a7194"></span></label>
+            <div class="sublegend" id="leg-gw" title="Colour = 10-year groundwater level trend (change per decade)">
+                <span><i style="background:#c98a9a"></i>falling</span>
+                <span><i style="background:#7a8ac0"></i>stable</span>
+                <span><i style="background:#7ec8e0"></i>rising</span>
+            </div>
             <label><input type="checkbox" id="tg-no3"> Nitrate stations <span id="n-no3" style="color:#6a7194"></span></label>
+            <div class="sublegend" id="leg-no3" style="display:none;" title="Colour = latest nitrate concentration. 37.5 mg/L = WFD trend-reversal threshold, 50 mg/L = EU quality standard">
+                <div class="grad" style="height:7px;background:linear-gradient(to right,#5f8ac7,#8fb08a 25%,#d8b455 37.5%,#e88a48 45%,#e05252 50%,#8f1d2f)">
+                    <i style="position:relative;display:block;left:37.5%;top:-1px;height:9px;width:1px;background:rgba(13,16,34,0.85)"></i>
+                </div>
+                <div style="position:relative;height:10px;font-size:8.5px;color:#8b93b8">
+                    <span style="position:absolute;left:0">0</span>
+                    <span style="position:absolute;left:37.5%;transform:translateX(-50%)">37.5</span>
+                    <span style="position:absolute;left:56%">50</span>
+                    <span style="position:absolute;right:0">100+ mg/L</span>
+                </div>
+            </div>
         </div>
         <div class="hint">Tap the map for any Katastralgemeinde</div>
     </div>
@@ -310,6 +341,6 @@
 
     <div id="toast" style="display:none; position:fixed; bottom:44px; left:50%; transform:translateX(-50%); background:#202a55; border:1px solid #4fc3f7; color:#cfe3ff; padding:8px 18px; border-radius:8px; z-index:3000; font-size:0.85em;"></div>
 
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
 </body>
 </html>
