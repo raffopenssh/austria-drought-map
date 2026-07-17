@@ -36,7 +36,9 @@ let plantInfl = null;      // plant_influence.json (hydropower downstream impact
 let no3Stations = [];      // nitrate stations
 let muniByIso = {}, muniByName = {};
 let gwTrendsCache = null;  // lazy full annual data
+let popData = null;        // population.json (Statistik Austria)
 let chart = null;          // active Chart.js instance
+let popChart = null;       // population trend chart in KG modal
 let currentShare = {};     // extra params beyond view
 let kgRegList = null;      // [[code, rec], ...] cached array
 
@@ -95,6 +97,7 @@ async function boot() {
         fetch('data/municipalities.json').then(r => r.json()),
         fetch('data/plant_influence.json').then(r => r.json()).catch(() => null),
     ]);
+    popData = await fetch('data/population.json').then(r => r.json()).catch(() => null);
     plantInfl = pinf;
     gwiKG = gwi.kgs; gwiMeta = gwi; kgReg = reg;
     kgRegList = Object.entries(reg);
@@ -124,9 +127,16 @@ function buildChoropleth(geo) {
             const p = f.properties;
             const g = p.gwi != null ? p.gwi.toFixed(2) : '–';
             const cat = p.gwi_category || 'no data';
-            layer.bindTooltip(
-                `<b>${esc(p.name)}</b><br>GWI ${g} · <span style="color:${CAT_COLOR[cat] || '#8b93b8'}">${cat}</span>`,
-                { className: 'gw-tip', sticky: true });
+            layer.bindTooltip(() => {
+                let pop = '';
+                const r = popForIso(p.iso);
+                if (r) {
+                    const now = r.t[r.t.length - 1], first = r.t[0];
+                    const d = (now - first) / first * 100;
+                    pop = `<br>${now.toLocaleString('en')} people · ${d >= 0 ? '+' : ''}${d.toFixed(0)}% since 2002`;
+                }
+                return `<b>${esc(p.name)}</b><br>GWI ${g} · <span style="color:${CAT_COLOR[cat] || '#8b93b8'}">${cat}</span>${pop}`;
+            }, { className: 'gw-tip', sticky: true });
             layer.on('mouseover', () => layer.setStyle({ weight: 1.6, color: '#4fc3f7', opacity: 1 }));
             layer.on('mouseout', () => choroLayer.resetStyle(layer));
             layer.on('click', e => {
@@ -381,6 +391,62 @@ function hydroImpactHTML(links, showStation) {
         <b>Correlation, not proven causation.</b> <a href="#" onclick="showMethods();return false;">Details</a></div>`;
 }
 
+// ---------- population (Statistik Austria) ----------
+function popForIso(iso) {
+    if (!popData || iso == null) return null;
+    let k = String(iso);
+    if (popData.alias[k]) k = popData.alias[k];
+    return popData.gemeinden[k] || null;
+}
+function popHTML(gem) {
+    const r = gem ? popForIso(gem.iso) : null;
+    if (!r) return '';
+    const yrs = popData.years, n = yrs.length - 1;
+    const now = r.t[n], first = r.t[0];
+    const d = (now - first) / first * 100;
+    const share65 = r.y65[n] / now * 100, share65f = r.y65[0] / r.t[0] * 100;
+    const dcol = d > 2 ? '#7ec8e0' : d < -2 ? '#c98a9a' : '#7a8ac0';
+    return `<h3>People on this water <small style="color:#6a7194;font-weight:400">Gemeinde ${esc(r.n)}, ${yrs[0]}–${yrs[n]}</small></h3>
+        <div class="kv-grid">
+            <div class="kv"><div class="k">Population ${yrs[n]}</div><div class="v">${now.toLocaleString('en')}</div></div>
+            <div class="kv"><div class="k">Since ${yrs[0]}</div><div class="v" style="color:${dcol}">${d >= 0 ? '+' : ''}${d.toFixed(1)}%</div></div>
+            <div class="kv" title="Share aged 65+ (was ${share65f.toFixed(0)}% in ${yrs[0]})"><div class="k">Aged 65+</div><div class="v">${share65.toFixed(0)}% <small style="color:#6a7194;font-size:.72em">was ${share65f.toFixed(0)}%</small></div></div>
+            <div class="kv" title="Estimated household water demand: population × 130 L/person/day (ÖVGW average). Excludes industry, agriculture, tourism."><div class="k">Est. household demand</div><div class="v">${fmtDemand(now)}</div></div>
+        </div>
+        <div class="chart-box" style="height:110px;margin-top:8px;"><canvas id="pop-chart"></canvas></div>
+        <div class="note">Population on Jan 1 (Statistik Austria, 2026 boundaries). Blue = total; dotted = aged 65+.
+        Demand estimate uses the Austrian average of ~130 L/person/day household use — an indicator of how many people rely on local water, not measured abstraction.</div>`;
+}
+function fmtDemand(pop) {
+    const m3yr = pop * 130 * 365 / 1000;
+    if (m3yr >= 1e6) return (m3yr / 1e6).toFixed(1) + ' Mm³/yr';
+    return Math.round(m3yr / 1000).toLocaleString('en') + 'k m³/yr';
+}
+function renderPopChart(gem) {
+    const r = gem ? popForIso(gem.iso) : null;
+    const ctx = document.getElementById('pop-chart');
+    if (!r || !ctx) return;
+    if (popChart) { popChart.destroy(); popChart = null; }
+    popChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: popData.years, datasets: [
+            { data: r.t, borderColor: 'rgba(79,195,247,0.9)', borderWidth: 1.5,
+              pointRadius: 0, fill: false, tension: 0.15 },
+            { data: r.y65, borderColor: 'rgba(245,207,107,0.8)', borderWidth: 1.2,
+              borderDash: [4, 3], pointRadius: 0, fill: false, tension: 0.15 },
+        ]},
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+            plugins: { legend: { display: false }, tooltip: { callbacks: {
+                label: c => (c.datasetIndex ? '65+: ' : 'total: ') + c.parsed.y.toLocaleString('en') } } },
+            scales: {
+                x: { ticks: { color: '#6a7194', maxTicksLimit: 7, font: { size: 9 } }, grid: { display: false } },
+                y: { ticks: { color: '#6a7194', font: { size: 9 }, maxTicksLimit: 4 }, grid: { color: 'rgba(58,63,85,0.3)' } },
+            },
+        },
+    });
+}
+
 function gemForKG(reg) {
     if (!reg) return null;
     if (muniByIso[reg.g]) return muniByIso[reg.g];
@@ -417,11 +483,13 @@ function showKGModal(code, opts = {}) {
             ${rec.no3 != null ? `<div class="kv" title="${NO3_TITLE}"><div class="k">Nitrate (interp.)</div><div class="v" style="color:${no3Tint(rec.no3)}">${rec.no3.toFixed(1)} mg/L <small style="color:#6a7194;font-weight:400;font-size:0.72em">${Math.round(rec.no3 / NO3_LIMIT * 100)}% of 50 mg/L</small></div></div>` : ''}
             ${rec.gw_trend != null ? `<div class="kv" title="${TREND_TITLE}"><div class="k">Level trend (interp.)</div><div class="v" style="color:${trendTint(rec.gw_trend)}">${fmtTrend(rec.gw_trend)}</div></div>` : ''}
         </div>
+        ${popHTML(gem)}
         ${edoBarsHTML(gem)}
         ${hydroImpactHTML(hydroLinksForKG(code), true)}
         ${lat != null ? stationListHTML(lat, lon, 12.5) : ''}
         <div class="apirow">API: <code><a href="/llm/kg/${esc(code)}" target="_blank">/llm/kg/${esc(code)}</a></code></div>`;
     openModal('kg-modal');
+    renderPopChart(gem);
     currentShare = { kg: code };
     updateURL();
     if (!opts.noFly && lat != null && !map.getBounds().contains([lat, lon])) {
@@ -430,7 +498,10 @@ function showKGModal(code, opts = {}) {
 }
 
 // ---------- station modals ----------
-function destroyChart() { if (chart) { chart.destroy(); chart = null; } }
+function destroyChart() {
+    if (chart) { chart.destroy(); chart = null; }
+    if (popChart) { popChart.destroy(); popChart = null; }
+}
 function closeModal(id) {
     $(id).classList.remove('active');
     if (id === 'st-modal' || id === 'kg-modal') { destroyChart(); currentShare = {}; updateURL(); }
