@@ -56,7 +56,7 @@ let gwkLayer = null;       // GW-body boundary overlay (lazy)
 let chart = null;          // active Chart.js instance
 let popChart = null;       // population trend chart in KG modal
 let currentShare = {};     // extra params beyond view
-let stNav = null;          // station-browsing context: {kg, kgName, items:[{k,id,name}], idx}
+let stNav = null;          // station-browsing context: {back:{kind,id,label}, items:[{k,id,name}], idx}
 let lastKGCtx = null;      // last opened KG: {code, name, lat, lon}
 let kgRegList = null;      // [[code, rec], ...] cached array
 
@@ -626,7 +626,7 @@ async function hpOpen(pid, isBack) {
     const showRes = p.psr !== 'ror';
 
     // downstream lists
-    const gwRows = p.gw.map(l => `<div class="station-item" onclick="stNavOpen('gw','${esc(l.station)}')">
+    const gwRows = p.gw.map(l => `<div class="station-item" onclick="stOpenFromHp('gw','${esc(l.station)}')">
             <span class="dot" style="background:#8fb8f2"></span>
             <span class="nm">${esc(l.name)} <small style="color:#6a7194">well ${esc(l.station)}</small></span>
             <span class="meta">${l.km.toFixed(0)} km</span>
@@ -1009,18 +1009,32 @@ function buildStNav(kind, id) {
         ...gws.map(({ s }) => ({ k: 'gw', id: String(s.id), name: s.name })),
         ...n3s.map(({ s }) => ({ k: 'no3', id: String(s.id), name: 'NO\u2083 ' + s.id })),
     ];
+    const back = { kind: 'kg', id: lastKGCtx.code, label: lastKGCtx.name };
     const idx = items.findIndex(it => it.k === kind && it.id === String(id));
-    if (idx < 0) return { kg: lastKGCtx.code, kgName: lastKGCtx.name, items: [], idx: -1 }; // back only
-    return { kg: lastKGCtx.code, kgName: lastKGCtx.name, items, idx };
+    if (idx < 0) return { back, items: [], idx: -1 }; // back only
+    return { back, items, idx };
 }
 function stNavSync(kind, id) {
     if (!stNav) return;
     const i = stNav.items.findIndex(it => it.k === kind && it.id === String(id));
     if (i >= 0) stNav.idx = i;
-    else if (stNav.items.length) stNav = { kg: stNav.kg, kgName: stNav.kgName, items: [], idx: -1 };
+    else if (stNav.items.length) stNav = { back: stNav.back, items: [], idx: -1 };
 }
 function stNavOpen(kind, id) {
     stNav = buildStNav(kind, id);
+    (kind === 'gw' ? openGWStationById : openNO3StationById)(id);
+}
+// open a station from the plant/gauge modal: back goes to that modal, not a KG
+function stOpenFromHp(kind, id) {
+    const c = modalCtx();
+    if (c && (c.kind === 'hp' || c.kind === 'pg')) {
+        const label = c.kind === 'hp'
+            ? (((plantProfiles && plantProfiles.plants[c.id]) || (plantInfl && plantInfl.plants[c.id]) || {}).name || c.id)
+            : 'gauge ' + c.id;
+        stNav = { back: { kind: c.kind, id: c.id, label }, items: [], idx: -1 };
+    } else {
+        stNav = buildStNav(kind, id);
+    }
     (kind === 'gw' ? openGWStationById : openNO3StationById)(id);
 }
 function stNavStep(dir) {
@@ -1033,11 +1047,13 @@ function stNavStep(dir) {
     if (s && !map.getBounds().contains([s.lat, s.lon])) map.panTo([s.lat, s.lon], { duration: 0.5 });
 }
 function stNavBack() {
-    if (!stNav) return;
-    const kg = stNav.kg;
+    if (!stNav || !stNav.back) return;
+    const b = stNav.back;
     closeModal('st-modal', true);
     destroyChart();
-    showKGModal(kg, { noFly: true });
+    if (b.kind === 'kg') showKGModal(b.id, { noFly: true });
+    else if (b.kind === 'hp') hpOpen(b.id, true);
+    else if (b.kind === 'pg') pgOpen(b.id, true);
 }
 function renderStNav() {
     const nav = $('st-topnav'), prev = $('st-prev'), next = $('st-next');
@@ -1046,7 +1062,7 @@ function renderStNav() {
         const many = stNav.items.length > 1;
         nav.style.display = 'flex';
         nav.innerHTML = `
-            <button class="modal-back" onclick="stNavBack()" title="Back to ${esc(stNav.kgName)}">← ${esc(stNav.kgName)}</button>` +
+            <button class="modal-back" onclick="stNavBack()" title="Back to ${esc(stNav.back.label)}">← ${esc(stNav.back.label)}</button>` +
             (many ? `<span class="mnav-pos">station ${stNav.idx + 1} / ${stNav.items.length} near this KG · ← → keys</span>` : '');
         prev.style.display = next.style.display = many ? 'flex' : 'none';
     } else {
@@ -1078,7 +1094,7 @@ function openGWStation(s) {
         <div class="note">Points from the last 10 years (red) drive the trend used in the GWI. Source: eHYD (BML).</div>
         ${hydroImpactHTML(hydroLinksForStation(s.id), false)}
         <div class="apirow">API: <code><a href="/llm/point/gw:${esc(s.id)}" target="_blank">/llm/point/gw:${esc(s.id)}</a></code></div>`;
-    closeModal('kg-modal', true);
+    closeModal('kg-modal', true); closeModal('hp-modal', true);
     stNavSync('gw', s.id);
     renderStNav();
     openModal('st-modal');
@@ -1151,7 +1167,7 @@ function openNO3Station(s) {
         <span style="color:#d8b455">···</span> 37.5 mg/L WFD trend-reversal threshold (75% of the standard — if concentrations rise above it, the Water Framework/Groundwater Directive requires measures to reverse the trend).
         Values below LOQ counted as LOQ/2. Source: EEA Waterbase ICM.</div>
         <div class="apirow">API: <code><a href="/llm/point/no3:${esc(s.id)}" target="_blank">/llm/point/no3:${esc(s.id)}</a></code></div>`;
-    closeModal('kg-modal', true);
+    closeModal('kg-modal', true); closeModal('hp-modal', true);
     stNavSync('no3', s.id);
     renderStNav();
     openModal('st-modal');
