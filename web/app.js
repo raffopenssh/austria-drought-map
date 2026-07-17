@@ -278,6 +278,7 @@ function buildStationLayers() {
     $('tg-no3').addEventListener('change', async e => {
         $('leg-no3').style.display = e.target.checked ? '' : 'none';
         if (e.target.checked) {
+            hintChips($('leg-no3'));
             no3LayerGroup.addTo(map);
             await ensureNO3BodyLayer();
             no3BodyLayer.addTo(map);
@@ -851,7 +852,12 @@ function wireUI() {
 // ---------- interactive legend ----------
 function wireLegend() {
     const tap = (el, fn) => {
-        el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); fn(); syncLegendUI(); updateURL(); });
+        el.addEventListener('click', e => {
+            e.preventDefault(); e.stopPropagation();
+            fn(); syncLegendUI(); updateURL();
+            el.classList.remove('leg-pop'); void el.offsetWidth; // restart animation
+            el.classList.add('leg-pop');
+        });
         el.style.cursor = 'pointer';
     };
     document.querySelectorAll('[data-cat]').forEach(el =>
@@ -861,6 +867,13 @@ function wireLegend() {
     document.querySelectorAll('[data-band]').forEach(el =>
         tap(el, () => { const i = +el.dataset.band; filt.no3[i] = !filt.no3[i]; applyStationFilters(); }));
     syncLegendUI();
+}
+// One-time staggered pop when a sublegend opens, so people discover the chips are filters.
+function hintChips(container) {
+    if (container._hinted) return;
+    container._hinted = true;
+    container.querySelectorAll('.leg-btn').forEach((el, i) =>
+        setTimeout(() => { el.classList.add('leg-pop'); setTimeout(() => el.classList.remove('leg-pop'), 350); }, 120 + i * 90));
 }
 function syncLegendUI() {
     document.querySelectorAll('[data-cat]').forEach(el => el.classList.toggle('leg-off', !filt.cat[el.dataset.cat]));
