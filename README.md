@@ -37,6 +37,31 @@ Full honesty section: the Methods modal in the app.
   the 50 mg/L EU limit in 2024
 - Mean groundwater decline ≈4.7 cm/decade, with strong east–west gradient
 
+## Glaciers & snow — the watering cans
+
+Informational, deliberately not a GWI component (an upstream, non-renewable
+input on a different clock than abstraction or nitrate):
+
+- **735 glaciers, 348 km²** (RGI 6.0, centroid in Austria) are losing
+  **363 Mm³/yr** of ice (ASTER dh/dt, Hugonnet et al. 2021, via WGMS FoG
+  2026-02) — ≈32% of Austria's entire annual groundwater abstraction, arriving
+  as river water. In-situ mass balance: −0.52 m w.e./yr in the 1980s →
+  **−1.78 m w.e./yr for 2021–25**.
+- Ice is routed to the valleys by walking the directed OSM waterway network
+  downstream from every outline; the reaches are buffered 2 km →
+  **633 Gemeinden and 1,482 KGs in the glacier-fed corridor**.
+- Those corridor wells trend **+0.068 m/decade above** their nearest
+  non-corridor neighbours (perm p < 0.001) and glacier-fed gauges still *gain*
+  flow (**+2.3%/dec** where ice ≥10% of the catchment) while ice-free gauges
+  lose **2.0%/dec** — a melt subsidy that masks drought, with an expiry date.
+- The bigger store is snow: SNOWGRID-CL v2 1 Apr SWE, median KG
+  **−18%/decade**; national KG-centroid mean 27 mm (1961–90) → 9 mm (2011–26).
+- Sparklines in the KG modal show observed history plus simple projections
+  (linear snow trend to 2050; ice melt depleted with melt ∝ remaining area →
+  peak water, then collapse). Scripts: `build_glacier_downstream.py`,
+  `build_glacier_corridor.py`, `build_snow_reservoir.py`,
+  `analyze_glacier_contribution.py`, `analyze_glacier_gw.py`.
+
 ## Context
 
 In recent years, Austrian municipalities have had to implement water rationing measures (e.g., restrictions on car washing, pool filling). While Vienna has its historic high-mountain water supply, most of Austria depends on groundwater. Climate change impacts are compounded by:
@@ -55,6 +80,10 @@ In recent years, Austrian municipalities have had to implement water rationing m
 - Wasserschatz Österreichs (BMLRT/Umweltbundesamt 2021) — per-groundwater-body available resource & sector water demand (`data/pop/wasserschatz_ergebnistabelle.xlsx`, `scripts/build_gwk_context.py`); GWK boundaries INSPIRE WFD NGP-2015 (`data/gwk/gwk.zip`)
 - Statistik Austria OGD — population 2002–2026 per Gemeinde (CC-BY-4.0, `scripts/build_population.py`)
 - [BEV cadastre API](https://cadastre-process-api.exe.xyz/) — canonical KG/Gemeinde registry, point-in-polygon snapping, address search
+- [WGMS Fluctuations of Glaciers 2026-02](https://wgms.ch/) (doi:10.5904/wgms-fog-2026-02) — Austrian mass balance 1946–2025, front variations since 1803, ASTER dh/dt volume change
+- [Randolph Glacier Inventory 6.0](https://www.glims.org/RGI/) region 11 — glacier outlines
+- [GeoSphere Austria data.hub](https://data.hub.geosphere.at/) — SNOWGRID-CL v2 snow water equivalent, 1 km, 1961–2026
+- [INSPIRE Austria](https://inspire-austria.exe.xyz/) — dataset discovery (BEV ALS 1 m DTM/DSM tiles for future corridor work)
 - [Oesterreichs Energie](https://oesterreichsenergie.at/) — power plant registry
 - Austrian municipality boundaries from GeoJSON-Austria
 

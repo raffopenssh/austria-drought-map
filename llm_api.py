@@ -269,6 +269,9 @@ def _load():
         _state["gwk_ctx"] = gc
     else:
         _state["gwk_ctx"] = None
+    # Glacier / snow context (WGMS FoG + ASTER dh/dt, RGI 6.0, SNOWGRID-CL).
+    gl_path = os.path.join(DATA, "glacier_context.json")
+    _state["glacier"] = json.load(open(gl_path)) if os.path.exists(gl_path) else None
     pop_path = os.path.join(DATA, "population.json")
     if os.path.exists(pop_path):
         _state["pop"] = json.load(open(pop_path))
@@ -449,6 +452,9 @@ def _payload_for_kg(kg_code):
     gwk = _gwk_block(kg_code)
     if gwk:
         payload["groundwater_body"] = gwk
+    cryo = _cryosphere_block(kg_code)
+    if cryo:
+        payload["cryosphere"] = cryo
     popb = _population_block(gem_code)
     if popb:
         popb["per_year"] = None  # keep per-KG payloads small
@@ -480,6 +486,74 @@ def _gwk_block(kg_code):
     if g.get("note"):
         out["note"] = g["note"]
     return out
+
+
+def _cryosphere_block(kg_code, series=False):
+    """Glacier melt upstream + seasonal snow store for a KG, or None.
+
+    Informational: an upstream, non-renewable input to the same aquifers, on a
+    different clock than abstraction or nitrate -- deliberately NOT a GWI
+    component. See the Methods section of the app.
+    """
+    gl = _state.get("glacier")
+    if not gl:
+        return None
+    r = (gl.get("kg") or {}).get(kg_code)
+    if not r:
+        return None
+    out = {
+        "source": gl.get("source"),
+        "in_gwi": False,
+        "note": ("Net glacier ice loss is a one-off storage release that is "
+                 "currently added to river flow and valley recharge; it ends "
+                 "with the ice. Snow is the larger, faster-shrinking store."),
+    }
+    if r.get("melt_mio_m3a"):
+        out["glacier"] = {
+            "ice_area_km2_upstream": r.get("ice_km2"),
+            "n_glaciers_upstream": r.get("n_gl"),
+            "net_ice_loss_mio_m3_per_year": r.get("melt_mio_m3a"),
+            "ice_volume_mio_m3_upstream": r.get("vol_mio_m3"),
+            "depletion_years_at_current_rate": r.get("depletion_years"),
+            "river_km_from_nearest_ice": r.get("dist_km"),
+            "share_of_kg_in_glacier_fed_corridor": r.get("corridor_share"),
+            "corridor_buffer_m": 2000,
+            "method": ("directed OSM waterway walk downstream from RGI 6.0 "
+                       "outlines; loss rates from ASTER dh/dt (Hugonnet et al. "
+                       "2021) via WGMS FoG 2026-02; volume from volume-area "
+                       "scaling (Bahr et al. 1997)"),
+        }
+        traj = (gl.get("ice_traj") or {}).get(r.get("ice_traj"))
+        if traj:
+            out["glacier"]["projection"] = {
+                "year_half_of_todays_melt": traj.get("year_half_melt"),
+                "year_ice_effectively_gone": traj.get("year_gone"),
+                "model": "melt scales with remaining area (peak water, then collapse)",
+            }
+            if series:
+                out["glacier"]["projection"]["melt_mio_m3_per_year"] = traj.get("melt")
+                out["glacier"]["observed_melt_mio_m3_per_year"] = traj.get("hist")
+    if r.get("snow_apr_mm") is not None:
+        snow = {
+            "swe_1apr_mm_mean_last10": r.get("snow_apr_mm"),
+            "swe_1apr_mm_mean_1961_1990": r.get("snow_apr_mm_6190"),
+            "swe_1apr_trend_pct_per_decade": r.get("snow_apr_pct_decade"),
+            "swe_1jul_mm_mean_last10": r.get("snow_jul_mm"),
+            "swe_1jul_trend_pct_per_decade": r.get("snow_jul_pct_decade"),
+            "source": "GeoSphere Austria SNOWGRID-CL v2, 1 km, 1961-2026",
+        }
+        sser = (gl.get("snow") or {}).get(kg_code)
+        if sser and sser.get("apr_proj"):
+            snow["projection_1apr"] = {
+                "mm_2050": sser["apr_proj"].get("proj_2050"),
+                "year_half_of_1961_1990_store": sser["apr_proj"].get("year_half"),
+                "model": "linear fit on the last 40 years, floored at zero",
+            }
+        if series and sser:
+            snow["swe_1apr_per_year"] = sser.get("apr")
+            snow["swe_1jul_per_year"] = sser.get("jul")
+        out["snow"] = snow
+    return out if ("glacier" in out or "snow" in out) else None
 
 
 def _population_block(gem_code):
@@ -652,6 +726,23 @@ def _payload_for_gemeinde(ident):
                     gwk["note_span"] = (f"Gemeinde spans {len(counts)} "
                                         "groundwater bodies; dominant shown")
                 payload["groundwater_body"] = gwk
+    if kgs:
+        # Cryosphere: report the KG of this Gemeinde with the most upstream ice
+        # (a Gemeinde is glacier-fed if any of its KGs is), full series here.
+        gl = _state.get("glacier")
+        if gl:
+            best, bm = None, -1.0
+            for kg in kgs:
+                r = (gl.get("kg") or {}).get(kg) or {}
+                m = r.get("melt_mio_m3a") or 0
+                if m > bm:
+                    bm, best = m, kg
+            if best is None:
+                best = kgs[0]
+            cryo = _cryosphere_block(best, series=True)
+            if cryo:
+                cryo["representative_kg_code"] = best
+                payload["cryosphere"] = cryo
     return payload, 200
 
 

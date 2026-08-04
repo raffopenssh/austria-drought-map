@@ -43,6 +43,30 @@ river network (partial R2 over a precipitation baseline, F-test p<0.01, above
 a 60-day-shift placebo). Informational only — NOT part of the GWI.
 Method: scripts/analyze_plant_downstream.py; data: web/data/plant_influence.json.
 
+KG and Gemeinde payloads may also carry "cryosphere" — the melting watering
+cans above the aquifers, also informational and NOT part of the GWI:
+  glacier: upstream ice area & net loss (Mm3/yr) from ASTER dh/dt (Hugonnet et
+    al. 2021) distributed in WGMS FoG 2026-02, matched by walking the directed
+    OSM waterway network DOWNSTREAM from RGI 6.0 outlines; remaining volume via
+    volume-area scaling (Bahr et al. 1997) -> depletion horizon; plus the share
+    of the KG inside the 2 km glacier-fed river corridor and a peak-water/
+    collapse projection (year_half_of_todays_melt, year_ice_effectively_gone).
+    Austria-wide: 735 glaciers, 348 km2, 363 Mm3/yr net loss 2014-19 (~32% of
+    national groundwater abstraction, arriving as river water).
+  snow: SNOWGRID-CL v2 (GeoSphere Austria, 1 km, 1961-2026) snow water
+    equivalent on 1 Apr (peak store) and 1 Jul (high-alpine residual): mean of
+    the last 10 years, 1961-90 baseline, %/decade trend and a linear projection
+    to 2050. The median KG has lost ~18% of its 1 Apr store per decade.
+Findings: groundwater stations inside the glacier-fed corridor trend +0.068
+m/decade above their nearest non-corridor neighbours (melt subsidy, perm
+p<0.001) and glacier-fed gauges still gain flow (+2.3%/dec at ice >=10% of
+catchment) while ice-free gauges lose 2.0%/dec.
+Method: scripts/build_glacier_downstream.py, build_glacier_corridor.py,
+build_snow_reservoir.py, analyze_glacier_contribution.py, analyze_glacier_gw.py;
+data: web/data/glacier_context.json, glacier_corridor.{json,geojson}.
+Gemeinde payloads include the full per-year snow and melt series; KG payloads
+carry summaries only.
+
 Granularity: MIXED — gwi_* per KG, legacy metrics per Gemeinde, stations per
 point. Keys: official 5-char kg_code / gemeinde_code strings.
 

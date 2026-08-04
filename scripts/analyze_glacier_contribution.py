@@ -83,7 +83,7 @@ def ice_decline(vol_mio, melt_mio):
     g = 1.375
     V, M0, V0 = float(vol_mio), float(melt_mio), float(vol_mio)
     ser = []
-    for y in range(2019, 2101):
+    for y in range(2019, 2201):
         if V <= 0: ser.append([y, 0.0]); continue
         m = M0*((V/V0)**(1.0/g))          # melt scales with area
         ser.append([y, round(m, 2)])
