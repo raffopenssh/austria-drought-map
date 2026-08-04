@@ -4,6 +4,7 @@
 import http.server
 import json
 import os
+import re
 import urllib.parse
 import sys
 
@@ -18,7 +19,14 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         # Add cache headers for static assets
         path = urllib.parse.urlparse(self.path).path
-        if path.endswith(('.json', '.geojson', '.js', '.css')):
+        if path.endswith(('.html', '/')) or path == '':
+            # HTML must always be revalidated, otherwise phones keep an old
+            # document whose ?v= cache-buster points at a stale app.js.
+            self.send_header('Cache-Control', 'no-cache')
+        elif path.endswith(('.js', '.css')):
+            # Revalidate code too; Last-Modified makes this a cheap 304.
+            self.send_header('Cache-Control', 'no-cache')
+        elif path.endswith(('.json', '.geojson')):
             self.send_header('Cache-Control', 'public, max-age=3600')
         super().end_headers()
     
@@ -29,6 +37,33 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_html(self, url_path):
+        name = 'index.html' if url_path in ('/', '/index.html') else url_path.lstrip('/')
+        fs_path = os.path.join('web', name)
+        try:
+            with open(fs_path, 'r', encoding='utf-8') as f:
+                html = f.read()
+        except OSError:
+            self.send_error(404)
+            return
+
+        def stamp(m):
+            asset = m.group(1)
+            try:
+                ver = int(os.path.getmtime(os.path.join('web', asset)))
+            except OSError:
+                return m.group(0)
+            return f'{asset}?v={ver}'
+
+        html = re.sub(r'\b(app\.js|explore\.js|[\w./-]+\.css)(?:\?v=[^"\']*)?', stamp, html)
+        body = html.encode('utf-8')
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        if self.command != 'HEAD':
+            self.wfile.write(body)
 
     def do_GET(self):
         parsed_full = urllib.parse.urlparse(self.path)
@@ -44,6 +79,13 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 status, obj = routed
                 self._send_json(status, obj)
                 return
+
+        # HTML: stamp asset URLs with the file mtime so the cache-buster can
+        # never drift out of sync with the deployed JS/CSS (a manual ?v=N bump
+        # was forgotten once, leaving phones on JS without new handlers).
+        if parsed_full.path in ('/', '/index.html', '/explore.html'):
+            self._send_html(parsed_full.path)
+            return
 
         # Check if client accepts gzip
         accept_encoding = self.headers.get('Accept-Encoding', '')

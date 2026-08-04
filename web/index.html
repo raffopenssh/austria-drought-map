@@ -236,11 +236,18 @@
         .kv .v { font-size: 0.95em; font-weight: 600; }
 
         .station-list { max-height: 220px; overflow-y: auto; border-radius: 8px; }
+        /* On touch/narrow screens a nested scroller inside the scrolling modal body
+           swallows taps (the tap just stops the inner scroll), so let lists grow and
+           keep a single scroll container. */
+        @media (max-width: 700px), (hover: none) {
+            .station-list, .station-list[style] { max-height: none !important; overflow: visible !important; }
+        }
         .station-item {
             display: flex; align-items: center; gap: 10px;
             padding: 8px 10px; border-bottom: 1px solid #1d2547; cursor: pointer; font-size: 0.82em;
+            touch-action: manipulation; -webkit-tap-highlight-color: rgba(143,184,242,0.25);
         }
-        .station-item:hover { background: #202a55; }
+        .station-item:hover, .station-item:active { background: #202a55; }
         .station-item .nm { flex: 1; }
         .station-item .meta { color: #6a7194; font-size: 0.85em; white-space: nowrap; }
         .station-item .val { font-weight: 600; white-space: nowrap; }
@@ -424,6 +431,6 @@
 
     <div id="toast" style="display:none; position:fixed; bottom:44px; left:50%; transform:translateX(-50%); background:#202a55; border:1px solid #4fc3f7; color:#cfe3ff; padding:8px 18px; border-radius:8px; z-index:3000; font-size:0.85em;"></div>
 
-    <script src="app.js?v=14"></script>
+    <script src="app.js?v=15"></script>
 </body>
 </html>

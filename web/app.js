@@ -990,6 +990,35 @@ document.querySelectorAll('.modal-overlay').forEach(ov =>
     ov.addEventListener('click', e => {
         if (e.target === ov || e.target.classList.contains('modal-wrap')) closeModal(ov.id);
     }));
+// Touch fallback: on some mobile browsers a tap on a row inside a nested/inertial
+// scroller never produces a click (the tap is consumed as "stop scrolling").
+// If a short, still tap on a .station-item is not followed by a click, fire its
+// handler manually. `tapDone` guards against double activation.
+(function () {
+    let x0 = 0, y0 = 0, row = null, t0 = 0, tapDone = false;
+    document.addEventListener('touchstart', e => {
+        if (e.touches.length !== 1) { row = null; return; }
+        const t = e.touches[0];
+        row = t.target.closest ? t.target.closest('.station-item') : null;
+        x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); tapDone = false;
+    }, { passive: true });
+    document.addEventListener('click', e => {
+        if (e.target.closest && e.target.closest('.station-item')) tapDone = true;
+    }, true);
+    document.addEventListener('touchend', e => {
+        const r = row; row = null;
+        if (!r || !r.isConnected) return;
+        const t = e.changedTouches[0];
+        if (!t || Math.abs(t.clientX - x0) > 12 || Math.abs(t.clientY - y0) > 12) return;
+        if (Date.now() - t0 > 700) return;
+        setTimeout(() => {
+            if (tapDone || !r.isConnected) return;
+            tapDone = true;
+            const fn = r.getAttribute('onclick');
+            if (fn) { try { new Function(fn).call(r); } catch (err) { console.warn(err); } }
+        }, 320);
+    }, { passive: true });
+})();
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(ov => closeModal(ov.id));
     if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && $('st-modal').classList.contains('active') && stNav) {
