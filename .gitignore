@@ -26,3 +26,20 @@ data/osm/*.osm.pbf
 data/osm/*.geojsonseq
 data/osm/.dl_done
 data/osm/.ex_done
+
+# Glacier/snow raw inputs (regenerate: see scripts/build_glacier_downstream.py
+# and scripts/build_snow_reservoir.py docstrings)
+data/glacier/fog.zip
+data/glacier/rgi11.zip
+data/glacier/rgi7_regions.zip
+data/glacier/data/
+data/glacier/snowgrid/
+data/glacier/*.f32
+data/glacier/*.shp
+data/glacier/*.dbf
+data/glacier/*.shx
+data/glacier/*.prj
+data/glacier/*_hypso.csv
+data/glacier/rgi_at.gpkg
+data/glacier/glacier_reaches.geojson
+web/data/snow_reservoir.json

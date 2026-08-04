@@ -53,6 +53,9 @@ let hpStack = [];          // modal back-stack for plant/gauge modals: [{kind:'k
 let popData = null;        // population.json (Statistik Austria)
 let gwkCtx = null;         // gwk_context.json (Wasserschatz per GW body)
 let gwkLayer = null;       // GW-body boundary overlay (lazy)
+let glacierLayer = null;   // glacier-fed river corridor overlay (lazy)
+let glacierIceLayer = null;// the glaciers themselves
+let glacierCtx = null;     // glacier_context.json (lazy; false = failed)
 let chart = null;          // active Chart.js instance
 let popChart = null;       // population trend chart in KG modal
 let currentShare = {};     // extra params beyond view
@@ -102,6 +105,7 @@ async function boot() {
         zoomSnap: 0.5, attributionControl: true,
     });
     map.zoomControl.setPosition('bottomleft');
+    map.on('zoomend', resizeIce);
     // Dedicated panes so station dots always render above choropleth + GWK polygons.
     map.createPane('gwkfill');  map.getPane('gwkfill').style.zIndex = 410;
     map.createPane('stations'); map.getPane('stations').style.zIndex = 620;
@@ -121,6 +125,7 @@ async function boot() {
     popData = await fetch('data/population.json').then(r => r.json()).catch(() => null);
     gaugesSlim = await fetch('data/gauges_slim.json').then(r => r.json()).catch(() => null);
     gwkCtx = await fetch('data/gwk_context.json').then(r => r.json()).catch(() => null);
+    ensureGlacierCtx();   // glaciers + snow: background, KG modal degrades gracefully
     plantInfl = pinf;
     gwiKG = gwi.kgs; gwiMeta = gwi; kgReg = reg;
     kgRegList = Object.entries(reg);
@@ -320,6 +325,69 @@ function buildStationLayers() {
     });
     // append updateURL to gwk toggle too
     $('tg-gwk').addEventListener('change', updateURL);
+
+    $('tg-glacier').addEventListener('change', async e => {
+        $('leg-glacier').style.display = e.target.checked ? '' : 'none';
+        if (!e.target.checked) {
+            if (glacierLayer) map.removeLayer(glacierLayer);
+            if (glacierIceLayer) map.removeLayer(glacierIceLayer);
+            updateURL(); return;
+        }
+        if (!glacierLayer) {
+            const gj = await fetch('data/glacier_corridor.geojson').then(r => r.json()).catch(() => null);
+            if (!gj) return;
+            glacierLayer = L.geoJSON(gj, {
+                pane: 'gwkfill',
+                style: f => ({ color: MELT_COL[f.properties.cls] || '#5ac8f5',
+                               weight: MELT_W[f.properties.cls] || 1.2,
+                               opacity: 0.9, fill: false, lineCap: 'round' }),
+                onEachFeature: (f, ly) => {
+                    ly.bindTooltip(`glacier-fed river · ${f.properties.cls} mio m³/a net ice loss upstream`, { sticky: true });
+                    ly.on('click', ev => openKGAt(ev.latlng.lat, ev.latlng.lng));
+                },
+            });
+            await ensureGlacierCtx();
+            const gl = (glacierCtx && glacierCtx.glaciers) || {};
+            glacierIceLayer = L.layerGroup(Object.entries(gl).map(([id, g]) =>
+                L.circleMarker([g.lat, g.lon], {
+                    pane: 'stations',
+                    radius: iceR(g.area_km2),
+                    color: '#ffffff', weight: 0.8, fillColor: '#fff8e1', fillOpacity: 0.9,
+                }).bindTooltip(`<b>${esc(g.name || id)}</b><br>${g.area_km2.toFixed(2)} km² ice · ` +
+                    `${(g.melt_m3a_recent / 1e6).toFixed(2)} mio m³/a net loss (2014–19)` +
+                    (g.melt_m3a_recent_est ? ' <i>(area-scaled est.)</i>' : '') +
+                    `<br>${g.zmin}–${g.zmed} m a.s.l.`)));
+        }
+        glacierLayer.addTo(map);
+        if (glacierIceLayer) glacierIceLayer.addTo(map);
+        resizeIce();
+        hintChips($('leg-glacier'));
+        updateURL();
+    });
+}
+
+// Colour = how much ice is melting upstream; width = the same, so the trunk
+// rivers that carry the melt read as trunks at a glance.
+const MELT_COL = { '<5': '#2e7fb8', '5-20': '#3fa8de', '20-50': '#57c8f0',
+                   '50-100': '#8fdcf7', '>100': '#c4ecfb' };
+const MELT_W = { '<5': 0.8, '5-20': 1.3, '20-50': 2, '50-100': 2.8, '>100': 3.6 };
+// Ice dots: area-proportional but zoom-damped, so the map reads as rivers at
+// national zoom and as individual glaciers when you go in.
+function iceR(km2, z) {
+    z = z != null ? z : (map ? map.getZoom() : 8);
+    const k = Math.max(0.35, Math.min(1.5, (z - 6) / 5));
+    return Math.max(1.2, Math.min(14, Math.sqrt(km2) * 2.6 * k));
+}
+function resizeIce() {
+    if (!glacierIceLayer || !map.hasLayer(glacierIceLayer)) return;
+    const gl = (glacierCtx && glacierCtx.glaciers) || {};
+    const ids = Object.keys(gl); let i = 0;
+    glacierIceLayer.eachLayer(ly => { const g = gl[ids[i++]]; if (g) ly.setRadius(iceR(g.area_km2)); });
+}
+async function ensureGlacierCtx() {
+    if (glacierCtx === null)
+        glacierCtx = await fetch('data/glacier_context.json').then(r => r.json()).catch(() => false);
+    return glacierCtx || null;
 }
 
 // ---------- nitrate aquifer heat layer ----------
@@ -913,6 +981,100 @@ function renderPopChart(gem) {
     });
 }
 
+// ---------- glaciers & the snow reservoir ----------
+// Ice is small in volume but it arrives exactly when nothing else does (late
+// summer). Snow (SNOWGRID 1 Apr SWE) is the far bigger seasonal store and it
+// is shrinking ~18%/decade at the median KG — so we show both, side by side.
+function glacierHTML(code) {
+    const g = glacierCtx && glacierCtx.kg && glacierCtx.kg[code];
+    if (!g) return '';
+    const hasIce = g.melt_mio_m3a > 0 && (g.corridor_share != null || g.dist_km != null);
+    const hasSnow = (g.snow_apr_mm || 0) >= 5 || (g.snow_apr_mm_6190 || 0) >= 10;
+    if (!hasIce && !hasSnow) return '';
+    const sn = snowSeries(code);
+    const traj = g.ice_traj && glacierCtx.ice_traj ? glacierCtx.ice_traj[g.ice_traj] : null;
+    const trendCol = v => v == null ? '#7a8ac0' : v < -15 ? '#e05252' : v < -5 ? '#e88a48' : '#7ec8e0';
+    let kv = '';
+    if (hasIce) {
+        kv += `<div class="kv" title="Net ice volume lost per year by the glaciers upstream of this KG's river reach (ASTER dh/dt 2014–19, Hugonnet et al. 2021 via WGMS). This is the part of river flow that is one-off storage release — it stops when the ice is gone."><div class="k">Ice loss upstream</div><div class="v" style="color:#9fe6ff">${g.melt_mio_m3a.toFixed(1)} Mm³/yr</div></div>`;
+        kv += `<div class="kv" title="Remaining glacier area upstream (RGI 6.0 outlines)"><div class="k">Ice upstream</div><div class="v">${g.ice_km2.toFixed(1)} km²</div></div>`;
+        if (g.dist_km != null)
+            kv += `<div class="kv" title="River distance along the OSM waterway network from the nearest ice to this KG"><div class="k">River km from ice</div><div class="v">${g.dist_km.toFixed(0)} km</div></div>`;
+        if (g.corridor_share != null)
+            kv += `<div class="kv" title="Share of this KG's area within 2 km of a glacier-fed river reach — the width over which an alpine valley aquifer typically exchanges water with its river"><div class="k">In glacier-fed corridor</div><div class="v">${Math.round(g.corridor_share * 100)}%</div></div>`;
+        if (g.depletion_years != null)
+            kv += `<div class="kv" title="Remaining ice volume upstream (volume-area scaling, Bahr et al. 1997) divided by today's loss rate. A lower bound on the horizon — real melt slows as the ice shrinks, see the curve below."><div class="k">Ice at today’s rate</div><div class="v" style="color:${g.depletion_years < 40 ? '#e88a48' : '#7ec8e0'}">${Math.round(g.depletion_years)} yr</div></div>`;
+    }
+    if (hasSnow) {
+        kv += `<div class="kv" title="Snow water equivalent on 1 April at this KG's centroid, mean of the last 10 years (SNOWGRID-CL, GeoSphere Austria, 1 km). 1 April is the usual peak of the seasonal snow store that feeds spring recharge."><div class="k">Snow store 1 Apr</div><div class="v">${Math.round(g.snow_apr_mm)} mm w.e.</div></div>`;
+        if (g.snow_apr_mm_6190 != null)
+            kv += `<div class="kv" title="Compared to the 1961–1990 mean of ${Math.round(g.snow_apr_mm_6190)} mm"><div class="k">vs 1961–90</div><div class="v" style="color:${trendCol(g.snow_apr_pct_decade)}">${g.snow_apr_mm_6190 > 5 ? (g.snow_apr_mm / g.snow_apr_mm_6190 * 100 - 100).toFixed(0) + '%' : '–'}</div></div>`;
+        if (g.snow_apr_pct_decade != null)
+            kv += `<div class="kv" title="Linear trend of 1 April SWE, % of the 1961–90 baseline per decade"><div class="k">Snow trend</div><div class="v" style="color:${trendCol(g.snow_apr_pct_decade)}">${g.snow_apr_pct_decade.toFixed(0)}%/dec</div></div>`;
+    }
+    return `<h3>The watering can above <small style="color:#6a7194;font-weight:400">${hasIce ? 'glacier-fed' : 'snow-fed'}</small></h3>
+        <div class="kv-grid">${kv}</div>
+        ${traj ? `<div class="glacier-spark" style="margin-top:8px">${sparkSVG(traj.hist, '#9fe6ff', { proj: { proj: traj.melt.filter(p => p[0] > 2019) }, h: 44 })}
+            <div style="font-size:9px;color:#6a7194;margin-top:3px">Melt water from the ice upstream, Mm³/yr — solid: observed
+            (ASTER loss rate shaped by the WGMS Austrian mass-balance record), dashed: depletion projection.
+            ${traj.year_half_melt ? `Half of today’s melt gone by <b>${traj.year_half_melt}</b>.` : ''}
+            ${traj.year_gone ? ` Ice effectively gone by <b>${traj.year_gone}</b>.` : ''}</div></div>` : ''}
+        ${sn && hasSnow ? `<div class="glacier-spark" style="margin-top:8px">${sparkSVG(sn.apr, '#7ec8e0', { proj: sn.aprProj, h: 40 })}
+            <div style="font-size:9px;color:#6a7194;margin-top:2px">1 Apr snow water equivalent ${sn.y0}–${sn.y1}, dashed = trend of the last 40 yr extended to 2050 · peak ${Math.round(sn.max)} mm, now ${Math.round(g.snow_apr_mm)} mm${sn.aprProj && sn.aprProj.proj_2050 != null ? `, ~${Math.round(sn.aprProj.proj_2050)} mm in 2050` : ''}${sn.aprProj && sn.aprProj.year_half ? ` · half of the 1961–90 store by <b>${sn.aprProj.year_half}</b>` : ''}</div></div>` : ''}
+        ${sn && hasSnow && sn.jul && sn.julmax > 5 ? `<div class="glacier-spark" style="margin-top:6px">${sparkSVG(sn.jul, '#f5cf6b', { proj: sn.julProj, h: 40 })}
+            <div style="font-size:9px;color:#6a7194;margin-top:2px">1 Jul residual snow — the high-alpine buffer that carries rivers into late summer${g.snow_jul_pct_decade != null ? ` · ${g.snow_jul_pct_decade.toFixed(0)}%/decade` : ''}${sn.julProj && sn.julProj.year_10pct ? ` · near-zero by <b>${sn.julProj.year_10pct}</b>` : ''}</div></div>` : ''}
+        <div class="note">${hasIce ? 'Glaciers are a one-way store: the ' + g.melt_mio_m3a.toFixed(1) + ' Mm³/yr of net ice loss upstream is currently <i>added</i> to river flow and to this valley’s aquifer recharge, and it disappears with the ice. ' : ''}Snow is the bigger and faster-changing store. Projections are simple extrapolations, not climate-model runs.
+        Sources: WGMS FoG 2026-02 / ASTER dh/dt, RGI 6.0, GeoSphere SNOWGRID-CL v2.
+        <a href="#" onclick="showMethods();return false;">Details</a></div>`;
+}
+function snowSeries(code) {
+    const s = glacierCtx && glacierCtx.snow && glacierCtx.snow[code];
+    if (!s || !s.apr || s.apr.length < 10) return null;
+    const apr = s.apr, jul = s.jul || null;
+    return { apr, jul, aprProj: s.apr_proj || null, julProj: s.jul_proj || null,
+             y0: apr[0][0], y1: apr[apr.length - 1][0],
+             max: Math.max(...apr.map(p => p[1])),
+             julmax: jul ? Math.max(...jul.map(p => p[1])) : 0 };
+}
+// Tiny inline sparkline: observed area + 10-yr running mean + dashed
+// projection to 2050 (linear fit on the last 40 years, floored at zero).
+function sparkSVG(ser, col, opts = {}) {
+    if (!ser || ser.length < 3) return '';
+    const w = opts.w || 300, h = opts.h || 38, pj = opts.proj || null;
+    const all = pj && pj.proj ? ser.concat(pj.proj) : ser;
+    const xs = all.map(p => p[0]), ys = all.map(p => p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), ymax = Math.max(1, Math.max(...ys));
+    const py = y => h - 1 - (y / ymax) * (h - 3);
+    const px = x => ((x - x0) / Math.max(1, x1 - x0)) * (w - 2) + 1;
+    const pts = ser.map(p => `${px(p[0]).toFixed(1)},${py(p[1]).toFixed(1)}`).join(' ');
+    const rm = [];
+    for (let i = 0; i < ser.length; i++) {
+        const a = Math.max(0, i - 4), b = Math.min(ser.length - 1, i + 5);
+        let s = 0; for (let j = a; j <= b; j++) s += ser[j][1];
+        rm.push(`${px(ser[i][0]).toFixed(1)},${py(s / (b - a + 1)).toFixed(1)}`);
+    }
+    let extra = '';
+    if (pj && pj.proj && pj.proj.length) {
+        const last = ser[ser.length - 1];
+        const prj = pj.proj.map(p => `${px(p[0]).toFixed(1)},${py(p[1]).toFixed(1)}`);
+        extra += `<polyline points="${px(last[0]).toFixed(1)},${py(pj.proj[0][1]).toFixed(1)} ${prj.join(' ')}" ` +
+                 `fill="none" stroke="${col}" stroke-width="1.6" stroke-dasharray="3 2.5" opacity="0.85"/>`;
+        extra += `<line x1="${px(last[0]).toFixed(1)}" y1="0" x2="${px(last[0]).toFixed(1)}" y2="${h - 1}" ` +
+                 `stroke="#3a3f55" stroke-width="0.7"/>`;
+    }
+    const nowX = pj && pj.proj && pj.proj.length ? (px(ser[ser.length - 1][0]) / w * 100) : null;
+    const axis = `<div style="position:relative;height:10px;font-size:8px;color:#6a7194">
+        <span style="position:absolute;left:0">${ser[0][0]}</span>
+        ${nowX != null ? `<span style="position:absolute;left:${nowX.toFixed(1)}%;transform:translateX(-50%)">${ser[ser.length - 1][0]}</span>` : ''}
+        <span style="position:absolute;right:0">${x1}</span></div>`;
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none" style="display:block">
+        <polygon points="1,${h - 1} ${pts} ${px(ser[ser.length - 1][0]).toFixed(1)},${h - 1}" fill="${col}" opacity="0.16"/>
+        <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="0.8" opacity="0.6"/>
+        <polyline points="${rm.join(' ')}" fill="none" stroke="${col}" stroke-width="1.8"/>
+        ${extra}
+    </svg>${axis}`;
+}
+
 function gemForKG(reg) {
     if (!reg) return null;
     if (muniByIso[reg.g]) return muniByIso[reg.g];
@@ -951,6 +1113,7 @@ function showKGModal(code, opts = {}) {
         </div>
         ${popHTML(gem)}
         ${gwkHTML(code)}
+        ${glacierHTML(code)}
         ${edoBarsHTML(gem)}
         ${hydroImpactHTML(hydroLinksForKG(code), true)}
         ${lat != null ? stationListHTML(lat, lon, 12.5) : ''}
@@ -1401,6 +1564,7 @@ function updateURL() {
     if ($('tg-gw').checked) ly.push('gw');
     if ($('tg-no3').checked) ly.push('no3');
     if ($('tg-gwk').checked) ly.push('gwk');
+    if ($('tg-glacier').checked) ly.push('ice');
     if (ly.join(',') !== 'gw') p.set('ly', ly.join(',') || 'none');
     // legend filters — encode hidden classes only
     const hc = Object.keys(filt.cat).filter(k => !filt.cat[k]);
@@ -1428,7 +1592,8 @@ function restoreFromURL() {
     // layer toggles
     if (p.get('ly') != null) {
         const ly = p.get('ly') === 'none' ? [] : p.get('ly').split(',');
-        for (const [param, id] of [['gw', 'tg-gw'], ['no3', 'tg-no3'], ['gwk', 'tg-gwk']]) {
+        for (const [param, id] of [['gw', 'tg-gw'], ['no3', 'tg-no3'], ['gwk', 'tg-gwk'],
+                                   ['ice', 'tg-glacier']]) {
             const want = ly.includes(param), el = $(id);
             if (el.checked !== want) { el.checked = want; el.dispatchEvent(new Event('change')); }
         }
@@ -1507,6 +1672,56 @@ function showMethods() {
     This is correlation with controls, <b>not proven causation</b>, which is why it is displayed but never
     folded into the index.</p>
 
+    <h3>Glaciers &amp; snow — the watering cans (informational, not in the GWI)</h3>
+    <p>Austria's <b>735 remaining glaciers</b> (RGI 6.0 outlines, ~348 km², centroid inside Austria) are tiny in
+    area but they release water exactly when nothing else does: in the hot, dry late summer that drought years are
+    made of. We quantify the part of river flow that is <i>net ice loss</i> — one-off storage release rather than
+    renewable recharge:</p>
+    <ul>
+        <li><b>How much ice is melting</b> — per-glacier volume change from ASTER DEM differencing
+            (Hugonnet et al. 2021, distributed in the WGMS <i>Fluctuations of Glaciers</i> 2026-02 database):
+            <b>363 Mm³/yr</b> of net loss in 2014–19, up from 308 Mm³/yr over 1999–2019. That is ≈32% of
+            Austria's <i>entire</i> annual groundwater abstraction, arriving as river water. Glaciers without
+            ASTER coverage (90 of 735, all small) are filled with the area-scaled mean loss rate.
+            In-situ mass balance (WGMS, 21 Austrian glaciers, 1946–2025) gives the same picture:
+            −0.52 m w.e./yr in the 1980s → <b>−1.78 m w.e./yr for 2021–25</b>.</li>
+        <li><b>Where the water goes</b> — we walk the directed OSM waterway network <i>downstream</i> from every
+            glacier outline (multi-source Dijkstra with SCC-collapsed mask propagation, so every reach knows the
+            exact set of glaciers upstream of it). Result: <b>glacier-fed reaches</b> shown as the “Glacier melt”
+            map layer, coloured by upstream ice loss.</li>
+        <li><b>Who sits on it</b> — those reaches are buffered by <b>2 km</b> (the width over which an Alpine
+            valley aquifer typically exchanges water with its river) and intersected with municipal and KG
+            geometry: <b>633 Gemeinden and 1,482 KGs lie in the glacier-fed corridor</b>. KG overlap uses the
+            registry bounding box as a polygon proxy, so shares are indicative.</li>
+        <li><b>The seasonal snow store</b> — SNOWGRID-CL v2 (GeoSphere Austria, 1 km) snow water equivalent on
+            1 April (peak accumulation) and 1 July (the high-alpine residual that carries rivers into late
+            summer), 1961–2026, sampled at every KG centroid and station. The median KG has lost
+            <b>≈18% of its 1 April snow store per decade</b>; the national mean at KG centroids fell from
+            27 mm (1961–90) to 9 mm (2011–26). Snow is 10–100× the annual glacier contribution and it is
+            vanishing faster.</li>
+    </ul>
+    <p><b>Projections in the sparklines are deliberately simple, not climate-model output.</b> Snow: a linear fit
+    over the last 40 years, floored at zero, extended to 2050 (dashed), plus the year the store would reach 50% /
+    10% of its 1961–90 baseline. Ice: remaining volume from volume–area scaling (V = 0.0347·A<sup>1.375</sup>,
+    Bahr et al. 1997) depleted year by year with melt scaling as the remaining area — which reproduces the
+    literature's “peak water then collapse” shape. Read them as orders of magnitude and directions, not forecasts.</p>
+    <p>What the data say about groundwater (<code>scripts/analyze_glacier_gw.py</code>):</p>
+    <ul>
+        <li>The 1,244 groundwater stations inside the glacier-fed corridor have level trends <b>+0.068 m/decade
+            above</b> their 15 nearest non-corridor neighbours (median; permutation p &lt; 0.001), and a
+            +0.11 m positive precipitation-divergence excess — i.e. they hold up better than rainfall alone
+            explains. A <b>melt subsidy</b>, not resilience.</li>
+        <li>Glacier-fed river gauges are still <i>gaining</i> flow: median trend <b>+2.3%/decade</b> where ice
+            covers ≥10% of the catchment, versus <b>−2.0%/decade</b> at ice-free gauges
+            (r = +0.18 between ice share and flow trend). Melt is masking drought in exactly the catchments
+            whose masking has an expiry date.</li>
+        <li>Snow decline and groundwater decline move together (r = +0.20 between 1 April SWE trend and level
+            trend across 816 stations) — weaker, as expected for a signal routed through soil and rock.</li>
+    </ul>
+    <p>None of this is folded into the GWI: it is an <i>upstream, non-renewable</i> input to the same aquifers,
+    on a different clock than abstraction or nitrate. It belongs beside the index, as a warning about how much of
+    today's “good” status is borrowed from ice.</p>
+
     <h3>Data sources</h3>
     <ul>
         <li><b>eHYD (BML)</b> — groundwater levels, annual means, most 1966–2022.</li>
@@ -1518,7 +1733,13 @@ function showMethods() {
         <li><b>Statistik Austria OGD</b> — KG/Gemeinde registry &amp; boundaries (CC-BY-4.0) and population
             2002–2026 behind the “people on this water” section.</li>
         <li><b>ENTSO-E Transparency</b> — hydro generation behind the hydropower section.</li>
-        <li><b>OSM/Geofabrik</b> — directed waterway network for plant→well matching.</li>
+        <li><b>OSM/Geofabrik</b> — directed waterway network for plant→well and glacier→valley matching.</li>
+        <li><b>WGMS Fluctuations of Glaciers 2026-02</b> (doi:10.5904/wgms-fog-2026-02) — Austrian mass balance
+            1946–2025, front variations since 1803, and the ASTER dh/dt volume changes of Hugonnet et al. 2021.</li>
+        <li><b>Randolph Glacier Inventory 6.0</b>, region 11 Central Europe — glacier outlines, area, elevation.</li>
+        <li><b>GeoSphere Austria SNOWGRID-CL v2</b> — 1 km daily snow water equivalent 1961–2026 (data.hub API).</li>
+        <li><b>INSPIRE Austria</b> (inspire-austria.exe.xyz) — dataset discovery; BEV ALS 1 m DTM/DSM tiles
+            available there for future high-resolution work on the glacier corridors.</li>
     </ul>
 
     <h3>Honest limitations</h3>
@@ -1530,6 +1751,10 @@ function showMethods() {
         <li>WFD status is per water body; its Gemeinde attribution is approximate.</li>
         <li>Values below the limit of quantification count as LOQ/2 — very clean stations may be slightly
             overstated.</li>
+        <li><b>Glacier attribution is network-based, not hydrogeological</b> — being 2 km from a glacier-fed river
+            does not prove the well is fed by melt water; and the corridor share uses KG bounding boxes. Gauge
+            assignments whose upstream ice exceeds their own catchment, or whose catchment is implausibly small
+            for the river distance, are dropped (16 of 126).</li>
         <li>Trend windows differ per station (most level records end 2020–2022; nitrate runs to 2024).</li>
         <li>The Gemeinde colour is the mean over its KGs — tap the map for KG-level values.</li>
     </ul>

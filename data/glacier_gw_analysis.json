@@ -1,0 +1,43 @@
+{
+ "t1_n": 1244,
+ "t1_median_excess_m_dec": 0.0678,
+ "t1_mean_excess_m_dec": 0.0631,
+ "t1_perm_p": 0.0,
+ "t1_div_n": 1194,
+ "t1_median_div_excess": 0.11,
+ "t1_median_trend_strong_melt": -0.0915,
+ "t1_median_trend_weak_melt": -0.1092,
+ "t1_n_strong": 516,
+ "t1_n_weak": 728,
+ "t1_strata": {
+  "0-25km": {
+   "n": 109,
+   "median_excess_m_dec": 0.0833
+  },
+  "25-75km": {
+   "n": 481,
+   "median_excess_m_dec": 0.0217
+  },
+  "75-150km": {
+   "n": 165,
+   "median_excess_m_dec": 0.0517
+  },
+  "150-infkm": {
+   "n": 489,
+   "median_excess_m_dec": 0.1124
+  }
+ },
+ "t2_n": 114,
+ "t2_r_icepct_flowtrend": 0.182,
+ "t2_slope_pct_dec_per_icepct": 0.085,
+ "t2_median_trend_ice_ge10pct": 2.3,
+ "t2_n_ice_ge10pct": 27,
+ "t2_median_trend_ice_lt2pct": 0.2,
+ "t2_median_trend_ice_free": -2.0,
+ "t3_n": 816,
+ "t3_r_snowtrend_gwtrend": 0.199,
+ "snow_national": {
+  "median_apr_pct_decade": -18.3,
+  "n_kg": 3190
+ }
+}
