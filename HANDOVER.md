@@ -1,5 +1,36 @@
 # GW Power — rebuild COMPLETE (2026-07-14)
 
+Real catchments (2026-08-05, DONE): the glacier/snow attribution now has a
+second, independent routing built on MERIT-Hydro basins instead of the OSM
+waterway snap. See the commit message of 3861810 for the full story; short form:
+- data/watersheds/*.json (640 gauges) + data/flowpaths/*.json (735 glaciers)
+  fetched from mghydro.com/watersheds at ~1 req/s (gitignored, a couple of
+  hours to regenerate). Endpoint: GET mghydro.com/app/getwshed?task=watershed|
+  flowpath&lat=&lng=&source=merit&precision=high&simplify=true -> gzipped JSON.
+- Catchments validated against the official eHYD catchment size (median 0.1%,
+  85% within 10%); 96 mis-snaps re-probed by fix_missnapped_watersheds.py, 22
+  repaired, 60 stay flagged 'missnap' and are excluded everywhere.
+- Re-run order for this branch of the pipeline: fetch_watersheds.py ->
+  fix_missnapped_watersheds.py -> build_watershed_context.py; separately
+  fetch_glacier_flowpaths.py -> build_merit_glacier_reaches.py; then
+  analyze_watershed_cryosphere.py and restart drought-map.
+- Key numbers now in Methods/README/llm.txt: 1 Apr snow store = median 7% of a
+  basin's annual flow (max 84%), median basin lost 61% of its 1961-90 store;
+  flow trends -2.2%/dec ice-free vs +2.1%/dec at ice>=5% (perm p<0.001); wells
+  in snow-rich basins -0.13 vs -0.23 m/dec rain-fed (perm p<0.001); 4.0 km3 of
+  1 Apr store already lost = ~9x annual net ice loss.
+- Gotchas found the hard way: (a) mghydro's flowpath response is UNORDERED and
+  linestring direction is mixed, so distance-from-ice must be Dijkstra over the
+  reach graph; (b) SNOWGRID's rectangular grid is no-data outside Austria, so
+  zonal means must mask on a reference grid and volumes must use the valid cell
+  count -- otherwise foreign-headwater basins (Danube, Rhine, upper Inn) get
+  absurd snow-vs-flow ratios; (c) json.dump writes NaN, which browsers reject:
+  build_watershed_context.py cleans with allow_nan=False.
+- Possible next: karst check for the 60 excluded gauges (the Altaussee/Traun
+  ones are genuine karst, not a snap error); MERIT-Basins comid join to give
+  every gauge its own upstream reach set; INSPIRE-Austria BEV ALS 1 m DTM for
+  valley-floor aquifer widths instead of the fixed 2 km corridor.
+
 Live: https://groundwater-at.exe.xyz:8000 (systemd `drought-map`).
 The rebuild described in earlier revisions of this file is finished:
 
