@@ -56,6 +56,9 @@ let gwkLayer = null;       // GW-body boundary overlay (lazy)
 let glacierLayer = null;   // glacier-fed river corridor overlay (lazy)
 let glacierIceLayer = null;// the glaciers themselves
 let glacierCtx = null;     // glacier_context.json (lazy; false = failed)
+let wsCtx = null;          // watershed_context.json (real MERIT catchments; lazy)
+let meritKG = null;        // merit_reach_kg.json (nearest glacier-fed MERIT reach)
+let basinLayer = null;     // glacier-fed catchment polygons (lazy)
 let chart = null;          // active Chart.js instance
 let popChart = null;       // population trend chart in KG modal
 let currentShare = {};     // extra params beyond view
@@ -126,6 +129,7 @@ async function boot() {
     gaugesSlim = await fetch('data/gauges_slim.json').then(r => r.json()).catch(() => null);
     gwkCtx = await fetch('data/gwk_context.json').then(r => r.json()).catch(() => null);
     ensureGlacierCtx();   // glaciers + snow: background, KG modal degrades gracefully
+    ensureWsCtx();        // real MERIT catchments: same, lazy & failure-tolerant
     plantInfl = pinf;
     gwiKG = gwi.kgs; gwiMeta = gwi; kgReg = reg;
     kgRegList = Object.entries(reg);
@@ -331,10 +335,16 @@ function buildStationLayers() {
         if (!e.target.checked) {
             if (glacierLayer) map.removeLayer(glacierLayer);
             if (glacierIceLayer) map.removeLayer(glacierIceLayer);
+            if (basinLayer) map.removeLayer(basinLayer);
             updateURL(); return;
         }
         if (!glacierLayer) {
-            const gj = await fetch('data/glacier_corridor.geojson').then(r => r.json()).catch(() => null);
+            await ensureWsCtx();
+            // MERIT-Basins flow paths: topologically connected by construction,
+            // so no OSM direction/tagging gaps. Falls back to the old
+            // OSM-derived corridor if the new file is missing.
+            const gj = await fetch('data/merit_reaches.geojson').then(r => r.json())
+                .catch(() => fetch('data/glacier_corridor.geojson').then(r => r.json()).catch(() => null));
             if (!gj) return;
             glacierLayer = L.geoJSON(gj, {
                 pane: 'gwkfill',
@@ -342,7 +352,8 @@ function buildStationLayers() {
                                weight: MELT_W[f.properties.cls] || 1.2,
                                opacity: 0.9, fill: false, lineCap: 'round' }),
                 onEachFeature: (f, ly) => {
-                    ly.bindTooltip(`glacier-fed river · ${f.properties.cls} mio m³/a net ice loss upstream`, { sticky: true });
+                    ly.bindTooltip(`glacier-fed river · ${f.properties.cls} mio m³/a net ice loss upstream` +
+                        (f.properties.km ? ` · ${f.properties.km} km of river in this class` : ''), { sticky: true });
                     ly.on('click', ev => openKGAt(ev.latlng.lat, ev.latlng.lng));
                 },
             });
@@ -360,6 +371,25 @@ function buildStationLayers() {
         }
         glacierLayer.addTo(map);
         if (glacierIceLayer) glacierIceLayer.addTo(map);
+        if (basinLayer === null) {
+            // the actual contributing areas of the glacier-fed gauges
+            const bj = await fetch('data/catchments.geojson').then(r => r.json()).catch(() => null);
+            basinLayer = bj ? L.geoJSON(bj, {
+                pane: 'gwkfill',
+                style: f => ({ color: '#9fe6ff', weight: 0.7, opacity: 0.55,
+                               fillColor: '#9fe6ff',
+                               fillOpacity: Math.min(0.22, 0.03 + (f.properties.ice_pct || 0) / 60) }),
+                onEachFeature: (f, ly) => {
+                    const p = f.properties;
+                    ly.bindTooltip(`<b>${esc(p.river || '')} @ ${esc(p.name || p.hzb)}</b><br>` +
+                        `catchment ${Math.round(p.km2).toLocaleString('de-AT')} km² · ` +
+                        `${(p.ice_pct || 0).toFixed(2)}% ice · ${(p.melt_mio_m3a || 0).toFixed(1)} Mm³/a net ice loss`,
+                        { sticky: true });
+                    ly.on('click', ev => openKGAt(ev.latlng.lat, ev.latlng.lng));
+                },
+            }) : false;
+        }
+        if (basinLayer) basinLayer.addTo(map);
         resizeIce();
         hintChips($('leg-glacier'));
         updateURL();
@@ -388,6 +418,16 @@ async function ensureGlacierCtx() {
     if (glacierCtx === null)
         glacierCtx = await fetch('data/glacier_context.json').then(r => r.json()).catch(() => false);
     return glacierCtx || null;
+}
+// Real upstream catchments (MERIT-Hydro via mghydro.com), validated against the
+// official eHYD catchment sizes. This is the honest basin: a polygon, not a
+// snap onto the nearest waterway line.
+async function ensureWsCtx() {
+    if (wsCtx === null)
+        wsCtx = await fetch('data/watershed_context.json').then(r => r.json()).catch(() => false);
+    if (meritKG === null)
+        meritKG = await fetch('data/merit_reach_kg.json').then(r => r.json()).catch(() => false);
+    return wsCtx || null;
 }
 
 // ---------- nitrate aquifer heat layer ----------
@@ -981,6 +1021,51 @@ function renderPopChart(gem) {
     });
 }
 
+// ---------- the real catchment above you (MERIT-Hydro basins) ----------
+// The old attribution asked "is there ice somewhere upstream along the OSM
+// waterway graph". This asks the hydrologically correct question: what is the
+// area that actually drains past this KG's gauge, how much of it is ice, and
+// how much water is sitting in its snowpack on 1 April compared with a whole
+// year of river flow.
+function basinHTML(code) {
+    const k = wsCtx && wsCtx.kg && wsCtx.kg[code];
+    if (!k) return '';
+    const g = wsCtx.gauges[k.hzb];
+    if (!g) return '';
+    const mr = meritKG && meritKG.kg ? meritKG.kg[code] : null;
+    const trendCol = v => v == null ? '#7a8ac0' : v < -15 ? '#e05252' : v < -5 ? '#e88a48' : '#7ec8e0';
+    const nf = n => Math.round(n).toLocaleString('de-AT');
+    let kv = '';
+    kv += `<div class="kv" title="The area that actually drains to this KG's river gauge, delineated from the MERIT-Hydro elevation model (mghydro.com) and cross-checked against the official eHYD catchment size${g.km2_err_pct != null ? ` — here within ${Math.abs(g.km2_err_pct).toFixed(1)}% of it` : ''}."><div class="k">Catchment above you</div><div class="v">${nf(g.km2)} km²</div></div>`;
+    kv += `<div class="kv" title="Gauge at the outlet of that catchment (eHYD ${esc(k.hzb)})"><div class="k">Measured at</div><div class="v" style="font-size:0.86em">${esc(g.river || '')} · ${esc(g.name || k.hzb)}</div></div>`;
+    if (g.flow_mio_m3a)
+        kv += `<div class="kv" title="Mean annual river flow past that gauge (eHYD long-term mean discharge)"><div class="k">River carries</div><div class="v">${nf(g.flow_mio_m3a)} Mm³/yr</div></div>`;
+    if (g.snow_store_mio_m3 != null) {
+        kv += `<div class="kv" title="Water stored as snow over this catchment on 1 April, mean of the last 10 years (SNOWGRID-CL v2, 1 km, summed over ${g.snow_px_km2} km² of grid cells inside the basin)"><div class="k">Snow on 1 Apr</div><div class="v" style="color:#7ec8e0">${nf(g.snow_store_mio_m3)} Mm³</div></div>`;
+        if (g.snow_pct_flow != null)
+            kv += `<div class="kv" title="That snowpack expressed as a share of one whole year of river flow — how much of the river's annual water is, on 1 April, still lying on the ground as snow"><div class="k">= of annual flow</div><div class="v" style="color:${g.snow_pct_flow >= 30 ? '#9fe6ff' : '#7ec8e0'}">${g.snow_pct_flow.toFixed(0)}%</div></div>`;
+        if (g.snow_store_6190_mio_m3)
+            kv += `<div class="kv" title="Compared with the 1961–1990 mean of ${nf(g.snow_store_6190_mio_m3)} Mm³ on 1 April"><div class="k">vs 1961–90</div><div class="v" style="color:${trendCol((g.snow_store_mio_m3 / g.snow_store_6190_mio_m3 - 1) * 100)}">${((g.snow_store_mio_m3 / g.snow_store_6190_mio_m3 - 1) * 100).toFixed(0)}%</div></div>`;
+    }
+    if (g.ice_km2 > 0) {
+        kv += `<div class="kv" title="Glacier area inside this catchment — real RGI 6.0 outlines intersected with the basin polygon, not a network guess"><div class="k">Ice in the basin</div><div class="v">${g.ice_km2.toFixed(2)} km² <small style="color:#6a7194;font-weight:400;font-size:0.72em">${g.ice_pct.toFixed(2)}%</small></div></div>`;
+        if (g.melt_pct_flow != null)
+            kv += `<div class="kv" title="Net ice loss inside the catchment (ASTER dh/dt 2014–19) as a share of annual river flow — the part of the river that is one-off storage release and stops when the ice is gone"><div class="k">Melt in the river</div><div class="v" style="color:${g.melt_pct_flow >= 5 ? '#e88a48' : '#9fe6ff'}">${g.melt_pct_flow.toFixed(1)}%</div></div>`;
+    } else if (mr) {
+        kv += `<div class="kv" title="No ice inside the gauged catchment above you, but the nearest river reach (${mr.dist_to_river_m} m away) does carry melt from ${mr.n_gl} glaciers ${mr.river_km_from_ice.toFixed(0)} river-km upstream (MERIT-Basins flow paths)"><div class="k">Melt passing by</div><div class="v" style="color:#9fe6ff">${mr.melt_mio_m3a.toFixed(0)} Mm³/yr</div></div>`;
+    }
+    if (g.trend_pct_decade != null)
+        kv += `<div class="kv" title="Observed trend of the annual mean discharge at that gauge"><div class="k">Flow trend</div><div class="v" style="color:${trendCol(g.trend_pct_decade * 3)}">${g.trend_pct_decade > 0 ? '+' : ''}${g.trend_pct_decade.toFixed(1)}%/dec</div></div>`;
+    const nested = k.n_nested > 1 ? ` This KG sits inside ${k.n_nested} nested gauged basins; the smallest one is shown.` : '';
+    const iceBasin = k.ice_basin ? ` The wider basin it drains into (${esc(k.ice_basin.river || '')} @ ${esc(k.ice_basin.name)}, ${nf(k.ice_basin.km2)} km²) is ${k.ice_basin.ice_pct.toFixed(2)}% ice.` : '';
+    return `<h3>Your river’s catchment <small style="color:#6a7194;font-weight:400">real basin, MERIT-Hydro</small></h3>
+        <div class="kv-grid">${kv}</div>
+        <div class="note">Delineated from the MERIT-Hydro DEM via <a href="https://mghydro.com/watersheds/" target="_blank" rel="noopener">mghydro.com</a>
+        and verified against the official eHYD catchment size (median agreement 0.1%; ${'' + (wsCtx.validation ? wsCtx.validation.within_10pct : '85')}% within 10%).
+        Ice and snow are intersected with this polygon, so no confluence mis-assignment.${nested}${iceBasin}
+        <a href="#" onclick="showMethods();return false;">Details</a></div>`;
+}
+
 // ---------- glaciers & the snow reservoir ----------
 // Ice is small in volume but it arrives exactly when nothing else does (late
 // summer). Snow (SNOWGRID 1 Apr SWE) is the far bigger seasonal store and it
@@ -998,8 +1083,11 @@ function glacierHTML(code) {
     if (hasIce) {
         kv += `<div class="kv" title="Net ice volume lost per year by the glaciers upstream of this KG's river reach (ASTER dh/dt 2014–19, Hugonnet et al. 2021 via WGMS). This is the part of river flow that is one-off storage release — it stops when the ice is gone."><div class="k">Ice loss upstream</div><div class="v" style="color:#9fe6ff">${g.melt_mio_m3a.toFixed(1)} Mm³/yr</div></div>`;
         kv += `<div class="kv" title="Remaining glacier area upstream (RGI 6.0 outlines)"><div class="k">Ice upstream</div><div class="v">${g.ice_km2.toFixed(1)} km²</div></div>`;
-        if (g.dist_km != null)
-            kv += `<div class="kv" title="River distance along the OSM waterway network from the nearest ice to this KG"><div class="k">River km from ice</div><div class="v">${g.dist_km.toFixed(0)} km</div></div>`;
+        if (g.dist_km != null) {
+            const mr = meritKG && meritKG.kg ? meritKG.kg[code] : null;
+            const d = mr ? mr.river_km_from_ice : g.dist_km;
+            kv += `<div class="kv" title="River distance from the nearest ice to the river reach beside this KG${mr ? ' (along MERIT-Basins flow paths, topologically connected by construction)' : ' (along the OSM waterway network)'}"><div class="k">River km from ice</div><div class="v">${d.toFixed(0)} km</div></div>`;
+        }
         if (g.corridor_share != null)
             kv += `<div class="kv" title="Share of this KG's area within 2 km of a glacier-fed river reach — the width over which an alpine valley aquifer typically exchanges water with its river"><div class="k">In glacier-fed corridor</div><div class="v">${Math.round(g.corridor_share * 100)}%</div></div>`;
         if (g.depletion_years != null)
@@ -1114,6 +1202,7 @@ function showKGModal(code, opts = {}) {
         ${popHTML(gem)}
         ${gwkHTML(code)}
         ${glacierHTML(code)}
+        ${basinHTML(code)}
         ${edoBarsHTML(gem)}
         ${hydroImpactHTML(hydroLinksForKG(code), true)}
         ${lat != null ? stationListHTML(lat, lon, 12.5) : ''}
@@ -1685,38 +1774,69 @@ function showMethods() {
             ASTER coverage (90 of 735, all small) are filled with the area-scaled mean loss rate.
             In-situ mass balance (WGMS, 21 Austrian glaciers, 1946–2025) gives the same picture:
             −0.52 m w.e./yr in the 1980s → <b>−1.78 m w.e./yr for 2021–25</b>.</li>
-        <li><b>Where the water goes</b> — we walk the directed OSM waterway network <i>downstream</i> from every
-            glacier outline (multi-source Dijkstra with SCC-collapsed mask propagation, so every reach knows the
-            exact set of glaciers upstream of it). Result: <b>glacier-fed reaches</b> shown as the “Glacier melt”
-            map layer, coloured by upstream ice loss.</li>
+        <li><b>Where the water goes</b> — two independent routings, both shown:
+            <br>(a) <b>real catchments</b> — for every one of the 640 eHYD river gauges we delineate the actual
+            upstream contributing area from the <b>MERIT-Hydro</b> elevation model (MERIT-Basins, served by
+            <a href="https://mghydro.com/watersheds/" target="_blank" rel="noopener">mghydro.com</a>, M. Heberger,
+            CC BY-NC-SA) and intersect RGI glacier outlines with that <i>polygon</i>. Every catchment is
+            cross-checked against the officially published eHYD catchment size: median agreement
+            <b>0.1%</b>, 85% within 10%. Catchments more than 25% off (small tributary gauges whose outlet
+            snapped onto the mainstem at a confluence) are re-probed on a grid of nearby outlets and, if still
+            off, <b>excluded</b> rather than used wrong (60 of 658 after re-probing).
+            <br>(b) <b>flow paths</b> — the downstream MERIT-Basins reach chain from each of the 735 glaciers
+            (485 reaches in/near Austria), which is what the “Glacier melt” map layer draws, coloured by
+            upstream ice loss, with the glacier-fed catchments shaded behind it. MERIT reaches are
+            topologically connected by construction, so unlike our earlier OSM waterway walk there are no
+            direction/tagging gaps — that walk is kept only for the 2 km valley corridor below.</li>
         <li><b>Who sits on it</b> — those reaches are buffered by <b>2 km</b> (the width over which an Alpine
             valley aquifer typically exchanges water with its river) and intersected with municipal and KG
             geometry: <b>633 Gemeinden and 1,482 KGs lie in the glacier-fed corridor</b>. KG overlap uses the
-            registry bounding box as a polygon proxy, so shares are indicative.</li>
+            registry bounding box as a polygon proxy, so shares are indicative. Independently, <b>7,627 of
+            7,850 KGs</b> are placed inside a verified gauged catchment, which is what the “Your river's
+            catchment” panel reports (smallest containing basin), and 1,842 KGs sit within 5 km of a
+            glacier-fed MERIT reach.</li>
         <li><b>The seasonal snow store</b> — SNOWGRID-CL v2 (GeoSphere Austria, 1 km) snow water equivalent on
             1 April (peak accumulation) and 1 July (the high-alpine residual that carries rivers into late
             summer), 1961–2026, sampled at every KG centroid and station. The median KG has lost
             <b>≈18% of its 1 April snow store per decade</b>; the national mean at KG centroids fell from
             27 mm (1961–90) to 9 mm (2011–26). Snow is 10–100× the annual glacier contribution and it is
-            vanishing faster.</li>
+            vanishing faster. With real catchments we can now express it as <i>volume</i>: summed over the 1 km
+            cells inside each basin, the 1 April snowpack holds a median <b>7% of a whole year of that river's
+            flow</b> (90th percentile 26%, up to <b>84%</b> in the Zemmbach headwater above the Schlegeis
+            reservoir) — and the median basin has lost <b>61%</b> of its 1961–90 store. Because SNOWGRID covers
+            Austria only, volumes use the sampled in-country cell count and the snow-vs-flow ratio is reported
+            only where ≥90% of the basin lies inside the grid (which excludes the Danube, Rhine and upper Inn
+            with their foreign headwaters).</li>
     </ul>
     <p><b>Projections in the sparklines are deliberately simple, not climate-model output.</b> Snow: a linear fit
     over the last 40 years, floored at zero, extended to 2050 (dashed), plus the year the store would reach 50% /
     10% of its 1961–90 baseline. Ice: remaining volume from volume–area scaling (V = 0.0347·A<sup>1.375</sup>,
     Bahr et al. 1997) depleted year by year with melt scaling as the remaining area — which reproduces the
     literature's “peak water then collapse” shape. Read them as orders of magnitude and directions, not forecasts.</p>
-    <p>What the data say about groundwater (<code>scripts/analyze_glacier_gw.py</code>):</p>
+    <p>What the data say about groundwater (<code>scripts/analyze_glacier_gw.py</code>,
+    <code>scripts/analyze_watershed_cryosphere.py</code>):</p>
     <ul>
         <li>The 1,244 groundwater stations inside the glacier-fed corridor have level trends <b>+0.068 m/decade
             above</b> their 15 nearest non-corridor neighbours (median; permutation p &lt; 0.001), and a
             +0.11 m positive precipitation-divergence excess — i.e. they hold up better than rainfall alone
             explains. A <b>melt subsidy</b>, not resilience.</li>
-        <li>Glacier-fed river gauges are still <i>gaining</i> flow: median trend <b>+2.3%/decade</b> where ice
-            covers ≥10% of the catchment, versus <b>−2.0%/decade</b> at ice-free gauges
-            (r = +0.18 between ice share and flow trend). Melt is masking drought in exactly the catchments
-            whose masking has an expiry date.</li>
+        <li>Repeated with real catchments (1,522 stations placed inside a verified basin whose snow store is
+            measurable): wells in <b>snow-rich basins</b> (1 April store ≥20% of annual flow) fall at
+            −0.13 m/decade versus <b>−0.23 m/decade in rain-fed basins</b> — a +0.102 m/decade difference,
+            permutation p &lt; 0.001, while their precipitation divergence is if anything slightly worse
+            (−0.58 vs −0.51 m). The mountains are still paying out.</li>
+        <li>Glacier-fed river gauges are still <i>gaining</i> flow: with polygon-based ice shares the median
+            trend is <b>+2.1%/decade where ice covers ≥5% of the catchment</b> and +0.5% at 1–5%, versus
+            <b>−2.2%/decade at ice-free gauges</b> (difference +3.0 pp, permutation p &lt; 0.001;
+            r = +0.27 between catchment snow trend and flow trend across 458 gauges). Melt is masking drought
+            in exactly the catchments whose masking has an expiry date: at the 26 gauges where net ice loss is
+            ≥5% of annual flow, the median depletion horizon is <b>≈45 years</b>.</li>
         <li>Snow decline and groundwater decline move together (r = +0.20 between 1 April SWE trend and level
             trend across 816 stations) — weaker, as expected for a signal routed through soil and rock.</li>
+        <li><b>Scale check.</b> Over 23 non-overlapping gauged basins (169,000 km² total, of which ~96,000 km²
+            inside the SNOWGRID domain) the 1 April snow store is ~<b>4.9 km³</b> today against <b>8.9 km³</b>
+            in 1961–90. The <b>4.0 km³ already lost</b> is about <b>9×</b> the entire annual net glacier ice
+            loss (0.46 km³/yr). Glaciers are the visible symbol; snow is the actual reservoir.</li>
     </ul>
     <p>None of this is folded into the GWI: it is an <i>upstream, non-renewable</i> input to the same aquifers,
     on a different clock than abstraction or nitrate. It belongs beside the index, as a warning about how much of
@@ -1734,6 +1854,11 @@ function showMethods() {
             2002–2026 behind the “people on this water” section.</li>
         <li><b>ENTSO-E Transparency</b> — hydro generation behind the hydropower section.</li>
         <li><b>OSM/Geofabrik</b> — directed waterway network for plant→well and glacier→valley matching.</li>
+        <li><b>MERIT-Hydro / MERIT-Basins</b> (Yamazaki et al.; Lin et al.) via
+            <a href="https://mghydro.com/watersheds/" target="_blank" rel="noopener">mghydro.com/watersheds</a>
+            (M. Heberger, <a href="https://github.com/mheberger/delineator" target="_blank" rel="noopener">delineator</a>,
+            CC BY-NC-SA) — on-demand catchment delineation and downstream flow paths behind “Your river's
+            catchment” and the glacier-fed reach layer. Non-commercial licence; used here for research.</li>
         <li><b>WGMS Fluctuations of Glaciers 2026-02</b> (doi:10.5904/wgms-fog-2026-02) — Austrian mass balance
             1946–2025, front variations since 1803, and the ASTER dh/dt volume changes of Hugonnet et al. 2021.</li>
         <li><b>Randolph Glacier Inventory 6.0</b>, region 11 Central Europe — glacier outlines, area, elevation.</li>
@@ -1755,6 +1880,16 @@ function showMethods() {
             does not prove the well is fed by melt water; and the corridor share uses KG bounding boxes. Gauge
             assignments whose upstream ice exceeds their own catchment, or whose catchment is implausibly small
             for the river distance, are dropped (16 of 126).</li>
+        <li><b>Catchments are modelled, not surveyed</b> — MERIT-Hydro is a 90 m DEM-derived network: it does not
+            know about karst (the Northern Limestone Alps route water underground across topographic divides),
+            canals, or inter-basin hydropower transfers, which is exactly why we reject any catchment that
+            disagrees with the official eHYD size by more than 25% (96 of 640 before re-probing). Where a gauge
+            is excluded, the “Your river's catchment” panel simply does not appear. Ice shares above 100% at
+            two tiny Salzach headwater gauges are a symptom of exactly this and are filtered out.</li>
+        <li><b>“Snow as % of annual flow” is a store/flux ratio, not a runoff share</b> — it says how much water
+            is lying on the ground on 1 April relative to a year of discharge, not that this fraction of the
+            river <i>comes from</i> snow (some sublimates, some recharges deep, some is counted in more than one
+            season). Treat it as a measure of how snow-dependent a basin is.</li>
         <li>Trend windows differ per station (most level records end 2020–2022; nitrate runs to 2024).</li>
         <li>The Gemeinde colour is the mean over its KGs — tap the map for KG-level values.</li>
     </ul>

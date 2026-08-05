@@ -43,3 +43,11 @@ data/glacier/*_hypso.csv
 data/glacier/rgi_at.gpkg
 data/glacier/glacier_reaches.geojson
 web/data/snow_reservoir.json
+
+# MERIT-Hydro catchments & glacier flow paths fetched from mghydro.com
+# (regenerate: scripts/fetch_watersheds.py, fix_missnapped_watersheds.py,
+#  fetch_glacier_flowpaths.py -- ~1 req/s, a couple of hours; CC BY-NC-SA source)
+data/watersheds/
+data/flowpaths/
+data/glacier/datapackage.json
+data/glacier/readme.pdf

@@ -272,6 +272,12 @@ def _load():
     # Glacier / snow context (WGMS FoG + ASTER dh/dt, RGI 6.0, SNOWGRID-CL).
     gl_path = os.path.join(DATA, "glacier_context.json")
     _state["glacier"] = json.load(open(gl_path)) if os.path.exists(gl_path) else None
+    # Real upstream catchments (MERIT-Hydro via mghydro.com) + the glacier-fed
+    # MERIT reach beside each KG. Validated against official eHYD catchment size.
+    ws_path = os.path.join(DATA, "watershed_context.json")
+    _state["ws"] = json.load(open(ws_path)) if os.path.exists(ws_path) else None
+    mr_path = os.path.join(DATA, "merit_reach_kg.json")
+    _state["merit_kg"] = json.load(open(mr_path)) if os.path.exists(mr_path) else None
     pop_path = os.path.join(DATA, "population.json")
     if os.path.exists(pop_path):
         _state["pop"] = json.load(open(pop_path))
@@ -455,11 +461,99 @@ def _payload_for_kg(kg_code):
     cryo = _cryosphere_block(kg_code)
     if cryo:
         payload["cryosphere"] = cryo
+    basin = _basin_block(kg_code)
+    if basin:
+        payload["catchment"] = basin
     popb = _population_block(gem_code)
     if popb:
         popb["per_year"] = None  # keep per-KG payloads small
         payload["population"] = {k: v for k, v in popb.items() if v is not None}
     return payload, 200
+
+
+def _basin_block(kg_code, series=False):
+    """The real upstream catchment of this KG's river, or None.
+
+    Delineated from the MERIT-Hydro DEM (MERIT-Basins) by mghydro.com and
+    validated against the officially published eHYD catchment size, so this is
+    the hydrologically correct contributing area rather than a snap onto the
+    nearest waterway line. Glacier outlines (RGI 6.0) and the SNOWGRID-CL snow
+    grid are intersected with the polygon.
+
+    Informational, NOT a GWI component -- like the cryosphere block it describes
+    upstream supply, not the state of the aquifer.
+    """
+    ws = _state.get("ws")
+    if not ws:
+        return None
+    k = (ws.get("kg") or {}).get(kg_code)
+    if not k:
+        return None
+    g = (ws.get("gauges") or {}).get(k["hzb"])
+    if not g:
+        return None
+    sn = g.get("snow") or {}
+    out = {
+        "in_gwi": False,
+        "source": ws.get("source"),
+        "method": ("MERIT-Hydro catchment delineation via mghydro.com "
+                   "(CC BY-NC-SA), cross-checked against the official eHYD "
+                   "catchment size; catchments off by >25% are excluded"),
+        "outlet_gauge": {
+            "hzb": k["hzb"], "name": g.get("name"), "river": g.get("river"),
+            "lat": g.get("lat"), "lon": g.get("lon"),
+        },
+        "area_km2": g.get("km2"),
+        "area_km2_official_ehyd": g.get("km2_ehyd"),
+        "area_agreement_pct": g.get("km2_err_pct"),
+        "quality": g.get("quality"),
+        "nested_gauged_basins_containing_this_kg": k.get("n_nested"),
+        "mean_annual_river_flow_mio_m3": g.get("flow_mio_m3a"),
+        "river_flow_trend_pct_per_decade": g.get("trend_pct_decade"),
+        "glacier": {
+            "ice_area_km2_in_catchment": g.get("ice_km2"),
+            "ice_share_of_catchment_pct": g.get("ice_pct"),
+            "n_glaciers": g.get("n_gl"),
+            "net_ice_loss_mio_m3_per_year": g.get("melt_mio_m3a"),
+            "net_ice_loss_share_of_annual_flow_pct": g.get("melt_pct_flow"),
+            "depletion_years_at_current_rate": g.get("depletion_years"),
+        },
+        "snow": {
+            "store_1apr_mio_m3_last10": g.get("snow_store_mio_m3"),
+            "store_1apr_mio_m3_1961_1990": g.get("snow_store_6190_mio_m3"),
+            "store_1apr_as_share_of_annual_flow_pct": g.get("snow_pct_flow"),
+            "swe_1apr_mm_last10": sn.get("apr_mean_last10"),
+            "swe_1apr_mm_1961_1990": sn.get("apr_mean_6190"),
+            "swe_1apr_trend_pct_per_decade": sn.get("apr_pct_dec"),
+            "swe_1jul_mm_last10": sn.get("jul_mean_last10"),
+            "swe_1jul_trend_pct_per_decade": sn.get("jul_pct_dec"),
+            "grid_coverage_of_catchment": g.get("snow_coverage"),
+            "grid_cells_km2": g.get("snow_px_km2"),
+            "note": ("SNOWGRID-CL v2 covers Austria only: volumes use the "
+                     "in-country cell count and the share-of-flow ratio is "
+                     "reported only when >=90% of the catchment is inside the "
+                     "grid. It is a store/flux ratio (how snow-dependent the "
+                     "basin is), not a runoff share."),
+        },
+    }
+    if k.get("ice_basin"):
+        out["wider_glacier_fed_basin"] = k["ice_basin"]
+    mk = (_state.get("merit_kg") or {}).get("kg", {}).get(kg_code)
+    if mk:
+        out["nearest_glacier_fed_river_reach"] = {
+            "comid": mk.get("comid"),
+            "distance_to_kg_centroid_m": mk.get("dist_to_river_m"),
+            "river_km_downstream_of_nearest_ice": mk.get("river_km_from_ice"),
+            "upstream_ice_area_km2": mk.get("ice_km2"),
+            "upstream_net_ice_loss_mio_m3_per_year": mk.get("melt_mio_m3a"),
+            "n_glaciers_upstream": mk.get("n_gl"),
+            "strahler_order": mk.get("sorder"),
+            "method": "MERIT-Basins downstream flow paths from every RGI 6.0 glacier",
+        }
+    if series:
+        out["snow"]["swe_1apr_per_year"] = sn.get("apr")
+        out["snow"]["swe_1jul_per_year"] = sn.get("jul")
+    return out
 
 
 def _gwk_block(kg_code):
@@ -743,6 +837,18 @@ def _payload_for_gemeinde(ident):
             if cryo:
                 cryo["representative_kg_code"] = best
                 payload["cryosphere"] = cryo
+        # Catchment: the largest verified basin any of the Gemeinde's KGs sits
+        # in (a Gemeinde usually drains to one river), with the full snow series.
+        ws = _state.get("ws")
+        if ws:
+            cand = [(((ws.get("kg") or {}).get(kg) or {}).get("km2") or 0, kg)
+                    for kg in kgs]
+            cand = [c for c in cand if c[0] > 0]
+            if cand:
+                basin = _basin_block(max(cand)[1], series=True)
+                if basin:
+                    basin["representative_kg_code"] = max(cand)[1]
+                    payload["catchment"] = basin
     return payload, 200
 
 

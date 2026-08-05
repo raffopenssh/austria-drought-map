@@ -170,3 +170,43 @@ water_quality_site.
   Statistik Austria), the shared source of truth — we maintain no private
   name/code table.
 - Version via as_of / updated_at, not by renaming keys.
+
+catchment (KG + Gemeinde payloads, informational, NOT a GWI component)
+  The real upstream contributing area of the river that drains the KG, from the
+  MERIT-Hydro DEM / MERIT-Basins, delineated on demand via mghydro.com
+  (M. Heberger, delineator, CC BY-NC-SA) for all 640 eHYD river gauges and
+  cross-checked against the officially published eHYD catchment size: median
+  agreement 0.1%, 85% within 10%; catchments >25% off (tributary outlets that
+  snap onto the mainstem at a confluence) are re-probed on a grid of nearby
+  outlets and otherwise excluded. 7,627 of 7,850 KGs fall inside a verified
+  catchment; the smallest containing basin is reported.
+  Fields: outlet_gauge, area_km2 (+ official eHYD area & agreement %),
+  mean_annual_river_flow_mio_m3, river_flow_trend_pct_per_decade,
+  glacier{ice_area_km2_in_catchment, ice_share_of_catchment_pct,
+  net_ice_loss_mio_m3_per_year, net_ice_loss_share_of_annual_flow_pct,
+  depletion_years_at_current_rate} from RGI 6.0 outlines intersected with the
+  polygon (not a network snap), snow{store_1apr_mio_m3_last10 vs _1961_1990,
+  store_1apr_as_share_of_annual_flow_pct, swe trends, grid_coverage} from
+  SNOWGRID-CL v2 cells inside the polygon, and nearest_glacier_fed_river_reach
+  from MERIT-Basins downstream flow paths of all 735 glaciers (485 reaches in
+  or near Austria; river distance from ice by Dijkstra over the reach graph).
+  Caveats: SNOWGRID covers Austria only, so volumes use the in-country cell
+  count and the snow share-of-flow ratio appears only when >=90% of the basin
+  is inside the grid (excludes Danube/Rhine/upper Inn). "Snow as % of annual
+  flow" is a store/flux ratio (how snow-dependent the basin is), not a runoff
+  share. MERIT is a 90 m DEM product: it does not know karst, canals or
+  inter-basin hydropower transfers.
+  Findings (scripts/analyze_watershed_cryosphere.py): the 1 Apr snowpack holds a
+  median 7% of a basin's annual flow (p90 26%, max 84% Zemmbach); the median
+  basin has lost 61% of its 1961-90 store. Flow trends grade with ice:
+  -2.2%/dec at ice-free gauges vs +2.1%/dec where ice >=5% of the catchment
+  (+3.0pp, perm p<0.001). GW stations in snow-rich basins (1 Apr store >=20% of
+  annual flow) fall at -0.13 m/dec vs -0.23 in rain-fed basins (+0.102,
+  perm p<0.001) despite similar precipitation divergence. Over 23 independent
+  basins the 1 Apr store is 4.9 km3 today vs 8.9 km3 in 1961-90: the 4.0 km3
+  already lost is ~9x the annual net glacier ice loss.
+  Data: web/data/watershed_context.json, merit_reach_kg.json,
+  catchments.geojson, merit_reaches.geojson; build scripts
+  fetch_watersheds.py, fix_missnapped_watersheds.py,
+  fetch_glacier_flowpaths.py, build_watershed_context.py,
+  build_merit_glacier_reaches.py.

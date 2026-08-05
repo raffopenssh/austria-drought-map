@@ -62,6 +62,44 @@ input on a different clock than abstraction or nitrate):
   `build_glacier_corridor.py`, `build_snow_reservoir.py`,
   `analyze_glacier_contribution.py`, `analyze_glacier_gw.py`.
 
+## Real catchments — the basin above you
+
+The attribution above routes water along the OSM waterway graph, which
+mis-assigns at confluences. A second, independent pass uses the *actual*
+contributing area:
+
+- All **640 eHYD river gauges** delineated from the **MERIT-Hydro** DEM
+  (MERIT-Basins) via [mghydro.com/watersheds](https://mghydro.com/watersheds/)
+  (M. Heberger, [delineator](https://github.com/mheberger/delineator),
+  CC BY-NC-SA), then **validated against the officially published eHYD catchment
+  size**: median agreement **0.1%**, 85% within 10%. Catchments off by >25%
+  (tributary outlets snapping onto the mainstem) are re-probed on a grid of
+  nearby outlets and otherwise **excluded** rather than used wrong.
+  **7,627 of 7,850 KGs** land inside a verified basin.
+- Glacier outlines (RGI 6.0) and SNOWGRID cells are intersected with the
+  *polygon*, so ice shares and snow volumes are hydrologically meaningful:
+  the **1 April snowpack holds a median 7% of a basin's annual river flow**
+  (p90 26%, up to **84%** in the Zemmbach headwater), and the median basin has
+  lost **61%** of its 1961–90 store.
+- Flow trends grade cleanly with ice: **−2.2%/dec at ice-free gauges vs
+  +2.1%/dec where ice ≥ 5% of the catchment** (+3.0 pp, permutation p < 0.001);
+  r = +0.27 between catchment snow trend and flow trend (458 gauges).
+- Groundwater wells in **snow-rich basins** (1 Apr store ≥ 20% of annual flow)
+  fall at **−0.13 m/decade vs −0.23 in rain-fed basins** (+0.102 m/dec,
+  perm p < 0.001) at similar precipitation divergence — the melt/snow subsidy,
+  reproduced with correct basins.
+- Scale check: over 23 non-overlapping basins the 1 Apr store is **4.9 km³**
+  today vs **8.9 km³** in 1961–90 — the **4.0 km³ already lost is ~9× the
+  annual net glacier ice loss**. Glaciers are the symbol; snow is the reservoir.
+- Downstream **MERIT-Basins flow paths** from all 735 glaciers give the
+  glacier-fed reach layer (485 reaches in/near Austria, river distance from ice
+  by Dijkstra over the reach graph; 1,842 KGs within 5 km of one).
+- Scripts: `fetch_watersheds.py`, `fix_missnapped_watersheds.py`,
+  `fetch_glacier_flowpaths.py`, `build_watershed_context.py`,
+  `build_merit_glacier_reaches.py`, `analyze_watershed_cryosphere.py`.
+  Caveat: MERIT is a 90 m DEM product — it knows nothing of karst, canals or
+  inter-basin hydropower transfers, which is why every catchment is size-checked.
+
 ## Context
 
 In recent years, Austrian municipalities have had to implement water rationing measures (e.g., restrictions on car washing, pool filling). While Vienna has its historic high-mountain water supply, most of Austria depends on groundwater. Climate change impacts are compounded by:
@@ -83,6 +121,7 @@ In recent years, Austrian municipalities have had to implement water rationing m
 - [WGMS Fluctuations of Glaciers 2026-02](https://wgms.ch/) (doi:10.5904/wgms-fog-2026-02) — Austrian mass balance 1946–2025, front variations since 1803, ASTER dh/dt volume change
 - [Randolph Glacier Inventory 6.0](https://www.glims.org/RGI/) region 11 — glacier outlines
 - [GeoSphere Austria data.hub](https://data.hub.geosphere.at/) — SNOWGRID-CL v2 snow water equivalent, 1 km, 1961–2026
+- [MERIT-Hydro / MERIT-Basins](https://www.reachhydro.org/home/params/merit-basins) via [mghydro.com/watersheds](https://mghydro.com/watersheds/) — on-demand catchment delineation & downstream flow paths (CC BY-NC-SA, non-commercial; research use)
 - [INSPIRE Austria](https://inspire-austria.exe.xyz/) — dataset discovery (BEV ALS 1 m DTM/DSM tiles for future corridor work)
 - [Oesterreichs Energie](https://oesterreichsenergie.at/) — power plant registry
 - Austrian municipality boundaries from GeoJSON-Austria

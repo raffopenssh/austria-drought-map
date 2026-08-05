@@ -1,0 +1,435 @@
+{
+ "source": "catchments delineated from MERIT-Hydro / MERIT-Basins by mghydro.com/watersheds (M. Heberger, CC BY-NC-SA); glaciers RGI 6.0 outlines with ASTER dh/dt (Hugonnet et al. 2021 via WGMS FoG 2026-02); snow GeoSphere SNOWGRID-CL v2 1 km",
+ "validation": {
+  "n_catchments": 662,
+  "km2_median_err_pct": 0.06,
+  "within_10pct": 85.1,
+  "within_25pct": 88.5
+ },
+ "n_gauges_used": 580,
+ "q1_old_vs_new": {
+  "n_common": 107,
+  "median_abs_diff_km2": 2.601,
+  "n_new_ice_where_old_none": 0,
+  "n_old_ice_where_new_none": 5,
+  "r_ice_km2": 0.633,
+  "largest_changes": [
+   {
+    "hzb": "207134",
+    "name": "Melk (Strom-km 2035,98)",
+    "old_km2": 52.66,
+    "new_km2": 331.988
+   },
+   {
+    "hzb": "207241",
+    "name": "Korneuburg",
+    "old_km2": 52.66,
+    "new_km2": 331.988
+   },
+   {
+    "hzb": "207357",
+    "name": "Kienstock",
+    "old_km2": 52.66,
+    "new_km2": 331.988
+   },
+   {
+    "hzb": "207126",
+    "name": "Ybbs",
+    "old_km2": 52.66,
+    "new_km2": 331.988
+   },
+   {
+    "hzb": "207084",
+    "name": "Mauthausen",
+    "old_km2": 52.66,
+    "new_km2": 331.988
+   },
+   {
+    "hzb": "207019",
+    "name": "Achleiten",
+    "old_km2": 49.39,
+    "new_km2": 327.694
+   },
+   {
+    "hzb": "207035",
+    "name": "Wehrstelle KW Aschach",
+    "old_km2": 49.39,
+    "new_km2": 327.694
+   },
+   {
+    "hzb": "207068",
+    "name": "Linz",
+    "old_km2": 49.39,
+    "new_km2": 327.694
+   },
+   {
+    "hzb": "206201",
+    "name": "Sch\u00e4rding (Schreibpegel)",
+    "old_km2": 49.39,
+    "new_km2": 327.078
+   },
+   {
+    "hzb": "201889",
+    "name": "Kirchbichl-Bichlwang",
+    "old_km2": 191.8,
+    "new_km2": 272.045
+   }
+  ],
+  "n_gauges_ice_new": 139,
+  "n_gauges_ice_old": 110
+ },
+ "q2_store_vs_flow": {
+  "n": 315,
+  "snow_pct_flow_median": 7.2,
+  "snow_pct_flow_p90": 25.8,
+  "melt_pct_flow_median": 0.0,
+  "snow_over_ice_ratio_median": 10.6,
+  "top_snow_basins": [
+   {
+    "hzb": "201715",
+    "name": "Sausteinaste",
+    "river": "Zemmbach",
+    "km2": 224.5,
+    "snow_pct_flow": 84.1,
+    "snow_store_mio_m3": 68.5,
+    "apr_pct_dec": -2.8
+   },
+   {
+    "hzb": "212472",
+    "name": "Pfl\u00fcglhof",
+    "river": "Malta",
+    "km2": 130.0,
+    "snow_pct_flow": 81.9,
+    "snow_store_mio_m3": 43.7,
+    "apr_pct_dec": -2.4
+   },
+   {
+    "hzb": "231662",
+    "name": "Lor\u00fcns-\u00c4ule",
+    "river": "Ill",
+    "km2": 533.9,
+    "snow_pct_flow": 79.2,
+    "snow_store_mio_m3": 135.5,
+    "apr_pct_dec": -5.4
+   },
+   {
+    "hzb": "201210",
+    "name": "Galt\u00fcr-Au",
+    "river": "Trisanna",
+    "km2": 98.3,
+    "snow_pct_flow": 64.5,
+    "snow_store_mio_m3": 28.9,
+    "apr_pct_dec": -2.3
+   },
+   {
+    "hzb": "213926",
+    "name": "Heiligenblut-Winkl",
+    "river": "M\u00f6ll",
+    "km2": 141.9,
+    "snow_pct_flow": 55.5,
+    "snow_store_mio_m3": 44.5,
+    "apr_pct_dec": -1.7
+   },
+   {
+    "hzb": "201699",
+    "name": "Klaushof (Br\u00fccke)",
+    "river": "Ziller",
+    "km2": 135.1,
+    "snow_pct_flow": 50.0,
+    "snow_store_mio_m3": 42.3,
+    "apr_pct_dec": -3.2
+   },
+   {
+    "hzb": "201335",
+    "name": "St. Leonhard im Pitztal",
+    "river": "Pitze",
+    "km2": 165.8,
+    "snow_pct_flow": 48.8,
+    "snow_store_mio_m3": 43.4,
+    "apr_pct_dec": 0.3
+   },
+   {
+    "hzb": "202143",
+    "name": "Scharnitz (Gie\u00dfenbach)",
+    "river": "Gie\u00dfenbach",
+    "km2": 58.7,
+    "snow_pct_flow": 46.5,
+    "snow_store_mio_m3": 8.8,
+    "apr_pct_dec": -9.6
+   },
+   {
+    "hzb": "208942",
+    "name": "Peisching",
+    "river": "M\u00fchlbach",
+    "km2": 677.8,
+    "snow_pct_flow": 44.4,
+    "snow_store_mio_m3": 6.3,
+    "apr_pct_dec": -12.8
+   },
+   {
+    "hzb": "212373",
+    "name": "Winklern",
+    "river": "M\u00f6ll",
+    "km2": 409.2,
+    "snow_pct_flow": 43.4,
+    "snow_store_mio_m3": 117.7,
+    "apr_pct_dec": -2.0
+   }
+  ],
+  "median_store_lost_vs_6190_pct": 61.0
+ },
+ "q3_snow_trend_vs_flow_trend": {
+  "n": 458,
+  "r": 0.269,
+  "p": 0.0,
+  "median_flow_trend_pct_dec": -1.1,
+  "median_snow_trend_pct_dec": -13.5,
+  "flow_trend_ice_free": {
+   "n": 437,
+   "median_pct_dec": -2.2
+  },
+  "flow_trend_trace_ice": {
+   "n": 38,
+   "median_pct_dec": -0.35
+  },
+  "flow_trend_ice_1_5pct": {
+   "n": 42,
+   "median_pct_dec": 0.5
+  },
+  "flow_trend_ice_over_5pct": {
+   "n": 27,
+   "median_pct_dec": 2.1
+  },
+  "ice_gradient_perm": {
+   "n_icy": 69,
+   "n_icefree": 437,
+   "median_diff_pct_dec": 3.0,
+   "p": 4.999750012499375e-05
+  }
+ },
+ "q4_gw_by_catchment_snow": {
+  "n": 1522,
+  "r_snowshare_vs_gw_trend": 0.008,
+  "p": 0.75589,
+  "note": "GW stations assigned to the smallest verified gauged catchment containing them; snow_pct_flow = 1 Apr snow store as % of the basin's annual river flow",
+  "groups": {
+   "rain_fed": {
+    "n": 1146,
+    "median_trend_m_dec": -0.2311,
+    "median_precip_divergence_m": -0.51
+   },
+   "snow_rich": {
+    "n": 176,
+    "median_trend_m_dec": -0.1293,
+    "median_precip_divergence_m": -0.58
+   },
+   "snow_moderate": {
+    "n": 200,
+    "median_trend_m_dec": -0.1763,
+    "median_precip_divergence_m": -0.85
+   }
+  },
+  "snowrich_vs_rainfed_perm": {
+   "median_diff_m_dec": 0.1018,
+   "p": 0.00034998250087495624
+  }
+ },
+ "q5_melt_masked_gauges": [
+  {
+   "hzb": "213926",
+   "name": "Heiligenblut-Winkl",
+   "river": "M\u00f6ll",
+   "ice_pct": 14.799,
+   "melt_pct_flow": 50.78,
+   "flow_trend_pct_dec": 12.5,
+   "depletion_years": 44.4
+  },
+  {
+   "hzb": "201335",
+   "name": "St. Leonhard im Pitztal",
+   "river": "Pitze",
+   "ice_pct": 16.252,
+   "melt_pct_flow": 33.26,
+   "flow_trend_pct_dec": 2.3,
+   "depletion_years": 48.6
+  },
+  {
+   "hzb": "201350",
+   "name": "Vent (oberh. Niedertalbach)",
+   "river": "Rofenache",
+   "ice_pct": 35.081,
+   "melt_pct_flow": 28.73,
+   "flow_trend_pct_dec": 4.5,
+   "depletion_years": 49.6
+  },
+  {
+   "hzb": "230300",
+   "name": "Gepatschalm",
+   "river": "Fagge",
+   "ice_pct": 37.234,
+   "melt_pct_flow": 24.83,
+   "flow_trend_pct_dec": 3.2,
+   "depletion_years": 76.0
+  },
+  {
+   "hzb": "201376",
+   "name": "Obergurgl",
+   "river": "Gurgler Ache",
+   "ice_pct": 27.535,
+   "melt_pct_flow": 23.85,
+   "flow_trend_pct_dec": 2.3,
+   "depletion_years": 38.6
+  },
+  {
+   "hzb": "201210",
+   "name": "Galt\u00fcr-Au",
+   "river": "Trisanna",
+   "ice_pct": 7.502,
+   "melt_pct_flow": 21.65,
+   "flow_trend_pct_dec": -1.0,
+   "depletion_years": 28.7
+  },
+  {
+   "hzb": "203893",
+   "name": "Kees",
+   "river": "Obersulzbach",
+   "ice_pct": 51.518,
+   "melt_pct_flow": 19.78,
+   "flow_trend_pct_dec": 2.3,
+   "depletion_years": 60.6
+  },
+  {
+   "hzb": "201392",
+   "name": "Huben",
+   "river": "\u00d6tztaler Ache",
+   "ice_pct": 16.608,
+   "melt_pct_flow": 15.69,
+   "flow_trend_pct_dec": 0.4,
+   "depletion_years": 44.6
+  },
+  {
+   "hzb": "212373",
+   "name": "Winklern",
+   "river": "M\u00f6ll",
+   "ice_pct": 5.397,
+   "melt_pct_flow": 15.63,
+   "flow_trend_pct_dec": -4.5,
+   "depletion_years": 43.2
+  },
+  {
+   "hzb": "201715",
+   "name": "Sausteinaste",
+   "river": "Zemmbach",
+   "ice_pct": 9.344,
+   "melt_pct_flow": 14.12,
+   "flow_trend_pct_dec": -38.6,
+   "depletion_years": 82.0
+  },
+  {
+   "hzb": "212068",
+   "name": "Innergschl\u00f6\u00df",
+   "river": "Gschl\u00f6ssbach",
+   "ice_pct": 30.211,
+   "melt_pct_flow": 13.73,
+   "flow_trend_pct_dec": 2.6,
+   "depletion_years": 55.2
+  },
+  {
+   "hzb": "201434",
+   "name": "Tumpen",
+   "river": "\u00d6tztaler Ache",
+   "ice_pct": 12.489,
+   "melt_pct_flow": 13.53,
+   "flow_trend_pct_dec": 1.2,
+   "depletion_years": 43.1
+  },
+  {
+   "hzb": "230342",
+   "name": "Brunau",
+   "river": "\u00d6tztaler Ache",
+   "ice_pct": 10.988,
+   "melt_pct_flow": 11.59,
+   "flow_trend_pct_dec": -0.0,
+   "depletion_years": 43.1
+  },
+  {
+   "hzb": "212076",
+   "name": "Matreier Tauernhaus",
+   "river": "Tauernbach",
+   "ice_pct": 18.84,
+   "melt_pct_flow": 10.4,
+   "flow_trend_pct_dec": 3.2,
+   "depletion_years": 55.3
+  },
+  {
+   "hzb": "212126",
+   "name": "Sp\u00f6ttling-Taurer",
+   "river": "Teischnitzbach",
+   "ice_pct": 12.34,
+   "melt_pct_flow": 10.29,
+   "flow_trend_pct_dec": 0.9,
+   "depletion_years": 43.3
+  },
+  {
+   "hzb": "212233",
+   "name": "Hinterbichl (M\u00fchle) (Summenpegel)",
+   "river": "Dorferbach und KW-Einzug",
+   "ice_pct": 25.812,
+   "melt_pct_flow": 9.1,
+   "flow_trend_pct_dec": 0.6,
+   "depletion_years": 79.0
+  },
+  {
+   "hzb": "202283",
+   "name": "Kr\u00f6ssbach",
+   "river": "Ruetz",
+   "ice_pct": 9.493,
+   "melt_pct_flow": 8.63,
+   "flow_trend_pct_dec": 2.7,
+   "depletion_years": 31.5
+  },
+  {
+   "hzb": "203042",
+   "name": "Neukirchen",
+   "river": "Untersulzbach",
+   "ice_pct": 13.709,
+   "melt_pct_flow": 7.93,
+   "flow_trend_pct_dec": 3.4,
+   "depletion_years": 46.8
+  },
+  {
+   "hzb": "203034",
+   "name": "Sulzau",
+   "river": "Obersulzbach",
+   "ice_pct": 16.743,
+   "melt_pct_flow": 7.8,
+   "flow_trend_pct_dec": 2.8,
+   "depletion_years": 58.1
+  },
+  {
+   "hzb": "201996",
+   "name": "Neukaser",
+   "river": "Zamserbach",
+   "ice_pct": 6.93,
+   "melt_pct_flow": 7.72,
+   "flow_trend_pct_dec": 6.4,
+   "depletion_years": 18.3
+  }
+ ],
+ "q5_summary": {
+  "n_gauges_melt_over_5pct_flow": 26,
+  "median_flow_trend_there": 2.3,
+  "median_depletion_years": 45.0
+ },
+ "q6_national": {
+  "n_independent_basins": 23,
+  "area_km2": 169208.0,
+  "snow_store_1apr_mio_m3_last10": 4852.0,
+  "snow_store_1apr_mio_m3_6190": 8895.0,
+  "lost_mio_m3": 4043.0,
+  "lost_pct": 45.5,
+  "net_ice_loss_mio_m3a": 459.8,
+  "ice_over_snow_pct": 9.48,
+  "note": "the 1 Apr snowpack of these basins holds ~11x the annual net ice loss; the store lost since 1961-90 alone is 9x the annual ice loss"
+ }
+}
