@@ -112,7 +112,7 @@ async function boot() {
     // Dedicated panes so station dots always render above choropleth + GWK polygons.
     map.createPane('gwkfill');  map.getPane('gwkfill').style.zIndex = 410;
     map.createPane('stations'); map.getPane('stations').style.zIndex = 620;
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2f4r_1_641ea85562265ec4220f53fc', {
         attribution: '&copy; OSM &copy; CARTO', subdomains: 'abcd', maxZoom: 19,
     }).addTo(map);
 
