@@ -155,6 +155,8 @@
         #footbar a:hover { color: #cfe3ff; }
         #footbar .foot-lic { color: #4e5578; font-size: 9.5px; letter-spacing: .02em; }
         #footbar .foot-lic:hover { color: #8b93b8; }
+        #footbar .foot-attr a { color: #4e5578; }
+        #footbar .foot-attr a:hover { color: #8b93b8; }
 
         /* ---- scrollbars (global) ---- */
         * { scrollbar-width: thin; scrollbar-color: #2e3a6e transparent; }
@@ -288,8 +290,6 @@
         .leaflet-tooltip.gw-tip::before { display: none; }
         .leaflet-bar a { background: #171c36; color: #cfe3ff; border-color: #26315e; }
         .leaflet-bar a:hover { background: #232b52; }
-        .leaflet-control-attribution { background: rgba(15,17,33,0.7) !important; color: #6a7194 !important; font-size: 9px !important; }
-        .leaflet-control-attribution a { color: #8b93b8 !important; }
 
         @media (max-width: 640px) {
             #topbar { flex-wrap: wrap; }
@@ -389,6 +389,7 @@
         <a href="/llm/manifest.json" target="_blank">API</a>
         <a href="data/austria_drought_risk.gpkg" download>GeoPackage</a>
         <a href="/LICENSE" target="_blank" class="foot-lic" title="Code MIT · data CC BY 4.0 · sources keep their own terms">MIT · CC&nbsp;BY</a>
+        <span class="foot-lic foot-attr"><a href="https://leafletjs.com" target="_blank">Leaflet</a> · &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OSM</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a></span>
     </div>
 
     <!-- KG / Gemeinde detail modal -->

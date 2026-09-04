@@ -105,7 +105,7 @@ async function boot() {
     map = L.map('map', {
         zoomControl: true, preferCanvas: true,
         center: [47.6, 13.5], zoom: 7, minZoom: 6, maxZoom: 18,
-        zoomSnap: 0.5, attributionControl: true,
+        zoomSnap: 0.5, attributionControl: false, // attribution lives in #footbar
     });
     map.zoomControl.setPosition('bottomleft');
     map.on('zoomend', resizeIce);
@@ -113,7 +113,7 @@ async function boot() {
     map.createPane('gwkfill');  map.getPane('gwkfill').style.zIndex = 410;
     map.createPane('stations'); map.getPane('stations').style.zIndex = 620;
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2f4r_1_641ea85562265ec4220f53fc', {
-        attribution: '&copy; OSM &copy; CARTO', subdomains: 'abcd', maxZoom: 19,
+        subdomains: 'abcd', maxZoom: 19,
     }).addTo(map);
 
     const [geo, slim, no3, gwi, reg, munis, pinf] = await Promise.all([
