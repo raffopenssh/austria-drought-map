@@ -3,7 +3,7 @@
 
 Base URL:    https://groundwater-at.exe.xyz/
 Service slug: groundwater-at
-License:     CC-BY-4.0
+License:     data CC-BY-4.0 (MERIT-Hydro catchment products CC-BY-NC-SA), code MIT — /LICENSE
 CORS:        all origins allowed (read-only GETs)
 
 ## What this dataset is

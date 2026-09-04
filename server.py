@@ -87,6 +87,16 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_html(parsed_full.path)
             return
 
+        # Repo-root LICENSE (code MIT, derived data CC BY 4.0), linked from the footer.
+        if parsed_full.path in ('/LICENSE', '/license'):
+            body = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'LICENSE'), 'rb').read()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
         # Check if client accepts gzip
         accept_encoding = self.headers.get('Accept-Encoding', '')
         

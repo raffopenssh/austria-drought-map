@@ -1,0 +1,71 @@
+GW Power — the groundwater status of Austria
+https://groundwater-at.exe.xyz/
+
+This project has three kinds of content, licensed separately.
+
+--------------------------------------------------------------------------
+1. CODE  (server.py, llm_api.py, scripts/, web/*.html, web/*.js) — MIT
+--------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2025-2026 Raffael Hickisch
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------
+2. DERIVED DATA  (web/data/*, data/*, the /llm/ API) — CC BY 4.0
+--------------------------------------------------------------------------
+
+The Groundwater Status Index (GWI), the legacy drought risk score, the
+glacier/snow corridor products and every other value computed by this
+project are released under the Creative Commons Attribution 4.0
+International licence: https://creativecommons.org/licenses/by/4.0/
+
+Suggested attribution:
+  "GW Power / groundwater-at.exe.xyz (CC BY 4.0), built on eHYD, EEA WISE,
+   Wasserschatz Österreich, Copernicus EDO, Statistik Austria, WGMS, RGI,
+   GeoSphere Austria and others."
+
+Exception: everything derived from MERIT-Hydro / MERIT-Basins catchments
+via mghydro.com (the "Your river's catchment" panels and the glacier-fed
+reach layer, web/data/*catchment* / *reach*) inherits CC BY-NC-SA and may
+NOT be reused commercially.
+
+The index is a research product: interpolated, not measured. No warranty of
+fitness for regulatory, legal or investment decisions.
+
+--------------------------------------------------------------------------
+3. UPSTREAM SOURCES — their own terms apply and are not changed here
+--------------------------------------------------------------------------
+
+  eHYD (BML)                              CC BY 4.0
+  EEA Waterbase ICM / WISE WFD            EEA standard re-use policy (CC BY-like)
+  Wasserschatz Österreichs (BMLRT/UBA)    CC BY 4.0 (INSPIRE NGP-2015 boundaries)
+  Copernicus EDO                          Copernicus free & open licence
+  NASA POWER                              public domain (US Gov)
+  Statistik Austria OGD                   CC BY 4.0
+  ENTSO-E Transparency Platform           ENTSO-E terms; non-commercial re-use
+  OpenStreetMap / Geofabrik               ODbL 1.0
+  MERIT-Hydro / MERIT-Basins, delineator  CC BY-NC-SA 4.0
+  WGMS Fluctuations of Glaciers 2026-02   CC BY 4.0 (doi:10.5904/wgms-fog-2026-02)
+  Randolph Glacier Inventory 6.0          CC BY 4.0
+  GeoSphere Austria SNOWGRID-CL v2        CC BY 4.0
+  Basemap tiles                           © OpenStreetMap contributors, © CARTO
+  Leaflet                                 BSD-2-Clause

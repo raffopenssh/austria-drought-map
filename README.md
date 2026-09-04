@@ -187,4 +187,7 @@ austria-drought-map/
 
 ## License
 
-Data sources have their own licenses. Code is provided as-is for educational purposes.
+Code: [MIT](LICENSE). Derived data (GWI, `web/data/*`, `/llm/` API): CC BY 4.0 —
+except the MERIT-Hydro catchment products, which inherit CC BY-NC-SA. Upstream
+sources keep their own terms; the full table is in [LICENSE](LICENSE) and is
+served at `/LICENSE`.

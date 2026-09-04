@@ -1897,7 +1897,7 @@ function showMethods() {
     <h3>Reproducibility &amp; API</h3>
     <p><code>scripts/build_gw_index.py</code> computes the index; per-KG values are served at
     <code>/llm/kg/{kg_code}</code> (<a href="/llm/manifest.json" target="_blank">manifest</a>).
-    Data license CC-BY-4.0; sources retain their own terms.</p>`;
+    Code MIT, derived data CC BY 4.0 (MERIT-Hydro catchment products CC BY-NC-SA); sources retain their own terms — <a href="/LICENSE" target="_blank">LICENSE</a>.</p>`;
     openModal('methods-modal');
 }
 
