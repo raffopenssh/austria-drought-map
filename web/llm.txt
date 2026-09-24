@@ -104,6 +104,54 @@ counts, mean GW trend, total MW, #at-risk) are folded into 'metrics'.
   GET /llm/covered_kgs.json        array of every kg_code we can answer (7,850)
   GET /llm/covered_gemeinden.json  array of every gemeinde_code (2,117)
 
+  Parcel-scale / viewport endpoints (Siedler AHEAD list GW-1..GW-8):
+  GET /llm/point?lon=&lat=         water context AT a coordinate: gwi_* re-evaluated
+                                   with the same IDW at the point, depth_to_gw_m_est
+                                   (+depth_confidence, from live eHYD stations' ground
+                                   elevation - level), aquifer_type, nearest_gw_station,
+                                   nearest_no3_station, nearest_river (nearest gauge),
+                                   groundwater_body, now{} block, kg_code + parcel_id
+                                   (cadastre PiP, cached; input quantised to 4 dp).
+                                   404 no_data outside Austria / no coverage.
+  GET /llm/points?west&south&east&north[&categories=a,b&limit<=500&history=0|1]
+                                   all snapped points inside a bbox, latest metrics only
+                                   (history=1 adds series) -> {points[],count,truncated}
+  GET /llm/protection?west&south&east&north[&limit<=500]
+                                   drinking-water protection zones (Schutz-/Schongebiete)
+                                   as WGS84 polygons {id,name,type,zone,state,geometry};
+                                   Länder WIS/INSPIRE AM; coverage OÖ Stmk T Bgld W NÖ Vbg
+  GET /llm/flowpath?lon=&lat=      downstream MERIT-Basins reach chain from the nearest
+                                   reach to the Austrian border: reaches[{reach_id,
+                                   stream_order,length_km,glacier_fed,river,gauge?}],
+                                   total_km, exit{river,border_point,sea}, geometry
+                                   (LineString <=3 KB). Chain follows the main stem;
+                                   river names from eHYD gauges within 400 m. Backed by
+                                   mghydro.com (CC BY-NC-SA), cached per 3-dp coordinate;
+                                   503 + retry_after_s if upstream is down.
+  GET /llm/gwi.json                all 7,850 KGs: {kgs:{kg_code:[gwi, cat_index]}}
+                                   (~40 KB gzip; Cache-Control 1 d)
+  GET /llm/parcel/{parcel_id}      e.g. /llm/parcel/63307-133/5 -> points snapped onto
+                                   the parcel, parcel meta (cadastre), point context at
+                                   the parcel centroid, water_body, now{}
+  Query params on /llm/kg and /llm/kgs: ?fields=metrics,points,drought,now (comma list
+  of top-level keys to keep; unit_glossary only when asked) and ?history=0.
+
+  Extra blocks on /llm/kg (never replace existing keys):
+  drought{}  Copernicus EDO CDI dekads 2012-2023 per Gemeinde: p_drought_year (share of
+             years with >=1 month of mean class >= warning), worst_year, season_profile
+             (12 x mean CDI class 0-3 per calendar month), events[{year,start_month,
+             end_month,cdi_max,class watch|warning|alert}]. Recovery classes count as 0.
+  now{}      latest measured state: eHYD live stations (daily cron), IDW at the KG
+             centroid: as_of, gw_level_anomaly_sigma (vs. the stations' own day-of-year
+             climatology, sigma from the p5-p95 band), gw_percentile_of_month, n_stations,
+             trend_30d_cm, no3_latest_mg_l, status normal|low|very_low|high.
+  history[]  additionally precip_mm (NASA POWER 0.5 deg cell, annual sum) and
+             gw_level_anomaly_m (mean of stations <=12.5 km vs. their record mean).
+
+All /llm/* JSON: CORS *, ETag + If-None-Match -> 304, gzip on request,
+Cache-Control max-age 3600 (gwi.json/manifest 86400). Static /data/*.json.gz
+likewise carry ETag/Last-Modified. No rate limit; be reasonable (<10 req/s).
+
 The per-Gemeinde payload mirrors the per-KG shape, plus 'kg_codes' (all KGs in
 the Gemeinde) and the union of snapped points across those KGs (each point
 carries its 'kg_code').

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Simple HTTP server with gzip support for pre-compressed files."""
 
+import gzip
+import hashlib
 import http.server
 import json
 import os
 import re
+import socketserver
 import urllib.parse
 import sys
 
@@ -30,13 +33,35 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Cache-Control', 'public, max-age=3600')
         super().end_headers()
     
-    def _send_json(self, status, obj):
-        body = json.dumps(obj).encode('utf-8')
+    def _send_json(self, status, obj, max_age=3600):
+        body = json.dumps(obj, allow_nan=False, separators=(',', ':')).encode('utf-8')
+        etag = '"' + hashlib.sha1(body).hexdigest()[:20] + '"'
+        if status == 200 and self.headers.get('If-None-Match') == etag:
+            self.send_response(304)
+            self.send_header('ETag', etag)
+            self.send_header('Cache-Control', f'public, max-age={max_age}')
+            self.end_headers()
+            return
+        enc = None
+        if len(body) > 512 and 'gzip' in self.headers.get('Accept-Encoding', ''):
+            body = gzip.compress(body, 6)
+            enc = 'gzip'
         self.send_response(status)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
+        if enc:
+            self.send_header('Content-Encoding', enc)
+        self.send_header('Vary', 'Accept-Encoding')
+        if status == 200:
+            self.send_header('ETag', etag)
+            self.send_header('Cache-Control', f'public, max-age={max_age}')
+        else:
+            self.send_header('Cache-Control', 'no-store')
+        if status in (202, 503) and isinstance(obj, dict) and obj.get('retry_after_s'):
+            self.send_header('Retry-After', str(obj['retry_after_s']))
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        if self.command != 'HEAD':
+            self.wfile.write(body)
 
     def _send_html(self, url_path):
         name = 'index.html' if url_path in ('/', '/index.html') else url_path.lstrip('/')
@@ -65,6 +90,13 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.command != 'HEAD':
             self.wfile.write(body)
 
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'If-None-Match, Content-Type')
+        self.send_header('Access-Control-Max-Age', '86400')
+        self.end_headers()
+
     def do_GET(self):
         parsed_full = urllib.parse.urlparse(self.path)
         # Sibling-service integration endpoints (/llm/...)
@@ -77,7 +109,9 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return
             if routed is not None:
                 status, obj = routed
-                self._send_json(status, obj)
+                # gwi.json / manifest change only on rebuilds; 'now' data daily.
+                max_age = 86400 if parsed_full.path in ('/llm/gwi.json', '/llm/manifest.json') else 3600
+                self._send_json(status, obj, max_age=max_age)
                 return
 
         # HTML: stamp asset URLs with the file mtime so the cache-buster can
@@ -110,6 +144,13 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             gz_path = fs_path + '.gz'
             
             if os.path.exists(gz_path) and os.path.isfile(gz_path):
+                st = os.stat(gz_path)
+                etag = f'"{int(st.st_mtime)}-{st.st_size}"'
+                if self.headers.get('If-None-Match') == etag:
+                    self.send_response(304)
+                    self.send_header('ETag', etag)
+                    self.end_headers()
+                    return
                 # Serve gzipped version
                 self.send_response(200)
                 
@@ -122,7 +163,10 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_header('Content-Type', 'application/octet-stream')
                 
                 self.send_header('Content-Encoding', 'gzip')
-                self.send_header('Content-Length', os.path.getsize(gz_path))
+                self.send_header('Vary', 'Accept-Encoding')
+                self.send_header('ETag', etag)
+                self.send_header('Last-Modified', self.date_time_string(st.st_mtime))
+                self.send_header('Content-Length', str(st.st_size))
                 self.end_headers()
                 
                 with open(gz_path, 'rb') as f:
@@ -135,6 +179,10 @@ class GzipHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
     
-    server = http.server.HTTPServer(('', port), GzipHTTPRequestHandler)
+    class Server(socketserver.ThreadingMixIn, http.server.HTTPServer):
+        daemon_threads = True
+        allow_reuse_address = True
+
+    server = Server(('', port), GzipHTTPRequestHandler)
     print(f'Serving on port {port} with gzip support...', flush=True)
     server.serve_forever()

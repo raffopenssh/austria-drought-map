@@ -22120,3 +22120,910 @@ day,plant,psr_type,mwh
 2026-07-09,Malta-Hauptstufe TU 4,Hydro Pumped Storage,909.5
 2026-07-09,Reisseck 2 TU 1,Hydro Pumped Storage,982.9
 2026-07-09,Reisseck 2 TU 2,Hydro Pumped Storage,638.5
+2026-07-10,Gerlos TU 5,Hydro Water Reservoir,67.3
+2026-07-10,Haeusling TU 11,Hydro Pumped Storage,584.5
+2026-07-10,Haeusling TU 12,Hydro Pumped Storage,1144.6
+2026-07-10,Limberg II TU 1,Hydro Pumped Storage,785.8
+2026-07-10,Limberg II TU 2,Hydro Pumped Storage,1490.1
+2026-07-10,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-10,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-10,Malta-Hauptstufe TU 1,Hydro Pumped Storage,104.1
+2026-07-10,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-10,Malta-Hauptstufe TU 3,Hydro Pumped Storage,19.9
+2026-07-10,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-10,Reisseck 2 TU 1,Hydro Pumped Storage,317.9
+2026-07-10,Reisseck 2 TU 2,Hydro Pumped Storage,134.4
+2026-07-11,Gerlos TU 5,Hydro Water Reservoir,41.3
+2026-07-11,Haeusling TU 11,Hydro Pumped Storage,319.4
+2026-07-11,Haeusling TU 12,Hydro Pumped Storage,505.3
+2026-07-11,Limberg II TU 1,Hydro Pumped Storage,362.3
+2026-07-11,Limberg II TU 2,Hydro Pumped Storage,1045.0
+2026-07-11,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-11,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-11,Malta-Hauptstufe TU 1,Hydro Pumped Storage,193.0
+2026-07-11,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-11,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-11,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-11,Reisseck 2 TU 1,Hydro Pumped Storage,1127.7
+2026-07-11,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-12,Gerlos TU 5,Hydro Water Reservoir,30.3
+2026-07-12,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-12,Haeusling TU 12,Hydro Pumped Storage,5.1
+2026-07-12,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-07-12,Limberg II TU 2,Hydro Pumped Storage,1526.3
+2026-07-12,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-12,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-12,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-12,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-12,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-12,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-12,Reisseck 2 TU 1,Hydro Pumped Storage,114.8
+2026-07-12,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-13,Gerlos TU 5,Hydro Water Reservoir,2.0
+2026-07-13,Haeusling TU 11,Hydro Pumped Storage,67.6
+2026-07-13,Haeusling TU 12,Hydro Pumped Storage,358.4
+2026-07-13,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-07-13,Limberg II TU 2,Hydro Pumped Storage,67.8
+2026-07-13,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-13,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-13,Malta-Hauptstufe TU 1,Hydro Pumped Storage,72.1
+2026-07-13,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-13,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-13,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-13,Reisseck 2 TU 1,Hydro Pumped Storage,137.0
+2026-07-13,Reisseck 2 TU 2,Hydro Pumped Storage,75.8
+2026-07-14,Gerlos TU 5,Hydro Water Reservoir,67.5
+2026-07-14,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-14,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-07-14,Limberg II TU 1,Hydro Pumped Storage,158.7
+2026-07-14,Limberg II TU 2,Hydro Pumped Storage,170.3
+2026-07-14,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-14,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-14,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-14,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-07-14,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-14,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-14,Reisseck 2 TU 1,Hydro Pumped Storage,303.6
+2026-07-14,Reisseck 2 TU 2,Hydro Pumped Storage,33.8
+2026-07-15,Gerlos TU 5,Hydro Water Reservoir,147.1
+2026-07-15,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-15,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-07-15,Limberg II TU 1,Hydro Pumped Storage,323.1
+2026-07-15,Limberg II TU 2,Hydro Pumped Storage,350.8
+2026-07-15,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-15,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-15,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-15,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-07-15,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-07-15,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-15,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-07-15,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-16,Gerlos TU 5,Hydro Water Reservoir,61.8
+2026-07-16,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-16,Haeusling TU 12,Hydro Pumped Storage,304.8
+2026-07-16,Limberg II TU 1,Hydro Pumped Storage,160.5
+2026-07-16,Limberg II TU 2,Hydro Pumped Storage,1159.9
+2026-07-16,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-16,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-16,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-16,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.3
+2026-07-16,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-16,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-16,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-07-16,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-17,Gerlos TU 5,Hydro Water Reservoir,33.7
+2026-07-17,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-17,Haeusling TU 12,Hydro Pumped Storage,483.6
+2026-07-17,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-07-17,Limberg II TU 2,Hydro Pumped Storage,164.8
+2026-07-17,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-17,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-17,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-17,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-07-17,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-17,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-17,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-07-17,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-18,Gerlos TU 5,Hydro Water Reservoir,47.6
+2026-07-18,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-18,Haeusling TU 12,Hydro Pumped Storage,1204.7
+2026-07-18,Limberg II TU 1,Hydro Pumped Storage,172.0
+2026-07-18,Limberg II TU 2,Hydro Pumped Storage,186.6
+2026-07-18,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-18,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-18,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-18,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-18,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-18,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-18,Reisseck 2 TU 1,Hydro Pumped Storage,691.0
+2026-07-18,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-19,Gerlos TU 5,Hydro Water Reservoir,80.9
+2026-07-19,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-19,Haeusling TU 12,Hydro Pumped Storage,195.6
+2026-07-19,Limberg II TU 1,Hydro Pumped Storage,50.9
+2026-07-19,Limberg II TU 2,Hydro Pumped Storage,222.9
+2026-07-19,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-19,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-19,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-19,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-07-19,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-07-19,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-19,Reisseck 2 TU 1,Hydro Pumped Storage,454.0
+2026-07-19,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-20,Gerlos TU 5,Hydro Water Reservoir,52.6
+2026-07-20,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-20,Haeusling TU 12,Hydro Pumped Storage,207.0
+2026-07-20,Limberg II TU 1,Hydro Pumped Storage,157.6
+2026-07-20,Limberg II TU 2,Hydro Pumped Storage,393.3
+2026-07-20,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-20,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-20,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-20,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-20,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-20,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-20,Reisseck 2 TU 1,Hydro Pumped Storage,142.1
+2026-07-20,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-21,Gerlos TU 5,Hydro Water Reservoir,67.5
+2026-07-21,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-21,Haeusling TU 12,Hydro Pumped Storage,310.7
+2026-07-21,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-07-21,Limberg II TU 2,Hydro Pumped Storage,1357.7
+2026-07-21,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-21,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-21,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-21,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-21,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-21,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-21,Reisseck 2 TU 1,Hydro Pumped Storage,306.8
+2026-07-21,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-22,Gerlos TU 5,Hydro Water Reservoir,28.8
+2026-07-22,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-22,Haeusling TU 12,Hydro Pumped Storage,13.5
+2026-07-22,Limberg II TU 1,Hydro Pumped Storage,367.7
+2026-07-22,Limberg II TU 2,Hydro Pumped Storage,606.3
+2026-07-22,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-22,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-22,Malta-Hauptstufe TU 1,Hydro Pumped Storage,2.6
+2026-07-22,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-22,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-22,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-22,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-07-22,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-23,Gerlos TU 5,Hydro Water Reservoir,69.9
+2026-07-23,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-23,Haeusling TU 12,Hydro Pumped Storage,242.9
+2026-07-23,Limberg II TU 1,Hydro Pumped Storage,127.5
+2026-07-23,Limberg II TU 2,Hydro Pumped Storage,1455.0
+2026-07-23,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-23,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-23,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-23,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-23,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-23,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-23,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-07-23,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-24,Gerlos TU 5,Hydro Water Reservoir,115.9
+2026-07-24,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-24,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-07-24,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-07-24,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-07-24,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-24,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-24,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-24,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-24,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-24,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-24,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-07-24,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-25,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-07-25,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-25,Haeusling TU 12,Hydro Pumped Storage,119.8
+2026-07-25,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-07-25,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-07-25,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-25,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-25,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-25,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-07-25,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-25,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-25,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-07-25,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-26,Gerlos TU 5,Hydro Water Reservoir,79.1
+2026-07-26,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-26,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-07-26,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-07-26,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-07-26,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-26,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-26,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-26,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.2
+2026-07-26,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-07-26,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-26,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-07-26,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-27,Gerlos TU 5,Hydro Water Reservoir,70.5
+2026-07-27,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-27,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-07-27,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-07-27,Limberg II TU 2,Hydro Pumped Storage,182.4
+2026-07-27,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-27,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-27,Malta-Hauptstufe TU 1,Hydro Pumped Storage,34.7
+2026-07-27,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-27,Malta-Hauptstufe TU 3,Hydro Pumped Storage,38.5
+2026-07-27,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-27,Reisseck 2 TU 1,Hydro Pumped Storage,97.4
+2026-07-27,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-28,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-07-28,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-07-28,Haeusling TU 12,Hydro Pumped Storage,311.9
+2026-07-28,Limberg II TU 1,Hydro Pumped Storage,242.9
+2026-07-28,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-07-28,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-28,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-28,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-28,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-07-28,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-07-28,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-28,Reisseck 2 TU 1,Hydro Pumped Storage,358.1
+2026-07-28,Reisseck 2 TU 2,Hydro Pumped Storage,246.5
+2026-07-29,Gerlos TU 5,Hydro Water Reservoir,67.6
+2026-07-29,Haeusling TU 11,Hydro Pumped Storage,302.1
+2026-07-29,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-07-29,Limberg II TU 1,Hydro Pumped Storage,516.7
+2026-07-29,Limberg II TU 2,Hydro Pumped Storage,558.5
+2026-07-29,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-29,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-29,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-29,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-29,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-29,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-29,Reisseck 2 TU 1,Hydro Pumped Storage,454.9
+2026-07-29,Reisseck 2 TU 2,Hydro Pumped Storage,69.0
+2026-07-30,Gerlos TU 5,Hydro Water Reservoir,7.7
+2026-07-30,Haeusling TU 11,Hydro Pumped Storage,142.9
+2026-07-30,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-07-30,Limberg II TU 1,Hydro Pumped Storage,655.1
+2026-07-30,Limberg II TU 2,Hydro Pumped Storage,1234.0
+2026-07-30,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-30,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-30,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-30,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-30,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-30,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-30,Reisseck 2 TU 1,Hydro Pumped Storage,660.0
+2026-07-30,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-07-31,Gerlos TU 5,Hydro Water Reservoir,67.2
+2026-07-31,Haeusling TU 11,Hydro Pumped Storage,865.0
+2026-07-31,Haeusling TU 12,Hydro Pumped Storage,472.8
+2026-07-31,Limberg II TU 1,Hydro Pumped Storage,833.0
+2026-07-31,Limberg II TU 2,Hydro Pumped Storage,1560.0
+2026-07-31,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-07-31,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-07-31,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-07-31,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-07-31,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-07-31,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-07-31,Reisseck 2 TU 1,Hydro Pumped Storage,907.0
+2026-07-31,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-01,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-01,Haeusling TU 11,Hydro Pumped Storage,129.2
+2026-08-01,Haeusling TU 12,Hydro Pumped Storage,130.5
+2026-08-01,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-01,Limberg II TU 2,Hydro Pumped Storage,1231.2
+2026-08-01,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-01,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-01,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-01,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-01,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-01,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-01,Reisseck 2 TU 1,Hydro Pumped Storage,166.4
+2026-08-01,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-02,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-02,Haeusling TU 11,Hydro Pumped Storage,180.9
+2026-08-02,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-02,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-02,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-02,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-02,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-02,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-02,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-02,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-02,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-02,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-02,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-03,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-03,Haeusling TU 11,Hydro Pumped Storage,316.6
+2026-08-03,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-03,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-03,Limberg II TU 2,Hydro Pumped Storage,178.3
+2026-08-03,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-03,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-03,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-03,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-03,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-03,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-03,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-03,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-04,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-04,Haeusling TU 11,Hydro Pumped Storage,260.4
+2026-08-04,Haeusling TU 12,Hydro Pumped Storage,98.8
+2026-08-04,Limberg II TU 1,Hydro Pumped Storage,0.1
+2026-08-04,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-04,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-04,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-04,Malta-Hauptstufe TU 1,Hydro Pumped Storage,263.7
+2026-08-04,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-04,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-04,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-04,Reisseck 2 TU 1,Hydro Pumped Storage,252.0
+2026-08-04,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-05,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-05,Haeusling TU 11,Hydro Pumped Storage,223.1
+2026-08-05,Haeusling TU 12,Hydro Pumped Storage,161.3
+2026-08-05,Limberg II TU 1,Hydro Pumped Storage,174.8
+2026-08-05,Limberg II TU 2,Hydro Pumped Storage,558.4
+2026-08-05,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-05,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-05,Malta-Hauptstufe TU 1,Hydro Pumped Storage,3.8
+2026-08-05,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-05,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-05,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-05,Reisseck 2 TU 1,Hydro Pumped Storage,286.0
+2026-08-05,Reisseck 2 TU 2,Hydro Pumped Storage,0.1
+2026-08-06,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-06,Haeusling TU 11,Hydro Pumped Storage,187.2
+2026-08-06,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-06,Limberg II TU 1,Hydro Pumped Storage,362.2
+2026-08-06,Limberg II TU 2,Hydro Pumped Storage,1082.2
+2026-08-06,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-06,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-06,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-06,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-06,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-06,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-06,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-06,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-07,Gerlos TU 5,Hydro Water Reservoir,439.1
+2026-08-07,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-07,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-07,Limberg II TU 1,Hydro Pumped Storage,0.1
+2026-08-07,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-07,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-07,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-07,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-07,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-07,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-07,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-07,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-07,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-08,Gerlos TU 5,Hydro Water Reservoir,50.6
+2026-08-08,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-08,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-08,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-08,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-08,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-08,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-08,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-08,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-08,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-08,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-08,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-08,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-09,Gerlos TU 5,Hydro Water Reservoir,48.0
+2026-08-09,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-09,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-09,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-09,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-09,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-09,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-09,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-09,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.6
+2026-08-09,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-08-09,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-09,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-09,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-10,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-10,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-10,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-10,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-10,Limberg II TU 2,Hydro Pumped Storage,152.5
+2026-08-10,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-10,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-10,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-10,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-10,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-10,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-10,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-10,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-11,Gerlos TU 5,Hydro Water Reservoir,67.0
+2026-08-11,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-11,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-11,Limberg II TU 1,Hydro Pumped Storage,183.3
+2026-08-11,Limberg II TU 2,Hydro Pumped Storage,779.4
+2026-08-11,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-11,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-11,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-11,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-11,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-11,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-11,Reisseck 2 TU 1,Hydro Pumped Storage,119.3
+2026-08-11,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-12,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-12,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-12,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-12,Limberg II TU 1,Hydro Pumped Storage,166.3
+2026-08-12,Limberg II TU 2,Hydro Pumped Storage,179.8
+2026-08-12,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-12,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-12,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-12,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-12,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-12,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-12,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-12,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-13,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-13,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-13,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-13,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-13,Limberg II TU 2,Hydro Pumped Storage,185.9
+2026-08-13,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-13,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-13,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-13,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-13,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-13,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-13,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-13,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-14,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-14,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-14,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-14,Limberg II TU 1,Hydro Pumped Storage,128.0
+2026-08-14,Limberg II TU 2,Hydro Pumped Storage,378.6
+2026-08-14,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-14,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-14,Malta-Hauptstufe TU 1,Hydro Pumped Storage,48.6
+2026-08-14,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-08-14,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-14,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-14,Reisseck 2 TU 1,Hydro Pumped Storage,126.5
+2026-08-14,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-15,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-15,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-15,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-15,Limberg II TU 1,Hydro Pumped Storage,643.1
+2026-08-15,Limberg II TU 2,Hydro Pumped Storage,910.0
+2026-08-15,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-15,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-15,Malta-Hauptstufe TU 1,Hydro Pumped Storage,60.6
+2026-08-15,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-15,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-15,Malta-Hauptstufe TU 4,Hydro Pumped Storage,61.1
+2026-08-15,Reisseck 2 TU 1,Hydro Pumped Storage,138.1
+2026-08-15,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-16,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-16,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-16,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-16,Limberg II TU 1,Hydro Pumped Storage,827.2
+2026-08-16,Limberg II TU 2,Hydro Pumped Storage,872.2
+2026-08-16,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-16,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-16,Malta-Hauptstufe TU 1,Hydro Pumped Storage,37.4
+2026-08-16,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-16,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-16,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-16,Reisseck 2 TU 1,Hydro Pumped Storage,198.7
+2026-08-16,Reisseck 2 TU 2,Hydro Pumped Storage,32.8
+2026-08-17,Gerlos TU 5,Hydro Water Reservoir,150.6
+2026-08-17,Haeusling TU 11,Hydro Pumped Storage,656.3
+2026-08-17,Haeusling TU 12,Hydro Pumped Storage,337.4
+2026-08-17,Limberg II TU 1,Hydro Pumped Storage,1325.5
+2026-08-17,Limberg II TU 2,Hydro Pumped Storage,1370.9
+2026-08-17,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-17,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-17,Malta-Hauptstufe TU 1,Hydro Pumped Storage,169.3
+2026-08-17,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-17,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-17,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-17,Reisseck 2 TU 1,Hydro Pumped Storage,184.5
+2026-08-17,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-18,Gerlos TU 5,Hydro Water Reservoir,37.8
+2026-08-18,Haeusling TU 11,Hydro Pumped Storage,123.5
+2026-08-18,Haeusling TU 12,Hydro Pumped Storage,123.3
+2026-08-18,Limberg II TU 1,Hydro Pumped Storage,0.1
+2026-08-18,Limberg II TU 2,Hydro Pumped Storage,59.5
+2026-08-18,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-18,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-18,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-18,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-18,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-18,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-18,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-18,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-19,Gerlos TU 5,Hydro Water Reservoir,7.7
+2026-08-19,Haeusling TU 11,Hydro Pumped Storage,37.1
+2026-08-19,Haeusling TU 12,Hydro Pumped Storage,37.5
+2026-08-19,Limberg II TU 1,Hydro Pumped Storage,155.4
+2026-08-19,Limberg II TU 2,Hydro Pumped Storage,392.4
+2026-08-19,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-19,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-19,Malta-Hauptstufe TU 1,Hydro Pumped Storage,111.3
+2026-08-19,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-19,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-19,Malta-Hauptstufe TU 4,Hydro Pumped Storage,48.0
+2026-08-19,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-19,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-20,Gerlos TU 5,Hydro Water Reservoir,37.5
+2026-08-20,Haeusling TU 11,Hydro Pumped Storage,122.4
+2026-08-20,Haeusling TU 12,Hydro Pumped Storage,122.2
+2026-08-20,Limberg II TU 1,Hydro Pumped Storage,303.9
+2026-08-20,Limberg II TU 2,Hydro Pumped Storage,548.1
+2026-08-20,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-20,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-20,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-20,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-20,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-20,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-20,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-21,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-21,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-21,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-21,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-21,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-21,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-21,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-21,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.3
+2026-08-21,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-21,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-21,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-21,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-21,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-22,Gerlos TU 5,Hydro Water Reservoir,92.0
+2026-08-22,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-22,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-22,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-22,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-22,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-22,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-22,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-22,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-22,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-22,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-22,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-22,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-23,Gerlos TU 5,Hydro Water Reservoir,29.2
+2026-08-23,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-23,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-23,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-23,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-23,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-23,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-23,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-23,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-08-23,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-08-23,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-23,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-23,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-24,Gerlos TU 5,Hydro Water Reservoir,29.5
+2026-08-24,Haeusling TU 11,Hydro Pumped Storage,142.8
+2026-08-24,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-08-24,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-24,Limberg II TU 2,Hydro Pumped Storage,183.1
+2026-08-24,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-24,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-24,Malta-Hauptstufe TU 1,Hydro Pumped Storage,115.3
+2026-08-24,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-24,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-24,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-24,Reisseck 2 TU 1,Hydro Pumped Storage,139.5
+2026-08-24,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-25,Gerlos TU 5,Hydro Water Reservoir,12.8
+2026-08-25,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-25,Haeusling TU 12,Hydro Pumped Storage,0.1
+2026-08-25,Limberg II TU 1,Hydro Pumped Storage,193.8
+2026-08-25,Limberg II TU 2,Hydro Pumped Storage,495.8
+2026-08-25,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-25,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-25,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-25,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-25,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-25,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-25,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-08-25,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-26,Gerlos TU 5,Hydro Water Reservoir,165.7
+2026-08-26,Haeusling TU 11,Hydro Pumped Storage,588.6
+2026-08-26,Haeusling TU 12,Hydro Pumped Storage,1668.8
+2026-08-26,Limberg II TU 1,Hydro Pumped Storage,2100.7
+2026-08-26,Limberg II TU 2,Hydro Pumped Storage,2500.0
+2026-08-26,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-26,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-26,Malta-Hauptstufe TU 1,Hydro Pumped Storage,593.5
+2026-08-26,Malta-Hauptstufe TU 2,Hydro Pumped Storage,274.7
+2026-08-26,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-08-26,Malta-Hauptstufe TU 4,Hydro Pumped Storage,991.9
+2026-08-26,Reisseck 2 TU 1,Hydro Pumped Storage,1172.3
+2026-08-26,Reisseck 2 TU 2,Hydro Pumped Storage,718.6
+2026-08-27,Gerlos TU 5,Hydro Water Reservoir,201.8
+2026-08-27,Haeusling TU 11,Hydro Pumped Storage,810.2
+2026-08-27,Haeusling TU 12,Hydro Pumped Storage,1077.9
+2026-08-27,Limberg II TU 1,Hydro Pumped Storage,1317.6
+2026-08-27,Limberg II TU 2,Hydro Pumped Storage,1672.9
+2026-08-27,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-27,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-27,Malta-Hauptstufe TU 1,Hydro Pumped Storage,552.4
+2026-08-27,Malta-Hauptstufe TU 2,Hydro Pumped Storage,471.3
+2026-08-27,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-08-27,Malta-Hauptstufe TU 4,Hydro Pumped Storage,673.1
+2026-08-27,Reisseck 2 TU 1,Hydro Pumped Storage,741.4
+2026-08-27,Reisseck 2 TU 2,Hydro Pumped Storage,359.0
+2026-08-28,Gerlos TU 5,Hydro Water Reservoir,416.9
+2026-08-28,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-28,Haeusling TU 12,Hydro Pumped Storage,333.0
+2026-08-28,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-08-28,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-08-28,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-28,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-28,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-28,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.4
+2026-08-28,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-08-28,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-28,Reisseck 2 TU 1,Hydro Pumped Storage,1217.5
+2026-08-28,Reisseck 2 TU 2,Hydro Pumped Storage,477.6
+2026-08-30,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-08-30,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-08-30,Haeusling TU 12,Hydro Pumped Storage,569.4
+2026-08-30,Limberg II TU 1,Hydro Pumped Storage,415.3
+2026-08-30,Limberg II TU 2,Hydro Pumped Storage,1102.8
+2026-08-30,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-30,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-30,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-30,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-30,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-08-30,Reisseck 2 TU 1,Hydro Pumped Storage,178.4
+2026-08-30,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-08-31,Gerlos TU 5,Hydro Water Reservoir,39.3
+2026-08-31,Haeusling TU 11,Hydro Pumped Storage,168.8
+2026-08-31,Haeusling TU 12,Hydro Pumped Storage,312.1
+2026-08-31,Limberg II TU 1,Hydro Pumped Storage,372.1
+2026-08-31,Limberg II TU 2,Hydro Pumped Storage,402.2
+2026-08-31,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-08-31,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-08-31,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-08-31,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-08-31,Malta-Hauptstufe TU 3,Hydro Pumped Storage,83.4
+2026-08-31,Malta-Hauptstufe TU 4,Hydro Pumped Storage,190.6
+2026-08-31,Reisseck 2 TU 1,Hydro Pumped Storage,157.8
+2026-08-31,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-01,Gerlos TU 5,Hydro Water Reservoir,49.6
+2026-09-01,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-01,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-01,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-01,Limberg II TU 2,Hydro Pumped Storage,382.5
+2026-09-01,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-01,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-01,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-01,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.2
+2026-09-01,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-09-01,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-09-01,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-01,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-02,Gerlos TU 5,Hydro Water Reservoir,38.4
+2026-09-02,Haeusling TU 11,Hydro Pumped Storage,0.1
+2026-09-02,Haeusling TU 12,Hydro Pumped Storage,152.7
+2026-09-02,Limberg II TU 1,Hydro Pumped Storage,383.1
+2026-09-02,Limberg II TU 2,Hydro Pumped Storage,825.4
+2026-09-02,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-02,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-02,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-09-02,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-02,Malta-Hauptstufe TU 4,Hydro Pumped Storage,134.8
+2026-09-02,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-02,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-03,Gerlos TU 5,Hydro Water Reservoir,129.8
+2026-09-03,Haeusling TU 11,Hydro Pumped Storage,523.6
+2026-09-03,Haeusling TU 12,Hydro Pumped Storage,1150.2
+2026-09-03,Limberg II TU 1,Hydro Pumped Storage,1417.7
+2026-09-03,Limberg II TU 2,Hydro Pumped Storage,2147.4
+2026-09-03,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-03,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-03,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-03,Malta-Hauptstufe TU 2,Hydro Pumped Storage,497.3
+2026-09-03,Malta-Hauptstufe TU 3,Hydro Pumped Storage,258.1
+2026-09-03,Malta-Hauptstufe TU 4,Hydro Pumped Storage,513.3
+2026-09-03,Reisseck 2 TU 1,Hydro Pumped Storage,605.8
+2026-09-03,Reisseck 2 TU 2,Hydro Pumped Storage,203.5
+2026-09-04,Gerlos TU 5,Hydro Water Reservoir,32.0
+2026-09-04,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-04,Haeusling TU 12,Hydro Pumped Storage,102.8
+2026-09-04,Limberg II TU 1,Hydro Pumped Storage,162.3
+2026-09-04,Limberg II TU 2,Hydro Pumped Storage,490.3
+2026-09-04,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-04,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-04,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-04,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-09-04,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-04,Malta-Hauptstufe TU 4,Hydro Pumped Storage,137.4
+2026-09-04,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-04,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-05,Gerlos TU 5,Hydro Water Reservoir,8.0
+2026-09-05,Haeusling TU 11,Hydro Pumped Storage,1298.5
+2026-09-05,Haeusling TU 12,Hydro Pumped Storage,302.9
+2026-09-05,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-05,Limberg II TU 2,Hydro Pumped Storage,487.4
+2026-09-05,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-05,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-05,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-05,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.6
+2026-09-05,Malta-Hauptstufe TU 3,Hydro Pumped Storage,7.4
+2026-09-05,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-09-05,Reisseck 2 TU 1,Hydro Pumped Storage,683.1
+2026-09-05,Reisseck 2 TU 2,Hydro Pumped Storage,652.2
+2026-09-06,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-09-06,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-06,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-06,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-06,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-09-06,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-06,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-06,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-06,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.3
+2026-09-06,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-06,Malta-Hauptstufe TU 4,Hydro Pumped Storage,173.6
+2026-09-06,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-06,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-07,Gerlos TU 5,Hydro Water Reservoir,15.0
+2026-09-07,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-07,Haeusling TU 12,Hydro Pumped Storage,137.6
+2026-09-07,Limberg II TU 1,Hydro Pumped Storage,150.7
+2026-09-07,Limberg II TU 2,Hydro Pumped Storage,165.4
+2026-09-07,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-07,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-07,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-07,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-09-07,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.1
+2026-09-07,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-09-07,Reisseck 2 TU 1,Hydro Pumped Storage,132.6
+2026-09-07,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-08,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-09-08,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-08,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-08,Limberg II TU 1,Hydro Pumped Storage,548.7
+2026-09-08,Limberg II TU 2,Hydro Pumped Storage,805.1
+2026-09-08,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-08,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-08,Malta-Hauptstufe TU 1,Hydro Pumped Storage,1.9
+2026-09-08,Malta-Hauptstufe TU 2,Hydro Pumped Storage,132.2
+2026-09-08,Malta-Hauptstufe TU 3,Hydro Pumped Storage,101.1
+2026-09-08,Malta-Hauptstufe TU 4,Hydro Pumped Storage,101.6
+2026-09-08,Reisseck 2 TU 1,Hydro Pumped Storage,154.9
+2026-09-08,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-09,Gerlos TU 5,Hydro Water Reservoir,74.4
+2026-09-09,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-09,Haeusling TU 12,Hydro Pumped Storage,158.3
+2026-09-09,Limberg II TU 1,Hydro Pumped Storage,173.2
+2026-09-09,Limberg II TU 2,Hydro Pumped Storage,197.4
+2026-09-09,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-09,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-09,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-09,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-09-09,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-09,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-09-09,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-09,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-10,Gerlos TU 5,Hydro Water Reservoir,134.6
+2026-09-10,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-10,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-10,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-10,Limberg II TU 2,Hydro Pumped Storage,595.1
+2026-09-10,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-10,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-10,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-10,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.1
+2026-09-10,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-10,Malta-Hauptstufe TU 4,Hydro Pumped Storage,2.4
+2026-09-10,Reisseck 2 TU 1,Hydro Pumped Storage,139.5
+2026-09-10,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-11,Gerlos TU 5,Hydro Water Reservoir,0.0
+2026-09-11,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-11,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-11,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-11,Limberg II TU 2,Hydro Pumped Storage,174.3
+2026-09-11,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-11,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-11,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-11,Malta-Hauptstufe TU 2,Hydro Pumped Storage,31.0
+2026-09-11,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-11,Malta-Hauptstufe TU 4,Hydro Pumped Storage,74.1
+2026-09-11,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-11,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-12,Gerlos TU 5,Hydro Water Reservoir,40.0
+2026-09-12,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-12,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-12,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-12,Limberg II TU 2,Hydro Pumped Storage,215.0
+2026-09-12,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-12,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-12,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-12,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-09-12,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-12,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-09-12,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-12,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-13,Gerlos TU 5,Hydro Water Reservoir,51.4
+2026-09-13,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-13,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-13,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-13,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-09-13,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-13,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-13,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-13,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.3
+2026-09-13,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-13,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-09-13,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-13,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-14,Gerlos TU 5,Hydro Water Reservoir,91.7
+2026-09-14,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-14,Haeusling TU 12,Hydro Pumped Storage,105.9
+2026-09-14,Limberg II TU 1,Hydro Pumped Storage,151.7
+2026-09-14,Limberg II TU 2,Hydro Pumped Storage,180.3
+2026-09-14,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-14,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-14,Malta-Hauptstufe TU 1,Hydro Pumped Storage,124.3
+2026-09-14,Malta-Hauptstufe TU 2,Hydro Pumped Storage,125.7
+2026-09-14,Malta-Hauptstufe TU 3,Hydro Pumped Storage,45.6
+2026-09-14,Malta-Hauptstufe TU 4,Hydro Pumped Storage,136.7
+2026-09-14,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-14,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-15,Gerlos TU 5,Hydro Water Reservoir,69.4
+2026-09-15,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-15,Haeusling TU 12,Hydro Pumped Storage,146.1
+2026-09-15,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-15,Limberg II TU 2,Hydro Pumped Storage,178.9
+2026-09-15,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-15,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-15,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-15,Malta-Hauptstufe TU 2,Hydro Pumped Storage,111.7
+2026-09-15,Malta-Hauptstufe TU 3,Hydro Pumped Storage,1.8
+2026-09-15,Malta-Hauptstufe TU 4,Hydro Pumped Storage,110.5
+2026-09-15,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-15,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-16,Gerlos TU 5,Hydro Water Reservoir,108.6
+2026-09-16,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-16,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-16,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-16,Limberg II TU 2,Hydro Pumped Storage,68.7
+2026-09-16,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-16,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-16,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-16,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-09-16,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-16,Malta-Hauptstufe TU 4,Hydro Pumped Storage,96.5
+2026-09-16,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-16,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-17,Gerlos TU 5,Hydro Water Reservoir,97.4
+2026-09-17,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-17,Haeusling TU 12,Hydro Pumped Storage,0.0
+2026-09-17,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-17,Limberg II TU 2,Hydro Pumped Storage,0.0
+2026-09-17,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-17,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-17,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-17,Malta-Hauptstufe TU 2,Hydro Pumped Storage,0.0
+2026-09-17,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-17,Malta-Hauptstufe TU 4,Hydro Pumped Storage,0.0
+2026-09-17,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-17,Reisseck 2 TU 2,Hydro Pumped Storage,0.0
+2026-09-18,Gerlos TU 5,Hydro Water Reservoir,74.5
+2026-09-18,Haeusling TU 11,Hydro Pumped Storage,0.0
+2026-09-18,Haeusling TU 12,Hydro Pumped Storage,49.8
+2026-09-18,Limberg II TU 1,Hydro Pumped Storage,0.0
+2026-09-18,Limberg II TU 2,Hydro Pumped Storage,176.3
+2026-09-18,Limberg III TU 1,Hydro Pumped Storage,0.0
+2026-09-18,Limberg III TU 2,Hydro Pumped Storage,0.0
+2026-09-18,Malta-Hauptstufe TU 1,Hydro Pumped Storage,0.0
+2026-09-18,Malta-Hauptstufe TU 2,Hydro Pumped Storage,100.9
+2026-09-18,Malta-Hauptstufe TU 3,Hydro Pumped Storage,0.0
+2026-09-18,Malta-Hauptstufe TU 4,Hydro Pumped Storage,99.9
+2026-09-18,Reisseck 2 TU 1,Hydro Pumped Storage,0.0
+2026-09-18,Reisseck 2 TU 2,Hydro Pumped Storage,0.0

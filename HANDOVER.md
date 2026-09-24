@@ -155,3 +155,18 @@ Population integration (2026-07-17, DONE except per-capita consumption):
 - Next steps if continued: build_gwk_context.py (xlsx+GML -> web/data/
   gwk_context.json keyed by GWK, plus kg/gem->GWK mapping), modal section,
   Methods update, llm_api exposure. Restart drought-map after data changes.
+
+Siedler AHEAD list (2026-09-24, https://siedler-oesterreich.exe.xyz:8000/llm/ahead?service=gw):
+- llm_extra.py implements GW-1 /llm/point, GW-2 /llm/points, GW-5 /llm/protection
+  (STRtree over the existing water_protection_at.geojson), GW-6 /llm/flowpath
+  (mghydro flowpath, ordered by endpoint chaining, clipped at the Austrian
+  outline web/data/austria_outline.json, gauges snapped <=400 m, glacier_fed via
+  web/data/glacier_comids.json), GW-7 /llm/gwi.json + ?fields=/&history=0,
+  GW-8 /llm/parcel/{id}; and the drought{} (GW-3, scripts/build_drought_events.py
+  from the dekadal EDO series) and now{} (GW-4, scripts/build_gw_now.py from the
+  daily eHYD live snapshot, in the cron) blocks on /llm/kg.
+- server.py: ETag/304 + gzip on all /llm JSON and static .gz, threading server,
+  OPTIONS. External lookups are cached under data/cache/ (gitignored, KBs).
+- Not done (needs research/data): true depth_to_gw via DEM (we use live-station
+  gok - level IDW, flagged low confidence beyond 5 km), river-network distance
+  for nearest_river, water_protection_share_pct per KG, Kärnten/Salzburg zones.

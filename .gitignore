@@ -51,3 +51,8 @@ data/watersheds/
 data/flowpaths/
 data/glacier/datapackage.json
 data/glacier/readme.pdf
+
+# On-demand external lookups (cadastre PiP, mghydro flowpaths), tiny gzipped JSON
+data/cache/
+web/data/gw_now.json.gz
+web/data/edo_drought_events.json.gz

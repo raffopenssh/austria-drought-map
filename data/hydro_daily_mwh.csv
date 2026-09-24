@@ -5150,7 +5150,275 @@ day,psr_type,mwh
 2026-07-13,Hydro Pumped Storage Consumption,9602.5
 2026-07-13,Hydro Run-of-river and poundage,46759.2
 2026-07-13,Hydro Water Reservoir,9054.7
-2026-07-14,Hydro Pumped Storage,2250.6
-2026-07-14,Hydro Pumped Storage Consumption,5377.4
-2026-07-14,Hydro Run-of-river and poundage,29045.2
-2026-07-14,Hydro Water Reservoir,4532.0
+2026-07-14,Hydro Pumped Storage,17792.9
+2026-07-14,Hydro Pumped Storage Consumption,5437.3
+2026-07-14,Hydro Run-of-river and poundage,49876.8
+2026-07-14,Hydro Water Reservoir,10000.1
+2026-07-15,Hydro Pumped Storage,16739.8
+2026-07-15,Hydro Pumped Storage Consumption,7120.3
+2026-07-15,Hydro Run-of-river and poundage,55255.3
+2026-07-15,Hydro Water Reservoir,9554.0
+2026-07-16,Hydro Pumped Storage,14830.6
+2026-07-16,Hydro Pumped Storage Consumption,9608.2
+2026-07-16,Hydro Run-of-river and poundage,55209.5
+2026-07-16,Hydro Water Reservoir,8380.5
+2026-07-17,Hydro Pumped Storage,10185.4
+2026-07-17,Hydro Pumped Storage Consumption,7599.9
+2026-07-17,Hydro Run-of-river and poundage,56002.0
+2026-07-17,Hydro Water Reservoir,7830.9
+2026-07-18,Hydro Pumped Storage,11597.7
+2026-07-18,Hydro Pumped Storage Consumption,12882.7
+2026-07-18,Hydro Run-of-river and poundage,54584.6
+2026-07-18,Hydro Water Reservoir,5738.1
+2026-07-19,Hydro Pumped Storage,8489.3
+2026-07-19,Hydro Pumped Storage Consumption,14374.8
+2026-07-19,Hydro Run-of-river and poundage,49211.1
+2026-07-19,Hydro Water Reservoir,5035.8
+2026-07-20,Hydro Pumped Storage,13910.9
+2026-07-20,Hydro Pumped Storage Consumption,11443.0
+2026-07-20,Hydro Run-of-river and poundage,56724.8
+2026-07-20,Hydro Water Reservoir,8231.0
+2026-07-21,Hydro Pumped Storage,14928.0
+2026-07-21,Hydro Pumped Storage Consumption,7569.8
+2026-07-21,Hydro Run-of-river and poundage,51850.6
+2026-07-21,Hydro Water Reservoir,8152.5
+2026-07-22,Hydro Pumped Storage,9260.9
+2026-07-22,Hydro Pumped Storage Consumption,9668.4
+2026-07-22,Hydro Run-of-river and poundage,53475.2
+2026-07-22,Hydro Water Reservoir,7174.2
+2026-07-23,Hydro Pumped Storage,8731.3
+2026-07-23,Hydro Pumped Storage Consumption,9179.7
+2026-07-23,Hydro Run-of-river and poundage,47494.3
+2026-07-23,Hydro Water Reservoir,7942.2
+2026-07-24,Hydro Pumped Storage,6698.2
+2026-07-24,Hydro Pumped Storage Consumption,13079.4
+2026-07-24,Hydro Run-of-river and poundage,48830.7
+2026-07-24,Hydro Water Reservoir,7091.6
+2026-07-25,Hydro Pumped Storage,2726.5
+2026-07-25,Hydro Pumped Storage Consumption,15370.5
+2026-07-25,Hydro Run-of-river and poundage,42234.1
+2026-07-25,Hydro Water Reservoir,3286.9
+2026-07-26,Hydro Pumped Storage,1095.0
+2026-07-26,Hydro Pumped Storage Consumption,17210.8
+2026-07-26,Hydro Run-of-river and poundage,37702.4
+2026-07-26,Hydro Water Reservoir,3551.3
+2026-07-27,Hydro Pumped Storage,7341.5
+2026-07-27,Hydro Pumped Storage Consumption,14548.2
+2026-07-27,Hydro Run-of-river and poundage,40831.3
+2026-07-27,Hydro Water Reservoir,4445.2
+2026-07-28,Hydro Pumped Storage,14257.3
+2026-07-28,Hydro Pumped Storage Consumption,13156.3
+2026-07-28,Hydro Run-of-river and poundage,44248.3
+2026-07-28,Hydro Water Reservoir,4234.1
+2026-07-29,Hydro Pumped Storage,16339.2
+2026-07-29,Hydro Pumped Storage Consumption,11125.5
+2026-07-29,Hydro Run-of-river and poundage,42987.2
+2026-07-29,Hydro Water Reservoir,4531.5
+2026-07-30,Hydro Pumped Storage,17028.8
+2026-07-30,Hydro Pumped Storage Consumption,8419.4
+2026-07-30,Hydro Run-of-river and poundage,40090.9
+2026-07-30,Hydro Water Reservoir,4699.7
+2026-07-31,Hydro Pumped Storage,19201.9
+2026-07-31,Hydro Pumped Storage Consumption,9384.8
+2026-07-31,Hydro Run-of-river and poundage,44430.9
+2026-07-31,Hydro Water Reservoir,5417.6
+2026-08-01,Hydro Pumped Storage,8345.6
+2026-08-01,Hydro Pumped Storage Consumption,8477.4
+2026-08-01,Hydro Run-of-river and poundage,42818.1
+2026-08-01,Hydro Water Reservoir,5265.9
+2026-08-02,Hydro Pumped Storage,6835.5
+2026-08-02,Hydro Pumped Storage Consumption,13296.7
+2026-08-02,Hydro Run-of-river and poundage,42849.1
+2026-08-02,Hydro Water Reservoir,5950.4
+2026-08-03,Hydro Pumped Storage,4755.3
+2026-08-03,Hydro Pumped Storage Consumption,10839.9
+2026-08-03,Hydro Run-of-river and poundage,40698.6
+2026-08-03,Hydro Water Reservoir,4026.6
+2026-08-04,Hydro Pumped Storage,13881.0
+2026-08-04,Hydro Pumped Storage Consumption,7561.1
+2026-08-04,Hydro Run-of-river and poundage,45647.1
+2026-08-04,Hydro Water Reservoir,6589.6
+2026-08-05,Hydro Pumped Storage,18209.0
+2026-08-05,Hydro Pumped Storage Consumption,6843.2
+2026-08-05,Hydro Run-of-river and poundage,41791.0
+2026-08-05,Hydro Water Reservoir,8656.4
+2026-08-06,Hydro Pumped Storage,15038.1
+2026-08-06,Hydro Pumped Storage Consumption,2865.1
+2026-08-06,Hydro Run-of-river and poundage,43127.4
+2026-08-06,Hydro Water Reservoir,8306.8
+2026-08-07,Hydro Pumped Storage,7419.4
+2026-08-07,Hydro Pumped Storage Consumption,9509.8
+2026-08-07,Hydro Run-of-river and poundage,56767.9
+2026-08-07,Hydro Water Reservoir,8515.3
+2026-08-08,Hydro Pumped Storage,5641.7
+2026-08-08,Hydro Pumped Storage Consumption,16431.8
+2026-08-08,Hydro Run-of-river and poundage,53386.9
+2026-08-08,Hydro Water Reservoir,5379.5
+2026-08-09,Hydro Pumped Storage,5426.6
+2026-08-09,Hydro Pumped Storage Consumption,16572.4
+2026-08-09,Hydro Run-of-river and poundage,45432.8
+2026-08-09,Hydro Water Reservoir,5056.7
+2026-08-10,Hydro Pumped Storage,11996.3
+2026-08-10,Hydro Pumped Storage Consumption,8594.2
+2026-08-10,Hydro Run-of-river and poundage,45808.8
+2026-08-10,Hydro Water Reservoir,6253.8
+2026-08-11,Hydro Pumped Storage,12547.9
+2026-08-11,Hydro Pumped Storage Consumption,6800.1
+2026-08-11,Hydro Run-of-river and poundage,43974.5
+2026-08-11,Hydro Water Reservoir,6858.0
+2026-08-12,Hydro Pumped Storage,8556.8
+2026-08-12,Hydro Pumped Storage Consumption,10853.5
+2026-08-12,Hydro Run-of-river and poundage,44702.5
+2026-08-12,Hydro Water Reservoir,6154.2
+2026-08-13,Hydro Pumped Storage,13476.3
+2026-08-13,Hydro Pumped Storage Consumption,8751.3
+2026-08-13,Hydro Run-of-river and poundage,41273.9
+2026-08-13,Hydro Water Reservoir,6647.4
+2026-08-14,Hydro Pumped Storage,13108.6
+2026-08-14,Hydro Pumped Storage Consumption,10674.8
+2026-08-14,Hydro Run-of-river and poundage,42981.2
+2026-08-14,Hydro Water Reservoir,7432.7
+2026-08-15,Hydro Pumped Storage,11897.7
+2026-08-15,Hydro Pumped Storage Consumption,14453.6
+2026-08-15,Hydro Run-of-river and poundage,39370.1
+2026-08-15,Hydro Water Reservoir,6209.1
+2026-08-16,Hydro Pumped Storage,16078.5
+2026-08-16,Hydro Pumped Storage Consumption,10826.2
+2026-08-16,Hydro Run-of-river and poundage,36170.5
+2026-08-16,Hydro Water Reservoir,7630.3
+2026-08-17,Hydro Pumped Storage,27707.9
+2026-08-17,Hydro Pumped Storage Consumption,609.2
+2026-08-17,Hydro Run-of-river and poundage,42598.7
+2026-08-17,Hydro Water Reservoir,12213.3
+2026-08-18,Hydro Pumped Storage,18444.9
+2026-08-18,Hydro Pumped Storage Consumption,1054.5
+2026-08-18,Hydro Run-of-river and poundage,42409.1
+2026-08-18,Hydro Water Reservoir,14884.7
+2026-08-19,Hydro Pumped Storage,17438.1
+2026-08-19,Hydro Pumped Storage Consumption,3817.1
+2026-08-19,Hydro Run-of-river and poundage,53730.1
+2026-08-19,Hydro Water Reservoir,11859.1
+2026-08-20,Hydro Pumped Storage,12621.2
+2026-08-20,Hydro Pumped Storage Consumption,4568.2
+2026-08-20,Hydro Run-of-river and poundage,50108.4
+2026-08-20,Hydro Water Reservoir,10345.4
+2026-08-21,Hydro Pumped Storage,5642.3
+2026-08-21,Hydro Pumped Storage Consumption,2793.3
+2026-08-21,Hydro Run-of-river and poundage,53748.7
+2026-08-21,Hydro Water Reservoir,9260.9
+2026-08-22,Hydro Pumped Storage,3450.1
+2026-08-22,Hydro Pumped Storage Consumption,13334.9
+2026-08-22,Hydro Run-of-river and poundage,57386.8
+2026-08-22,Hydro Water Reservoir,7503.6
+2026-08-23,Hydro Pumped Storage,3725.3
+2026-08-23,Hydro Pumped Storage Consumption,17329.7
+2026-08-23,Hydro Run-of-river and poundage,52154.5
+2026-08-23,Hydro Water Reservoir,6304.4
+2026-08-24,Hydro Pumped Storage,13250.7
+2026-08-24,Hydro Pumped Storage Consumption,9957.2
+2026-08-24,Hydro Run-of-river and poundage,51171.6
+2026-08-24,Hydro Water Reservoir,10092.3
+2026-08-25,Hydro Pumped Storage,14831.0
+2026-08-25,Hydro Pumped Storage Consumption,761.3
+2026-08-25,Hydro Run-of-river and poundage,43191.8
+2026-08-25,Hydro Water Reservoir,9615.6
+2026-08-26,Hydro Pumped Storage,16314.3
+2026-08-26,Hydro Pumped Storage Consumption,17750.5
+2026-08-26,Hydro Run-of-river and poundage,46764.0
+2026-08-26,Hydro Water Reservoir,9961.1
+2026-08-27,Hydro Pumped Storage,13686.0
+2026-08-27,Hydro Pumped Storage Consumption,6229.0
+2026-08-27,Hydro Run-of-river and poundage,47478.5
+2026-08-27,Hydro Water Reservoir,9453.5
+2026-08-28,Hydro Pumped Storage,5156.1
+2026-08-28,Hydro Pumped Storage Consumption,9092.0
+2026-08-28,Hydro Run-of-river and poundage,43163.0
+2026-08-28,Hydro Water Reservoir,8058.7
+2026-08-29,Hydro Pumped Storage,24.9
+2026-08-29,Hydro Pumped Storage Consumption,406.6
+2026-08-29,Hydro Run-of-river and poundage,3919.6
+2026-08-29,Hydro Water Reservoir,572.0
+2026-08-30,Hydro Pumped Storage,2214.9
+2026-08-30,Hydro Pumped Storage Consumption,0.0
+2026-08-30,Hydro Run-of-river and poundage,4280.9
+2026-08-30,Hydro Water Reservoir,1338.5
+2026-09-03,Hydro Pumped Storage,10850.3
+2026-09-03,Hydro Pumped Storage Consumption,8135.3
+2026-09-03,Hydro Run-of-river and poundage,38187.9
+2026-09-03,Hydro Water Reservoir,6758.7
+2026-09-04,Hydro Pumped Storage,9427.5
+2026-09-04,Hydro Pumped Storage Consumption,9993.2
+2026-09-04,Hydro Run-of-river and poundage,39713.1
+2026-09-04,Hydro Water Reservoir,6903.3
+2026-09-05,Hydro Pumped Storage,4593.5
+2026-09-05,Hydro Pumped Storage Consumption,13159.2
+2026-09-05,Hydro Run-of-river and poundage,33229.5
+2026-09-05,Hydro Water Reservoir,3362.5
+2026-09-06,Hydro Pumped Storage,7350.2
+2026-09-06,Hydro Pumped Storage Consumption,14343.9
+2026-09-06,Hydro Run-of-river and poundage,34342.0
+2026-09-06,Hydro Water Reservoir,4412.8
+2026-09-07,Hydro Pumped Storage,2618.5
+2026-09-07,Hydro Pumped Storage Consumption,6801.7
+2026-09-07,Hydro Run-of-river and poundage,21397.4
+2026-09-07,Hydro Water Reservoir,2104.5
+2026-09-10,Hydro Pumped Storage,8559.4
+2026-09-10,Hydro Pumped Storage Consumption,276.3
+2026-09-10,Hydro Run-of-river and poundage,19677.5
+2026-09-10,Hydro Water Reservoir,3319.8
+2026-09-11,Hydro Pumped Storage,13713.8
+2026-09-11,Hydro Pumped Storage Consumption,4123.2
+2026-09-11,Hydro Run-of-river and poundage,59978.2
+2026-09-11,Hydro Water Reservoir,6149.6
+2026-09-12,Hydro Pumped Storage,4883.4
+2026-09-12,Hydro Pumped Storage Consumption,8833.8
+2026-09-12,Hydro Run-of-river and poundage,52388.0
+2026-09-12,Hydro Water Reservoir,5710.5
+2026-09-13,Hydro Pumped Storage,5424.0
+2026-09-13,Hydro Pumped Storage Consumption,6130.8
+2026-09-13,Hydro Run-of-river and poundage,41895.0
+2026-09-13,Hydro Water Reservoir,4324.2
+2026-09-14,Hydro Pumped Storage,16804.8
+2026-09-14,Hydro Pumped Storage Consumption,3505.4
+2026-09-14,Hydro Run-of-river and poundage,48970.2
+2026-09-14,Hydro Water Reservoir,6617.8
+2026-09-15,Hydro Pumped Storage,12794.4
+2026-09-15,Hydro Pumped Storage Consumption,6376.9
+2026-09-15,Hydro Run-of-river and poundage,53225.9
+2026-09-15,Hydro Water Reservoir,6680.4
+2026-09-16,Hydro Pumped Storage,6872.6
+2026-09-16,Hydro Pumped Storage Consumption,5440.7
+2026-09-16,Hydro Run-of-river and poundage,47161.7
+2026-09-16,Hydro Water Reservoir,5808.5
+2026-09-17,Hydro Pumped Storage,8008.2
+2026-09-17,Hydro Pumped Storage Consumption,2161.4
+2026-09-17,Hydro Run-of-river and poundage,55545.9
+2026-09-17,Hydro Water Reservoir,7101.9
+2026-09-18,Hydro Pumped Storage,8092.2
+2026-09-18,Hydro Pumped Storage Consumption,167.0
+2026-09-18,Hydro Run-of-river and poundage,38640.1
+2026-09-18,Hydro Water Reservoir,4887.1
+2026-09-19,Hydro Pumped Storage,6149.1
+2026-09-19,Hydro Pumped Storage Consumption,8908.5
+2026-09-19,Hydro Run-of-river and poundage,48786.1
+2026-09-19,Hydro Water Reservoir,6218.8
+2026-09-20,Hydro Pumped Storage,4689.1
+2026-09-20,Hydro Pumped Storage Consumption,9906.9
+2026-09-20,Hydro Run-of-river and poundage,46157.6
+2026-09-20,Hydro Water Reservoir,6099.3
+2026-09-21,Hydro Pumped Storage,7375.6
+2026-09-21,Hydro Pumped Storage Consumption,11805.9
+2026-09-21,Hydro Run-of-river and poundage,41584.7
+2026-09-21,Hydro Water Reservoir,5276.6
+2026-09-22,Hydro Pumped Storage,15003.3
+2026-09-22,Hydro Pumped Storage Consumption,5364.1
+2026-09-22,Hydro Run-of-river and poundage,36386.2
+2026-09-22,Hydro Water Reservoir,7039.8
+2026-09-23,Hydro Pumped Storage,18111.9
+2026-09-23,Hydro Pumped Storage Consumption,3436.5
+2026-09-23,Hydro Run-of-river and poundage,41482.0
+2026-09-23,Hydro Water Reservoir,6176.1
+2026-09-24,Hydro Pumped Storage,845.6
+2026-09-24,Hydro Pumped Storage Consumption,0.0
+2026-09-24,Hydro Run-of-river and poundage,8898.6
+2026-09-24,Hydro Water Reservoir,538.4

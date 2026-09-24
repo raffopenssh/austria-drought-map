@@ -7,6 +7,7 @@ mkdir -p logs
 {
   echo "=== $(date -Is) ==="
   python3 scripts/fetch_ehyd_live.py
+  python3 scripts/build_gw_now.py   # 'now' block on /llm/kg + /llm/point (GW-4)
   python3 scripts/fetch_ehyd_pegel.py
   TOKEN=rcv4NYye5cPXOviOKRRR2uf7lkXhLFEZIALehhifL7A
   curl -sG "https://austria-power.exe.xyz/api/entsoe/query" \

@@ -29,6 +29,9 @@ import os
 import datetime
 import urllib.request
 import urllib.parse
+import sys
+
+import llm_extra
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "web", "data")
@@ -133,6 +136,7 @@ POINT_GLOSSARY = {
 }
 
 _state = {"loaded": False}
+_load_lock = __import__("threading").Lock()
 
 
 def _gw_point(s, snap):
@@ -220,6 +224,13 @@ def _no3_point(s, snap):
 def _load():
     if _state["loaded"]:
         return
+    with _load_lock:
+        if _state["loaded"]:
+            return
+        _load_impl()
+
+
+def _load_impl():
     munis = json.load(open(os.path.join(DATA, "municipalities.json")))
     _state["gem_by_code"] = {str(m["iso"]).zfill(5): m for m in munis}
     # kg_code / gemeinde_code are canonically 5-char zero-padded strings.
@@ -468,7 +479,37 @@ def _payload_for_kg(kg_code):
     if popb:
         popb["per_year"] = None  # keep per-KG payloads small
         payload["population"] = {k: v for k, v in popb.items() if v is not None}
+    # GW-3 drought calendar (Gemeinde, EDO CDI dekads) + GW-4 live state (IDW
+    # over eHYD live stations at the KG centroid) + per-year precip/GW anomaly.
+    reg = _state["kg_registry"].get(kg_code) or _state["kg_registry"].get(kg_code.lstrip("0"))
+    lat = reg["lat"] if reg else (float(m["lat"]) if m and m.get("lat") else None)
+    lon = reg["lon"] if reg else (float(m["lon"]) if m and m.get("lon") else None)
+    try:
+        dr = llm_extra.drought_block(gem_code)
+        if dr:
+            payload["drought"] = dr
+        if lat is not None:
+            payload["now"] = llm_extra.now_block(lat, lon)
+            payload["history"] = llm_extra.history_extras(payload["history"], lat, lon)
+            payload["point_url"] = f"/llm/point?lon={lon:.4f}&lat={lat:.4f}"
+    except Exception as exc:  # never lose the base payload over an add-on
+        payload["extras_error"] = str(exc)[:200]
     return payload, 200
+
+
+def _slim(obj, query):
+    """?fields=a,b (top-level keys; id/contract keys always kept) and ?history=0."""
+    if not isinstance(obj, dict):
+        return obj
+    if (query.get("history", ["1"])[0]) == "0" and "history" in obj:
+        obj = dict(obj); obj["history"] = []
+        obj["history_omitted"] = True
+    fields = (query.get("fields", [""])[0] or "").strip()
+    if fields:
+        keep = {"service", "kg_code", "gemeinde_code", "granularity", "as_of", "error"}
+        keep.update(f.strip() for f in fields.split(",") if f.strip())
+        obj = {k: v for k, v in obj.items() if k in keep}
+    return obj
 
 
 def _basin_block(kg_code, series=False):
@@ -874,6 +915,15 @@ def manifest():
         "gemeinde_endpoint": "/llm/gemeinde/{gemeinde_code_or_name}",
         "gemeinde_batch_endpoint": "/llm/gemeinden?codes={gemeinde_code,...}",
         "point_endpoint": "/llm/point/{point_id}",
+        "point_context_endpoint": "/llm/point?lon={lon}&lat={lat}",
+        "points_bbox_endpoint": "/llm/points?west&south&east&north[&categories&limit&history=0|1]",
+        "protection_endpoint": "/llm/protection?west&south&east&north",
+        "flowpath_endpoint": "/llm/flowpath?lon={lon}&lat={lat}",
+        "gwi_all_kgs_url": "/llm/gwi.json",
+        "parcel_endpoint": "/llm/parcel/{parcel_id}",
+        "kg_query_params": "?fields=metrics,points,drought,now (top-level keys) &history=0",
+        "kg_blocks": ["metrics", "history", "points", "drought", "now", "groundwater_body",
+                      "catchment", "cryosphere", "hydropower_influence", "population"],
         "covered_gemeinden_url": "/llm/covered_gemeinden.json",
         "metrics_schema": schema,
         "point_categories": [
@@ -935,7 +985,7 @@ def handle(path, query):
         results = []
         for c in code_list:
             obj, _ = _payload_for_kg(c)
-            results.append(obj)
+            results.append(_slim(obj, query))
         return 200, {"results": results,
                      "meta": {"requested": len(code_list)}}
     if path.startswith("/llm/plant/"):
@@ -1026,5 +1076,8 @@ def handle(path, query):
         if not kg:
             return 400, {"error": "missing kg_code"}
         obj, status = _payload_for_kg(kg)
-        return status, obj
+        return status, _slim(obj, query)
+    extra = llm_extra.handle(path, query, sys.modules[__name__])
+    if extra is not None:
+        return extra
     return None
