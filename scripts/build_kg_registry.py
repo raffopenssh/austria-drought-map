@@ -10,7 +10,7 @@ import gzip, json, urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-URL = ("https://cadastre-process-api.exe.xyz/api/v1/spatial/kgs"
+URL = ("https://umfeld-at.exe.xyz/api/v1/spatial/kgs"
        "?west=9.4&south=46.3&east=17.2&north=49.1&limit=20000"
        "&fields=kg_code,kg_name,gemeinde_code,bbox")
 

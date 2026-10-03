@@ -22,7 +22,7 @@ need NO cadastre calls — they are served straight from municipalities.json.
 """
 import json, os, time, urllib.request, urllib.error
 
-URL = "https://cadastre-process-api.exe.xyz/api/v1/spatial/points"
+URL = "https://umfeld-at.exe.xyz/api/v1/spatial/points"
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "web", "data")
 SNAP = os.path.join(DATA, "point_snap.json")

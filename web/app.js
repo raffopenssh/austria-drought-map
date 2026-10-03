@@ -4,7 +4,7 @@
 'use strict';
 
 // ---------- config ----------
-const CADASTRE = 'https://cadastre-process-api.exe.xyz';
+const CADASTRE = 'https://umfeld-at.exe.xyz';
 const GRAD = [
     [0.00, [0x1a, 0x98, 0x50]],
     [0.20, [0x91, 0xcf, 0x60]],

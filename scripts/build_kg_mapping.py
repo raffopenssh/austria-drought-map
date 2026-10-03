@@ -5,7 +5,7 @@ Output: web/data/kg_to_gemeinde.json  and  web/data/covered_kgs.json
 """
 import json, os, sys, time, urllib.request, urllib.error
 
-BASE = "https://cadastre-process-api.exe.xyz/api/v1/lookup"
+BASE = "https://umfeld-at.exe.xyz/api/v1/lookup"
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "web", "data")
 

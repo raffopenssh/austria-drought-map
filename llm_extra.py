@@ -20,8 +20,8 @@ DATA = os.path.join(HERE, "web", "data")
 CACHE = os.path.join(HERE, "data", "cache")
 os.makedirs(CACHE, exist_ok=True)
 
-CADASTRE_POINTS = "https://cadastre-process-api.exe.xyz/api/v1/spatial/points"
-CADASTRE_PARCEL = "https://cadastre-process-api.exe.xyz/api/v1/search/parcel?id="
+CADASTRE_POINTS = "https://umfeld-at.exe.xyz/api/v1/spatial/points"
+CADASTRE_PARCEL = "https://umfeld-at.exe.xyz/api/v1/search/parcel?id="
 MGHYDRO = ("https://mghydro.com/app/getwshed?task=flowpath&lat={lat}&lng={lon}"
            "&source=merit&precision=high&simplify=true")
 R_NEAR_KM, R_FALLBACK_KM = 12.5, 30.0

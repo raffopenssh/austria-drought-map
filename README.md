@@ -117,7 +117,7 @@ In recent years, Austrian municipalities have had to implement water rationing m
 - NASA POWER — daily precipitation behind the divergence component
 - Wasserschatz Österreichs (BMLRT/Umweltbundesamt 2021) — per-groundwater-body available resource & sector water demand (`data/pop/wasserschatz_ergebnistabelle.xlsx`, `scripts/build_gwk_context.py`); GWK boundaries INSPIRE WFD NGP-2015 (`data/gwk/gwk.zip`)
 - Statistik Austria OGD — population 2002–2026 per Gemeinde (CC-BY-4.0, `scripts/build_population.py`)
-- [BEV cadastre API](https://cadastre-process-api.exe.xyz/) — canonical KG/Gemeinde registry, point-in-polygon snapping, address search
+- [BEV cadastre API](https://umfeld-at.exe.xyz/) — canonical KG/Gemeinde registry, point-in-polygon snapping, address search
 - [WGMS Fluctuations of Glaciers 2026-02](https://wgms.ch/) (doi:10.5904/wgms-fog-2026-02) — Austrian mass balance 1946–2025, front variations since 1803, ASTER dh/dt volume change
 - [Randolph Glacier Inventory 6.0](https://www.glims.org/RGI/) region 11 — glacier outlines
 - [GeoSphere Austria data.hub](https://data.hub.geosphere.at/) — SNOWGRID-CL v2 snow water equivalent, 1 km, 1961–2026
@@ -128,7 +128,7 @@ In recent years, Austrian municipalities have had to implement water rationing m
 
 ## API
 
-Sibling-service endpoints per the [cadastre integration spec](https://cadastre-process-api.exe.xyz/api/v1/docs/llm.txt?section=integration), keyed on official BEV/Statistik Austria codes (5-char zero-padded strings):
+Sibling-service endpoints per the [cadastre integration spec](https://umfeld-at.exe.xyz/api/v1/docs/llm.txt?section=integration), keyed on official BEV/Statistik Austria codes (5-char zero-padded strings):
 
 - `GET /llm/kg/{kg_code}` — per Katastralgemeinde: **KG-granular GWI + components**, legacy Gemeinde metrics, snapped point observations
 - `GET /llm/gemeinde/{code_or_name}` — per municipality (alias `/llm/muni/`), name lookup included

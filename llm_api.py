@@ -2,7 +2,7 @@
 """Sibling-service integration endpoints for the Kohlschwarz cadastre ecosystem.
 
 Implements the "Integration Spec for Sibling Data Services" published at
-https://cadastre-process-api.exe.xyz/api/v1/docs/llm.txt?section=integration
+https://umfeld-at.exe.xyz/api/v1/docs/llm.txt?section=integration
 
 Granularity is MIXED:
   - The Groundwater Status Index (GWI) and its components are computed at
@@ -768,7 +768,7 @@ def _canonical_lookup(name):
         return _lookup_cache[key]
     code = None
     try:
-        url = ("https://cadastre-process-api.exe.xyz/api/v1/lookup?type=gemeinde&limit=2&q="
+        url = ("https://umfeld-at.exe.xyz/api/v1/lookup?type=gemeinde&limit=2&q="
                + urllib.parse.quote(name))
         with urllib.request.urlopen(url, timeout=5) as resp:
             data = json.load(resp).get("data") or []
