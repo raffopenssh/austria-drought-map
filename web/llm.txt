@@ -73,7 +73,7 @@ point. Keys: official 5-char kg_code / gemeinde_code strings.
 ## Sibling-service integration endpoints (/llm/)
 
 Implements the Austrian Cadastre "Integration Spec for Sibling Data Services"
-(https://umfeld-at.exe.xyz/api/v1/docs/llm.txt?section=integration).
+(https://umfeld-at.exe.xyz/api/v1/docs/llm.txt).
 
 The gwi_* metrics are computed AT the requested KG's centroid (granularity
 "kg"). Legacy drought metrics map UP from kg_code to gemeinde_code (resolved

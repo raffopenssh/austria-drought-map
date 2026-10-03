@@ -20,8 +20,11 @@ DATA = os.path.join(HERE, "web", "data")
 CACHE = os.path.join(HERE, "data", "cache")
 os.makedirs(CACHE, exist_ok=True)
 
-CADASTRE_POINTS = "https://umfeld-at.exe.xyz/api/v1/spatial/points"
-CADASTRE_PARCEL = "https://umfeld-at.exe.xyz/api/v1/search/parcel?id="
+# umfeld-at (successor of cadastre-process-api) serves NO cadastre: no point->KG
+# PiP and no parcel search. We resolve point->Gemeinde there and pick the KG
+# ourselves from the local registry (nearest centroid within that Gemeinde).
+UMFELD_MUNI = "https://umfeld-at.exe.xyz/api/v1/search/municipalities?contains_lon={lon}&contains_lat={lat}"
+CADASTRE_PARCEL = None  # retired upstream; /llm/parcel/ works from local snapped points only
 MGHYDRO = ("https://mghydro.com/app/getwshed?task=flowpath&lat={lat}&lng={lon}"
            "&source=merit&precision=high&simplify=true")
 R_NEAR_KM, R_FALLBACK_KM = 12.5, 30.0
@@ -167,22 +170,36 @@ def _q4(x):
 
 
 def kg_at_point(lon, lat, api):
-    """(kg_code, parcel_id) via cadastre PiP; cached; falls back to nearest KG centroid."""
+    """{kg_code, method} for a point; cached.
+
+    umfeld-at gives the containing Gemeinde; the KG is the nearest registry
+    centroid inside that Gemeinde (bbox-filtered when possible). Falls back to
+    the nearest KG centroid nationwide if the API is unreachable."""
     key = f"{_q4(lon):.4f}_{_q4(lat):.4f}"
     hit = _cache_get("pip", key)
     if hit is None:
         hit = {}
+        gem = None
         try:
-            body = json.dumps({"points": [{"id": "p", "lon": _q4(lon), "lat": _q4(lat)}]}).encode()
-            res = _http_json(CADASTRE_POINTS, body, timeout=8)
-            r = (res.get("results") or [{}])[0]
-            if r.get("kg_code"):
-                hit = {"kg_code": str(r["kg_code"]).zfill(5),
-                       "parcel_id": (r.get("parcel") or {}).get("parcel_id"),
-                       "method": res.get("meta", {}).get("method")}
-                _cache_put("pip", key, hit)
+            res = _http_json(UMFELD_MUNI.format(lon=_q4(lon), lat=_q4(lat)), timeout=8)
+            rows = res.get("data") or []
+            if rows and rows[0].get("gemeinde_code"):
+                gem = str(rows[0]["gemeinde_code"]).zfill(5)
+                if gem.startswith("9") and gem != "90001":
+                    gem = "90001"  # Statistik Austria lists Vienna's districts; the register uses 90001
         except Exception as exc:
             hit = {"error": str(exc)[:120]}
+        reg = api._state.get("kg_registry") or {}
+        if gem and reg:
+            codes = [c for c, r in reg.items() if r.get("g") == gem]
+            inbb = [c for c in codes if (b := reg[c].get("bb")) and b[0] <= lon <= b[2] and b[1] <= lat <= b[3]]
+            pool = inbb or codes
+            if pool:
+                lat_a = np.array([reg[c]["lat"] for c in pool]); lon_a = np.array([reg[c]["lon"] for c in pool])
+                i = int(np.argmin(_km(lat, lon, lat_a, lon_a)))
+                hit = {"kg_code": pool[i], "gemeinde_code": gem,
+                       "method": "gemeinde_pip+nearest_kg_centroid" + ("" if inbb else "_nobbox")}
+                _cache_put("pip", key, hit)
     if not hit.get("kg_code"):
         # nearest KG centroid from the registry
         reg = api._state.get("kg_registry") or {}
@@ -657,22 +674,9 @@ def ep_parcel(pid, api):
            if p.get("parcel_id") == pid]
     for p in pts:
         p.pop("history", None)
-    key = hashlib.md5(pid.encode()).hexdigest()[:16]
-    meta = _cache_get("parcel", key)
-    if meta is None:
-        try:
-            res = _http_json(CADASTRE_PARCEL + urllib.parse.quote(pid, safe=""), timeout=8)
-            rows = res.get("data") or []
-            if rows:
-                r = rows[0]
-                meta = {"lon": r.get("lon"), "lat": r.get("lat"), "area_sqm": r.get("area_sqm"),
-                        "ez": r.get("ez"), "gnr": r.get("gnr"), "kg_name": r.get("kg_name"),
-                        "landuse_summary": r.get("landuse_summary")}
-                _cache_put("parcel", key, meta)
-            else:
-                meta = {}
-        except Exception as exc:
-            meta = {"error": str(exc)[:120]}
+    # Parcel geometry/metadata lookup retired with cadastre-process-api; the
+    # successor (umfeld-at) serves no cadastre. We rely on locally snapped points.
+    meta = {}
     if not meta.get("lat") and not pts:
         return 404, {"parcel_id": pid, "error": "no_data"}
     lat = meta.get("lat") or pts[0]["lat"]; lon = meta.get("lon") or pts[0]["lon"]

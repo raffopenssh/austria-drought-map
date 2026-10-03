@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# NOTE (2026-10): cadastre-process-api.exe.xyz was replaced by umfeld-at.exe.xyz,
+# which serves NO cadastre (/api/v1/spatial/kgs is gone). This script is kept for
+# provenance of the committed web/data outputs; re-running it will fail.
+# Point->KG is now resolved via /api/v1/search/municipalities + local kg_registry.
 """Build web/data/kg_registry.json: every Austrian KG with name, gemeinde_code,
 centroid (bbox center) and bbox, from the canonical cadastre API.
 

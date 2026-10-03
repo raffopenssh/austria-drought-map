@@ -493,14 +493,22 @@ function nearestKG(lat, lon) {
 async function resolveKG(lat, lon) {
     const cand = bboxCandidates(lat, lon);
     if (cand.length === 1) return cand[0];
-    try {
-        const resp = await fetch(CADASTRE + '/api/v1/spatial/points', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ points: [{ lon, lat }] }),
-        });
+    try { // umfeld-at has no point->KG PiP; ask for the Gemeinde and pick the KG locally
+        const resp = await fetch(CADASTRE + '/api/v1/search/municipalities?contains_lon=' + lon.toFixed(5) + '&contains_lat=' + lat.toFixed(5));
         const j = await resp.json();
-        const r = (j.results || [])[0];
-        if (r && r.kg_code) return r.kg_code;
+        let gem = ((j.data || [])[0] || {}).gemeinde_code;
+        if (gem && gem[0] === '9') gem = '90001'; // Vienna districts -> one Gemeinde in the register
+        if (gem) {
+            const inGem = (cand.length ? cand : kgRegList.map(([c]) => c)).filter(c => kgReg[c] && kgReg[c].g === gem);
+            if (inGem.length) {
+                let best = null, bd = Infinity;
+                for (const c of inGem) {
+                    const d = distKm(lat, lon, kgReg[c].lat, kgReg[c].lon);
+                    if (d < bd) { bd = d; best = c; }
+                }
+                return best;
+            }
+        }
     } catch (e) { /* offline fallback below */ }
     if (cand.length) { // nearest centroid among bbox candidates
         let best = null, bd = Infinity;

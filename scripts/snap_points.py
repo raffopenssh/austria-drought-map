@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# NOTE (2026-10): cadastre-process-api.exe.xyz was replaced by umfeld-at.exe.xyz,
+# which serves NO cadastre (POST /api/v1/spatial/points is gone). This script is kept for
+# provenance of the committed web/data outputs; re-running it will fail.
+# Point->KG is now resolved via /api/v1/search/municipalities + local kg_registry.
 """Snap ALL of this app's point datasets to the official cadastre in ONE crawl.
 
 Per the cadastre 'Integration Spec for Sibling Data Services' (granularity=point),

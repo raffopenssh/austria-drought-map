@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# NOTE (2026-10): cadastre-process-api.exe.xyz was replaced by umfeld-at.exe.xyz,
+# which serves NO cadastre; /lookup still works but this crawl is kept only for
+# provenance of the committed web/data outputs; re-running it will fail.
+# Point->KG is now resolved via /api/v1/search/municipalities + local kg_registry.
 """Build canonical kg_code -> gemeinde_code mapping by crawling the cadastre
 EDM lookup (the shared source of truth) once for every Gemeinde we cover.
 Output: web/data/kg_to_gemeinde.json  and  web/data/covered_kgs.json

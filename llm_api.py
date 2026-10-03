@@ -2,7 +2,7 @@
 """Sibling-service integration endpoints for the Kohlschwarz cadastre ecosystem.
 
 Implements the "Integration Spec for Sibling Data Services" published at
-https://umfeld-at.exe.xyz/api/v1/docs/llm.txt?section=integration
+https://umfeld-at.exe.xyz/api/v1/docs/llm.txt
 
 Granularity is MIXED:
   - The Groundwater Status Index (GWI) and its components are computed at
